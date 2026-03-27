@@ -382,7 +382,7 @@ async function genererPDF(devis) {
     doc.setFont('helvetica', 'normal');
     doc.text('Logiciel BTP intelligent · tayco-bat.vercel.app', 14, 20);
     doc.text('SIRET : ' + siret, 14, 26);
-    if (meta.telephone) doc.text('Tel : ' + meta.telephone, 14, 31);
+    if (meta.email) doc.text('Email : ' + (meta.email||''), 14, 31);
 
     // NUMÉRO DEVIS (droite)
     doc.setFontSize(14);
@@ -427,8 +427,8 @@ async function genererPDF(devis) {
       l.description,
       String(parseFloat(l.quantite||0)),
       l.unite||'u',
-      parseFloat(l.prix_unitaire||0).toLocaleString('fr-FR') + ' €',
-      parseFloat(l.total_ht||0).toLocaleString('fr-FR') + ' €'
+      fmtPDF(parseFloat(l.prix_unitaire||0)) + ' EUR',
+      fmtPDF(parseFloat(l.total_ht||0)) + ' EUR'
     ]) : [['Aucune ligne de devis', '', '', '', '']];
 
     doc.autoTable({
@@ -469,10 +469,10 @@ async function genererPDF(devis) {
     doc.setTextColor(...GRAY);
     doc.setFont('helvetica', 'normal');
     doc.text('Total HT', totsX + 2, finalY + 7);
-    doc.text(ht.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €', totsX + totsW - 2, finalY + 7, {align:'right'});
+    doc.text(fmtPDF(ht) + ' EUR', totsX + totsW - 2, finalY + 7, {align:'right'});
 
     doc.text(`TVA ${tvaPct}%`, totsX + 2, finalY + 13);
-    doc.text(tva.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €', totsX + totsW - 2, finalY + 13, {align:'right'});
+    doc.text(fmtPDF(tva) + ' EUR', totsX + totsW - 2, finalY + 13, {align:'right'});
 
     doc.setDrawColor(...GREEN);
     doc.line(totsX, finalY + 16, totsX + totsW, finalY + 16);
@@ -482,7 +482,7 @@ async function genererPDF(devis) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text('Total TTC', totsX + 2, finalY + 23);
-    doc.text(ttc.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €', totsX + totsW - 2, finalY + 23, {align:'right'});
+    doc.text(fmtPDF(ttc) + ' EUR', totsX + totsW - 2, finalY + 23, {align:'right'});
 
     // ── SIGNATURE ──
     const sigY = finalY + 36;
