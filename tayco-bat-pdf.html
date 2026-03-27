@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Génération PDF</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2faf5;--surface:#fff;--s2:#e4f5eb;--border:#b8dfc5;
+  --green:#1a9e52;--green2:#0e7a3c;--gl:rgba(26,158,82,0.09);
+  --text:#0d2d1a;--muted:#4a7a5e;--soft:#1e5c38;
+  --red:#d42828;--orange:#e07b12;
+  --shadow:0 2px 14px rgba(26,158,82,0.08);--r:12px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:54px;background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#1a9e52,#0e7a3c);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+.logo-name{font-size:16px;font-weight:800;color:var(--green)}
+.sep{width:1px;height:20px;background:var(--border)}
+.page-title{font-size:15px;font-weight:700}
+.spacer{flex:1}
+.main{flex:1;max-width:1000px;margin:0 auto;width:100%;padding:24px}
+.page-header{margin-bottom:24px}
+.page-h-title{font-size:22px;font-weight:800}
+.page-h-sub{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* DEVIS LIST */
+.devis-grid{display:flex;flex-direction:column;gap:10px}
+.devis-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);transition:all .2s}
+.devis-card:hover{border-color:var(--green);transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,158,82,.1)}
+.dc-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--green);min-width:120px}
+.dc-info{flex:1}
+.dc-titre{font-size:14px;font-weight:600;color:var(--text)}
+.dc-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.dc-montant{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:var(--green);min-width:100px;text-align:right}
+.dc-statut{min-width:90px;text-align:center}
+.badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.b-brouillon{background:rgba(90,122,158,.1);color:#5a7a9e}
+.b-envoye{background:rgba(26,111,212,.1);color:#1a6fd4}
+.b-signe{background:rgba(26,158,82,.1);color:var(--green)}
+.dc-actions{display:flex;gap:8px}
+.btn{padding:8px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.btn-pdf{background:linear-gradient(135deg,#d42828,#a01e1e);color:#fff}
+.btn-pdf:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(212,40,40,.3)}
+.btn-apercu{background:var(--gl);color:var(--green);border:1.5px solid rgba(26,158,82,.2)}
+.btn-apercu:hover{background:rgba(26,158,82,.15)}
+
+/* LOADING */
+.loading{text-align:center;padding:60px;color:var(--muted)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:14px;opacity:.5}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:700;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;color:#fff;font-family:'Outfit',sans-serif}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+.toast.info{background:#1a6fd4}
+
+/* MODAL APERCU */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.overlay.hidden{display:none}
+.modal{background:var(--surface);border-radius:16px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.modal-header{padding:18px 22px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-title{font-size:16px;font-weight:800}
+.modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:18px;color:var(--muted);transition:all .15s}
+.modal-close:hover{background:var(--s2)}
+.modal-body{padding:24px}
+
+/* APERCU DEVIS */
+.apercu-doc{background:#fff;border:1px solid #ddd;border-radius:8px;padding:32px;font-size:12px;line-height:1.6;color:#333}
+.ap-header{display:flex;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #1a9e52}
+.ap-logo{font-size:22px;font-weight:900;color:#1a9e52}
+.ap-tagline{font-size:10px;color:#888;margin-top:2px}
+.ap-infos{font-size:10px;color:#666;line-height:1.8;margin-top:4px}
+.ap-num-devis{text-align:right}
+.ap-num-val{font-size:15px;font-weight:800;color:#1a9e52;font-family:'JetBrains Mono',monospace}
+.ap-num-date{font-size:10px;color:#888;margin-top:3px;line-height:1.8}
+.ap-client-box{background:#f2faf5;border-radius:8px;padding:12px 16px;margin-bottom:20px}
+.ap-client-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#4a7a5e;margin-bottom:4px}
+.ap-client-name{font-size:13px;font-weight:700;color:#0d2d1a}
+.ap-client-info{font-size:10px;color:#666;margin-top:2px}
+.ap-table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.ap-table thead tr{background:linear-gradient(135deg,#1a9e52,#0e7a3c)}
+.ap-table thead th{color:#fff;padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.ap-table tbody tr:nth-child(even){background:#f9fdfb}
+.ap-table tbody td{padding:8px 10px;border-bottom:1px solid #e4f5eb;font-size:11px;color:#333}
+.ap-totaux{display:flex;justify-content:flex-end;margin-bottom:20px}
+.ap-tots-inner{width:220px}
+.ap-tot-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;color:#666}
+.ap-tot-row.ttc{font-size:14px;font-weight:900;color:#0d2d1a;border-top:2px solid #1a9e52;padding-top:8px;margin-top:6px}
+.ap-tot-row.ttc span:last-child{color:#1a9e52;font-family:'JetBrains Mono',monospace}
+.ap-mentions{margin-top:16px;padding-top:12px;border-top:1px dashed #ddd;font-size:9px;color:#999;line-height:1.7}
+.ap-signature{margin-top:20px;padding-top:16px;border-top:1px solid #eee;display:flex;justify-content:space-between}
+.ap-sig-box{width:45%;border:1px solid #ddd;border-radius:6px;padding:12px;min-height:80px}
+.ap-sig-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:#888;margin-bottom:6px}
+.ap-sig-text{font-size:10px;color:#aaa;font-style:italic}
+
+.modal-footer{padding:16px 22px;border-top:1.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--s2)}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo" onclick="window.location.href='tayco-bat-dashboard-final.html'">
+    <div class="logo-mark">TB</div>
+    <div class="logo-name">TAYCO BAT</div>
+  </div>
+  <div class="sep"></div>
+  <div class="page-title">📄 Génération PDF</div>
+  <div class="spacer"></div>
+</header>
+
+<div class="main">
+  <div class="page-header">
+    <div class="page-h-title">Mes devis — Export PDF</div>
+    <div class="page-h-sub">Génère un PDF professionnel conforme aux normes françaises BTP</div>
+  </div>
+
+  <div id="devisContainer">
+    <div class="loading">
+      <div class="spinner"></div>
+      Chargement de vos devis...
+    </div>
+  </div>
+</div>
+
+<!-- MODAL APERCU -->
+<div class="overlay hidden" id="apercuOverlay" onclick="closeApercu(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="apercuTitle">Aperçu du devis</div>
+      <button class="modal-close" onclick="document.getElementById('apercuOverlay').classList.add('hidden')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="apercu-doc" id="apercuContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-apercu" onclick="document.getElementById('apercuOverlay').classList.add('hidden')">Fermer</button>
+      <button class="btn btn-pdf" id="apercuDownloadBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Télécharger PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SURL = 'https://uwdfytuvpujhiniotqyl.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok';
+const sb = supabase.createClient(SURL, SKEY);
+
+let currentUser = null;
+let currentDevis = null;
+let profileData = null;
+
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'tayco-bat-login-final.html'; return; }
+  currentUser = session.user;
+  profileData = session.user.user_metadata;
+  await loadDevis();
+});
+
+async function loadDevis() {
+  try {
+    const { data, error } = await sb.from('devis')
+      .select('*, clients(nom, prenom, email, telephone, adresse, ville, code_postal, siret)')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const container = document.getElementById('devisContainer');
+    if (!data || data.length === 0) {
+      container.innerHTML = `<div class="empty"><div class="empty-icon">📄</div><div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">Aucun devis</div><div style="font-size:13px">Crée d'abord un devis depuis la page de création.</div></div>`;
+      return;
+    }
+
+    // Charger les lignes pour chaque devis
+    const devisIds = data.map(d => d.id);
+    const { data: lignes } = await sb.from('devis_lignes')
+      .select('*')
+      .in('devis_id', devisIds)
+      .order('ordre');
+
+    // Associer lignes aux devis
+    data.forEach(d => {
+      d.lignes = lignes?.filter(l => l.devis_id === d.id) || [];
+    });
+
+    container.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'devis-grid';
+
+    data.forEach(d => {
+      const card = document.createElement('div');
+      card.className = 'devis-card';
+      const statut = d.statut === 'signe' ? '<span class="badge b-signe">✓ Signé</span>' :
+                     d.statut === 'envoye' ? '<span class="badge b-envoye">Envoyé</span>' :
+                     '<span class="badge b-brouillon">Brouillon</span>';
+      const client = d.clients ? `${d.clients.prenom||''} ${d.clients.nom}` : 'Client non défini';
+      const montant = Math.round(parseFloat(d.montant_ttc)||0).toLocaleString('fr-FR');
+      const date = new Date(d.created_at).toLocaleDateString('fr-FR');
+
+      card.innerHTML = `
+        <div class="dc-num">${d.numero}</div>
+        <div class="dc-info">
+          <div class="dc-titre">${d.titre || 'Sans titre'}</div>
+          <div class="dc-meta">${client} · ${date} · ${d.lignes.length} ligne${d.lignes.length > 1 ? 's' : ''}</div>
+        </div>
+        <div class="dc-montant">${montant} €</div>
+        <div class="dc-statut">${statut}</div>
+        <div class="dc-actions">
+          <button class="btn btn-apercu" onclick="voirApercu(${JSON.stringify(d).replace(/"/g,'&quot;')})">
+            👁️ Aperçu
+          </button>
+          <button class="btn btn-pdf" onclick="genererPDF(${JSON.stringify(d).replace(/"/g,'&quot;')})">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            PDF
+          </button>
+        </div>`;
+      grid.appendChild(card);
+    });
+    container.appendChild(grid);
+
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+// ══ APERÇU HTML ══
+function voirApercu(devis) {
+  currentDevis = devis;
+  document.getElementById('apercuTitle').textContent = 'Aperçu — ' + devis.numero;
+  document.getElementById('apercuContent').innerHTML = buildApercuHTML(devis);
+  document.getElementById('apercuDownloadBtn').onclick = () => genererPDF(devis);
+  document.getElementById('apercuOverlay').classList.remove('hidden');
+}
+
+function buildApercuHTML(d) {
+  const ht = parseFloat(d.montant_ht)||0;
+  const tva = ht * (parseFloat(d.tva_pct)||10) / 100;
+  const ttc = ht + tva;
+  const client = d.clients || {};
+  const meta = profileData || {};
+  const entreprise = meta.entreprise || 'TAYCO BAT';
+  const siret = meta.siret || '000 000 000 00000';
+  const lignes = d.lignes || [];
+  const dateCreation = new Date(d.created_at).toLocaleDateString('fr-FR');
+  const dateValidite = d.date_validite ? new Date(d.date_validite).toLocaleDateString('fr-FR') : '—';
+
+  const lignesHTML = lignes.length > 0 ? lignes.map(l => `
+    <tr>
+      <td>${l.description}</td>
+      <td style="text-align:center">${l.quantite} ${l.unite}</td>
+      <td style="text-align:right">${parseFloat(l.prix_unitaire||0).toLocaleString('fr-FR')} €</td>
+      <td style="text-align:right;font-weight:700">${parseFloat(l.total_ht||0).toLocaleString('fr-FR')} €</td>
+    </tr>`).join('') : `
+    <tr><td colspan="4" style="text-align:center;color:#999;font-style:italic;padding:20px">Aucune ligne de devis</td></tr>`;
+
+  return `
+    <div class="ap-header">
+      <div>
+        <div class="ap-logo">${entreprise}</div>
+        <div class="ap-tagline">Logiciel BTP intelligent · tayco-bat.fr</div>
+        <div class="ap-infos">
+          SIRET : ${siret}<br>
+          ${meta.email || ''}<br>
+          ${meta.telephone || ''}
+        </div>
+      </div>
+      <div class="ap-num-devis">
+        <div class="ap-num-val">DEVIS N° ${d.numero}</div>
+        <div class="ap-num-date">
+          Date : ${dateCreation}<br>
+          Valable jusqu'au : ${dateValidite}<br>
+          TVA : ${parseFloat(d.tva_pct||10)}%
+        </div>
+      </div>
+    </div>
+
+    <div class="ap-client-box">
+      <div class="ap-client-lbl">Client</div>
+      <div class="ap-client-name">${client.prenom||''} ${client.nom||'Client'}</div>
+      <div class="ap-client-info">
+        ${client.email ? client.email + '<br>' : ''}
+        ${client.telephone ? client.telephone + '<br>' : ''}
+        ${client.adresse ? client.adresse + ', ' : ''}${client.ville || ''}
+        ${client.siret ? '<br>SIRET : ' + client.siret : ''}
+      </div>
+    </div>
+
+    ${d.description ? `<div style="background:#f9fdfb;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#555;border-left:3px solid #1a9e52"><strong>Objet :</strong> ${d.description}</div>` : ''}
+
+    <table class="ap-table">
+      <thead>
+        <tr>
+          <th style="width:45%">Désignation</th>
+          <th style="width:15%;text-align:center">Quantité</th>
+          <th style="width:20%;text-align:right">Prix unitaire HT</th>
+          <th style="width:20%;text-align:right">Total HT</th>
+        </tr>
+      </thead>
+      <tbody>${lignesHTML}</tbody>
+    </table>
+
+    <div class="ap-totaux">
+      <div class="ap-tots-inner">
+        <div class="ap-tot-row"><span>Total HT</span><span style="font-family:'JetBrains Mono',monospace">${ht.toLocaleString('fr-FR',{minimumFractionDigits:2})} €</span></div>
+        <div class="ap-tot-row"><span>TVA ${parseFloat(d.tva_pct||10)}%</span><span style="font-family:'JetBrains Mono',monospace">${tva.toLocaleString('fr-FR',{minimumFractionDigits:2})} €</span></div>
+        <div class="ap-tot-row ttc"><span>Total TTC</span><span>${ttc.toLocaleString('fr-FR',{minimumFractionDigits:2})} €</span></div>
+      </div>
+    </div>
+
+    <div class="ap-signature">
+      <div class="ap-sig-box">
+        <div class="ap-sig-lbl">Bon pour accord — Signature client</div>
+        <div class="ap-sig-text">Date et signature précédées de la mention<br>"Bon pour accord"</div>
+      </div>
+      <div class="ap-sig-box">
+        <div class="ap-sig-lbl">Cachet et signature de l'entreprise</div>
+        <div class="ap-sig-text">${entreprise}</div>
+      </div>
+    </div>
+
+    <div class="ap-mentions">
+      <strong>Mentions légales :</strong> Garantie décennale — RC Professionnelle. TVA réduite ${parseFloat(d.tva_pct||10)}% selon article 279-0 bis du CGI (travaux de rénovation). Retenue de garantie de 5% applicable si prévu au contrat. En cas de retard de paiement, pénalités au taux légal majoré de 3 points + indemnité forfaitaire de 40 €. Délai de rétractation : 14 jours. Pas d'escompte en cas de paiement anticipé.
+    </div>`;
+}
+
+// ══ GÉNÉRER PDF AVEC jsPDF ══
+async function genererPDF(devis) {
+  showToast('Génération du PDF...', 'info');
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const ht = parseFloat(devis.montant_ht)||0;
+    const tvaPct = parseFloat(devis.tva_pct)||10;
+    const tva = ht * tvaPct / 100;
+    const ttc = ht + tva;
+    const client = devis.clients || {};
+    const meta = profileData || {};
+    const entreprise = meta.entreprise || 'TAYCO BAT';
+    const siret = meta.siret || '000 000 000 00000';
+    const lignes = devis.lignes || [];
+    const dateCreation = new Date(devis.created_at).toLocaleDateString('fr-FR');
+    const dateValidite = devis.date_validite ? new Date(devis.date_validite).toLocaleDateString('fr-FR') : '—';
+
+    // ── COULEURS ──
+    const GREEN = [26, 158, 82];
+    const DARK = [13, 45, 26];
+    const GRAY = [90, 122, 94];
+    const LIGHT_GREEN = [228, 245, 235];
+
+    // ── HEADER ENTREPRISE ──
+    doc.setFillColor(...GREEN);
+    doc.rect(0, 0, 210, 38, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(entreprise.toUpperCase(), 14, 14);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Logiciel BTP intelligent · tayco-bat.vercel.app', 14, 20);
+    doc.text('SIRET : ' + siret, 14, 26);
+    if (meta.telephone) doc.text('Tel : ' + meta.telephone, 14, 31);
+
+    // NUMÉRO DEVIS (droite)
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DEVIS N° ' + devis.numero, 196, 14, { align: 'right' });
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Date : ' + dateCreation, 196, 21, { align: 'right' });
+    doc.text('Valable jusqu\'au : ' + dateValidite, 196, 27, { align: 'right' });
+    doc.text('TVA applicable : ' + tvaPct + '%', 196, 33, { align: 'right' });
+
+    // ── CLIENT BOX ──
+    doc.setFillColor(...LIGHT_GREEN);
+    doc.roundedRect(14, 44, 90, 32, 3, 3, 'F');
+    doc.setTextColor(...DARK);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CLIENT', 18, 51);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text((client.prenom||'') + ' ' + (client.nom||'Client'), 18, 58);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    if (client.email) doc.text(client.email, 18, 64);
+    if (client.telephone) doc.text(client.telephone, 18, 69);
+    if (client.ville) doc.text((client.adresse||'') + ' ' + (client.ville||''), 18, 74);
+
+    // ── OBJET ──
+    if (devis.titre) {
+      doc.setTextColor(...GRAY);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Objet :', 110, 51);
+      doc.setFont('helvetica', 'normal');
+      const titreLines = doc.splitTextToSize(devis.titre, 85);
+      doc.text(titreLines, 110, 57);
+    }
+
+    // ── TABLEAU DES LIGNES ──
+    const tableColumns = ['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT'];
+    const tableRows = lignes.length > 0 ? lignes.map(l => [
+      l.description,
+      String(parseFloat(l.quantite||0)),
+      l.unite||'u',
+      parseFloat(l.prix_unitaire||0).toLocaleString('fr-FR') + ' €',
+      parseFloat(l.total_ht||0).toLocaleString('fr-FR') + ' €'
+    ]) : [['Aucune ligne de devis', '', '', '', '']];
+
+    doc.autoTable({
+      head: [tableColumns],
+      body: tableRows,
+      startY: 82,
+      margin: { left: 14, right: 14 },
+      headStyles: {
+        fillColor: GREEN,
+        textColor: [255,255,255],
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'center'
+      },
+      bodyStyles: { fontSize: 9, textColor: DARK },
+      columnStyles: {
+        0: { cellWidth: 80, halign: 'left' },
+        1: { cellWidth: 20, halign: 'center' },
+        2: { cellWidth: 15, halign: 'center' },
+        3: { cellWidth: 30, halign: 'right' },
+        4: { cellWidth: 30, halign: 'right', fontStyle: 'bold' }
+      },
+      alternateRowStyles: { fillColor: [249, 253, 251] },
+      tableLineColor: LIGHT_GREEN,
+      tableLineWidth: 0.3
+    });
+
+    // ── TOTAUX ──
+    const finalY = doc.lastAutoTable.finalY + 8;
+    const totsX = 130;
+    const totsW = 66;
+
+    doc.setDrawColor(...GREEN);
+    doc.setLineWidth(0.5);
+    doc.line(totsX, finalY, totsX + totsW, finalY);
+
+    doc.setFontSize(9);
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Total HT', totsX + 2, finalY + 7);
+    doc.text(ht.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €', totsX + totsW - 2, finalY + 7, {align:'right'});
+
+    doc.text(`TVA ${tvaPct}%`, totsX + 2, finalY + 13);
+    doc.text(tva.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €', totsX + totsW - 2, finalY + 13, {align:'right'});
+
+    doc.setDrawColor(...GREEN);
+    doc.line(totsX, finalY + 16, totsX + totsW, finalY + 16);
+    doc.setFillColor(...GREEN);
+    doc.rect(totsX, finalY + 17, totsW, 9, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('Total TTC', totsX + 2, finalY + 23);
+    doc.text(ttc.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €', totsX + totsW - 2, finalY + 23, {align:'right'});
+
+    // ── SIGNATURE ──
+    const sigY = finalY + 36;
+    doc.setDrawColor(200,200,200);
+    doc.setLineWidth(0.3);
+    doc.rect(14, sigY, 85, 28);
+    doc.rect(111, sigY, 85, 28);
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('Bon pour accord — Signature client', 16, sigY + 6);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text('Date et signature précédées de "Bon pour accord"', 16, sigY + 11);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('Cachet et signature ' + entreprise, 113, sigY + 6);
+
+    // ── MENTIONS LÉGALES ──
+    const mentionsY = sigY + 36;
+    doc.setDrawColor(...LIGHT_GREEN);
+    doc.setFillColor(249, 253, 251);
+    doc.rect(14, mentionsY, 182, 22, 'FD');
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    const mentions = `Garantie décennale et RC Professionnelle incluses. TVA réduite ${tvaPct}% selon art. 279-0 bis du CGI. Retenue de garantie 5% si applicable. En cas de retard de paiement : pénalités au taux légal + 3 points, indemnité forfaitaire 40 €. Délai de rétractation : 14 jours. Pas d'escompte en cas de paiement anticipé.`;
+    const mentionsLines = doc.splitTextToSize(mentions, 175);
+    doc.text(mentionsLines, 17, mentionsY + 5);
+
+    // ── FOOTER ──
+    doc.setFillColor(...GREEN);
+    doc.rect(0, 285, 210, 12, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(entreprise + ' · SIRET ' + siret + ' · tayco-bat.vercel.app', 105, 292, {align:'center'});
+
+    // ── TÉLÉCHARGER ──
+    const fileName = 'DEVIS_' + devis.numero + '_' + (client.nom||'client') + '.pdf';
+    doc.save(fileName);
+    showToast('✅ PDF téléchargé : ' + fileName, 'success');
+    document.getElementById('apercuOverlay').classList.add('hidden');
+
+  } catch(e) {
+    console.error('PDF error:', e);
+    showToast('Erreur PDF : ' + e.message, 'error');
+  }
+}
+
+function closeApercu(e) {
+  if (e.target === document.getElementById('apercuOverlay')) {
+    document.getElementById('apercuOverlay').classList.add('hidden');
+  }
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
