@@ -743,3 +743,78 @@ function toggleMic(){
   const s=document.getElementById('micSt');
   if(micOn){b.style.background='linear-gradient(135deg,#1a9e52,#0e7a3c)';b.style.borderColor='var(--gold)';b.querySelector('svg').setAttribute('stroke','#111');s.textContent='Enregistrement…';b.style.animation='pulseGold 1.5s ease-in-out infinite';}
   else{b.style.background='var(--bg3)';b.style.borderColor='var(--border)';b.querySelector('svg').setAttribute('stroke','currentColor');s.textContent='Appuie pour parler';b.style
+  b.style.animation='none';}
+}
+function flashCard(){
+  const c=document.getElementById('genCard');
+  c.style.background='rgba(26,158,82,0.06)';
+  setTimeout(()=>c.style.background='',800);
+}
+
+// SUPABASE DONNEES REELLES
+const SURL_DB='https://uwdfytuvpujhiniotqyl.supabase.co';
+const SKEY_DB='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok';
+const sbDB = supabase.createClient(SURL_DB, SKEY_DB);
+
+function fmtNum(n){ return Math.round(n).toLocaleString('fr-FR'); }
+
+window.addEventListener('load', async () => {
+  try {
+    const { data: { session } } = await sbDB.auth.getSession();
+    if (!session) { window.location.href='tayco-bat-login-final.html'; return; }
+    const meta = session.user.user_metadata;
+    const prenom = meta.prenom || 'Hassan';
+    const mois = new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+    document.getElementById('contentSub').textContent = 'Bonjour ' + prenom + ' - Bienvenue sur TAYCO BAT';
+
+    const uid = session.user.id;
+    const [devisRes, clientsRes] = await Promise.all([
+      sbDB.from('devis').select('numero,titre,montant_ht,montant_ttc,statut,created_at').eq('user_id', uid).order('created_at',{ascending:false}),
+      sbDB.from('clients').select('id,nom,prenom,email,telephone,ville,created_at').eq('user_id', uid).order('created_at',{ascending:false})
+    ]);
+
+    const devisData = devisRes.data || [];
+    const clientsData = clientsRes.data || [];
+
+    // KPIs accueil
+    const caTotal = devisData.reduce((a,d) => a+(parseFloat(d.montant_ttc)||0), 0);
+    const nbClients = clientsData.length;
+    const nbDevis = devisData.length;
+    const brouillons = devisData.filter(d=>d.statut==='brouillon').length;
+
+    // Mettre a jour KPI CA
+    const kpiVals = document.querySelectorAll('.kpi-val');
+    if(kpiVals[0]) kpiVals[0].textContent = fmtNum(caTotal) + ' EUR';
+    if(kpiVals[1]) kpiVals[1].textContent = '0 EUR';
+    if(kpiVals[2]) kpiVals[2].textContent = fmtNum(caTotal) + ' EUR';
+    if(kpiVals[3]) kpiVals[3].textContent = '0 EUR';
+
+    // Derniers devis dans tableau
+    const tbodies = document.querySelectorAll('tbody');
+    tbodies.forEach(tbody => {
+      if(devisData.length > 0) {
+        tbody.innerHTML = devisData.slice(0,5).map(d => {
+          const montant = fmtNum(parseFloat(d.montant_ttc)||0);
+          const badge = d.statut==='brouillon' ? '<span class="badge bo">Brouillon</span>' : '<span class="badge bg">Envoyé</span>';
+          const date = new Date(d.created_at).toLocaleDateString('fr-FR');
+          return '<tr><td class="b">'+d.numero+'</td><td>Client</td><td>'+(d.titre||'Devis')+'</td><td class="b">'+montant+' EUR</td><td>'+date+'</td><td>'+badge+'</td><td><button class="btn btn-ghost" style="padding:3px 9px;font-size:11px">PDF</button></td></tr>';
+        }).join('');
+      }
+    });
+
+    // Contacts — vrais clients
+    const contactGrid = document.querySelector('#s-contacts > div:last-child');
+    if(contactGrid && clientsData.length > 0) {
+      const colors = ['linear-gradient(135deg,#1a9e52,#0e7a3c)','linear-gradient(135deg,#0e9e52,#077a3e)','linear-gradient(135deg,#e07b12,#d06020)'];
+      contactGrid.innerHTML = clientsData.slice(0,6).map((c,i) => {
+        const ini = ((c.prenom||'').charAt(0)+(c.nom||'').charAt(0)).toUpperCase()||'?';
+        return '<div class="cnt-card"><div class="cnt-av" style="background:'+colors[i%colors.length]+'">'+ini+'</div><div><div class="cnt-name">'+(c.prenom||'')+' '+c.nom+'</div><div class="cnt-info">'+(c.email?'Email: '+c.email+'<br>':'')+(c.telephone?'Tel: '+c.telephone:'')+(c.ville?' - '+c.ville:'')+'</div><div style="margin-top:6px"><span class="badge bb">Client</span> <span class="badge bg">Actif</span></div></div></div>';
+      }).join('');
+    }
+
+    console.log('Dashboard charge - Devis:'+nbDevis+' Clients:'+nbClients+' CA:'+caTotal);
+  } catch(e) { console.error('Dashboard erreur:', e); }
+});
+</script>
+</body>
+</html>
