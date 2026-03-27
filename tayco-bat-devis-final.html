@@ -233,13 +233,10 @@ let sb;try{sb=supabase.createClient(SURL,SKEY)}catch(e){}
           <div class="fg">
             <label>Client</label>
             <div class="client-select-wrap">
-              <select>
-                <option>M. Dupont Pierre</option>
-                <option>Résid. Les Pins</option>
-                <option>SCI Belvédère</option>
-                <option>M. Coban Taylan</option>
+              <select id="client-select">
+                <option value="">⏳ Chargement des clients...</option>
               </select>
-              <button class="new-client-btn">+ Nouveau</button>
+              <button class="new-client-btn" onclick="window.open('tayco-bat-clients.html','_blank')">+ Nouveau</button>
             </div>
           </div>
           <div class="fg">
@@ -526,8 +523,9 @@ let sb;try{sb=supabase.createClient(SURL,SKEY)}catch(e){}
   <div class="bot-info">Devis <strong>DE-2024-114</strong> — <strong>M. Dupont Pierre</strong> — <strong id="bot-ttc">3 678,40 € TTC</strong></div>
   <div class="bot-actions">
     <button class="btn btn-ghost">💾 Sauvegarder brouillon</button>
+    <button class="btn btn-ghost" onclick="sauvegarderDevis('brouillon')">💾 Sauvegarder brouillon</button>
     <button class="btn btn-ghost">👁️ Aperçu PDF</button>
-    <button class="btn btn-primary">
+    <button class="btn btn-primary" onclick="sauvegarderDevis('brouillon')">
       Continuer — Validation
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
@@ -535,6 +533,143 @@ let sb;try{sb=supabase.createClient(SURL,SKEY)}catch(e){}
 </div>
 
 <script>
+// ══ SUPABASE ══
+const SURL='https://uwdfytuvpujhiniotqyl.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok';
+const sb = supabase.createClient(SURL, SKEY);
+let currentUser = null;
+
+// ══ INIT — Charger session + clients réels ══
+window.addEventListener('load', async () => {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      // Pas de session — afficher quand même la page en mode demo
+      document.getElementById('client-select').innerHTML = '<option value="">Connecte-toi pour voir tes clients</option>';
+      return;
+    }
+    currentUser = session.user;
+    const meta = session.user.user_metadata;
+    const userSpan = document.querySelector('.top-title');
+    if (userSpan) userSpan.textContent = 'Nouveau devis — ' + (meta.prenom || '');
+    await loadClients();
+    genNumeroDevis();
+  } catch(e) {
+    console.error('Init error:', e);
+    document.getElementById('client-select').innerHTML = '<option value="">Erreur de connexion</option>';
+  }
+});
+
+// ══ CHARGER LES VRAIS CLIENTS ══
+async function loadClients() {
+  try {
+    const { data, error } = await sb.from('clients')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('nom', { ascending: true });
+    if (error) throw error;
+    const select = document.querySelector('select');
+    if (select && data && data.length > 0) {
+      select.innerHTML = data.map(c =>
+        `<option value="${c.id}">${c.prenom || ''} ${c.nom}${c.entreprise ? ' — ' + c.entreprise : ''}</option>`
+      ).join('');
+    } else if (select) {
+      select.innerHTML = '<option value="">Aucun client — Ajoute d\'abord un client</option>';
+    }
+  } catch(e) { console.error('Erreur clients:', e); }
+}
+
+// ══ GÉNÉRER NUMÉRO DEVIS ══
+async function genNumeroDevis() {
+  try {
+    const { count } = await sb.from('devis')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id);
+    const num = 'DE-' + new Date().getFullYear() + '-' + String((count || 0) + 1).padStart(3, '0');
+    const numEl = document.querySelector('.ap-num');
+    if (numEl) numEl.textContent = 'DEVIS N° ' + num;
+    document.getElementById('devis-num-val') && (document.getElementById('devis-num-val').value = num);
+  } catch(e) {}
+}
+
+// ══ SAUVEGARDER LE DEVIS ══
+async function sauvegarderDevis(statut = 'brouillon') {
+  if (!currentUser) { alert('Tu dois être connecté'); return; }
+
+  const clientSelect = document.querySelector('select');
+  const clientId = clientSelect?.value || null;
+  const titre = document.getElementById('devis-titre')?.value || 'Nouveau devis';
+
+  // Récupérer les lignes
+  const lignes = [];
+  document.querySelectorAll('.ligne-item').forEach((item, i) => {
+    const desc = item.querySelector('.ligne-desc-input')?.value || '';
+    const inputs = item.querySelectorAll('.ligne-num-input');
+    const qty = parseFloat(inputs[0]?.value) || 1;
+    const pu = parseFloat(inputs[1]?.value) || 0;
+    const unite = item.querySelector('select')?.value || 'u';
+    if (desc) lignes.push({ description: desc, quantite: qty, unite, prix_unitaire: pu, total_ht: qty * pu, ordre: i });
+  });
+
+  // Calcul totaux
+  const ht = lignes.reduce((a, l) => a + l.total_ht, 0);
+  const ttc = ht + (ht * tvaPct / 100);
+  const num = 'DE-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4);
+
+  const btn = document.querySelector('.btn-primary');
+  if (btn) { btn.innerHTML = '⏳ Sauvegarde...'; btn.disabled = true; }
+
+  try {
+    // 1. Créer le devis
+    const { data: devisData, error: devisErr } = await sb.from('devis').insert([{
+      user_id: currentUser.id,
+      client_id: clientId || null,
+      numero: num,
+      titre,
+      description: document.getElementById('devis-desc')?.value || '',
+      montant_ht: ht,
+      tva_pct: tvaPct,
+      montant_ttc: ttc,
+      statut,
+      date_creation: new Date().toISOString().split('T')[0],
+      date_validite: document.querySelector('input[type="date"]:last-of-type')?.value || null,
+    }]).select().single();
+    if (devisErr) throw devisErr;
+
+    // 2. Créer les lignes
+    if (lignes.length > 0) {
+      const lignesData = lignes.map(l => ({ ...l, devis_id: devisData.id }));
+      const { error: lignesErr } = await sb.from('devis_lignes').insert(lignesData);
+      if (lignesErr) throw lignesErr;
+    }
+
+    showToastDevis('✅ Devis ' + num + ' sauvegardé !', 'success');
+    if (statut === 'envoye') {
+      setTimeout(() => window.location.href = 'tayco-bat-signature.html', 1500);
+    }
+  } catch(e) {
+    showToastDevis('❌ Erreur : ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.innerHTML = 'Continuer — Validation →'; btn.disabled = false; }
+  }
+}
+
+// ══ TOAST ══
+function showToastDevis(msg, type) {
+  let t = document.getElementById('toast-devis');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast-devis';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:700;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;font-family:Outfit,sans-serif;color:#fff';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.background = type === 'success' ? '#1a9e52' : '#d42828';
+  t.style.opacity = '1';
+  t.style.transform = 'translateY(0)';
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; }, 3500);
+}
+
 // ── MODE SWITCH ──
 function switchMode(mode) {
   document.querySelectorAll('.mode-screen').forEach(s => s.classList.remove('active'));
