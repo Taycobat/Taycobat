@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Nouveau Devis</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2faf5;--surface:#fff;--s2:#e4f5eb;--border:#b8dfc5;
+  --green:#1a9e52;--green2:#0e7a3c;--gl:rgba(26,158,82,0.09);
+  --text:#0d2d1a;--muted:#4a7a5e;--soft:#1e5c38;
+  --red:#d42828;--orange:#e07b12;
+  --shadow:0 2px 14px rgba(26,158,82,0.08);--r:12px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{height:56px;background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-mark{width:34px;height:34px;background:linear-gradient(135deg,#1a9e52,#0e7a3c);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.logo-name{font-size:17px;font-weight:800;color:var(--green)}
+.sep{width:1px;height:22px;background:var(--border)}
+.back{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:7px;transition:all .15s}
+.back:hover{background:var(--s2);color:var(--green)}
+.top-title{font-size:15px;font-weight:700}
+.spacer{flex:1}
+
+/* STEPS */
+.steps-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:6px}
+.stp{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);padding:5px 12px;border-radius:20px;cursor:default}
+.stp.active{background:var(--gl);color:var(--green)}
+.stp.done{color:var(--green)}
+.stp-n{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800}
+.stp.done .stp-n{background:var(--green);border-color:var(--green);color:#fff}
+.stp.active .stp-n{background:var(--green);border-color:var(--green);color:#fff}
+.stp-arr{color:var(--border);font-size:14px}
+
+/* MAIN */
+.main{flex:1;max-width:1200px;margin:0 auto;width:100%;padding:22px 24px;display:grid;grid-template-columns:1fr 360px;gap:20px}
+
+/* PANELS */
+.panel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.ph{padding:14px 18px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(26,158,82,0.03),transparent)}
+.pt{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.pico{width:28px;height:28px;border-radius:7px;background:var(--gl);display:flex;align-items:center;justify-content:center;color:var(--green)}
+.pb{padding:18px}
+
+/* MODE SWITCHER */
+.mode-switch{display:flex;background:var(--s2);border-radius:10px;padding:4px;gap:3px;margin-bottom:18px}
+.mode-btn{flex:1;padding:10px;border-radius:7px;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);background:transparent}
+.mode-btn.active{background:var(--surface);color:var(--green);box-shadow:0 2px 8px rgba(26,158,82,0.12);border:1px solid var(--border)}
+.mode-btn svg{width:16px;height:16px;flex-shrink:0}
+
+/* SCREENS */
+.mode-screen{display:none}
+.mode-screen.active{display:block;animation:fu .25s ease}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── AUDIO MODE ── */
+.audio-zone{display:flex;flex-direction:column;align-items:center;gap:16px;padding:8px 0}
+.lang-row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:4px}
+.lp{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;font-size:12px;font-weight:500;color:var(--soft);transition:all .15s;font-family:'Outfit',sans-serif;background:transparent}
+.lp:hover,.lp.on{border-color:var(--green);background:var(--gl);color:var(--green);font-weight:700}
+.mic-btn{width:76px;height:76px;border-radius:50%;border:2px solid var(--border);background:var(--s2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .2s}
+.mic-btn.rec{background:linear-gradient(135deg,#1a9e52,#0e7a3c);border-color:var(--green);color:#fff;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,158,82,.4)}50%{box-shadow:0 0 0 14px rgba(26,158,82,0)}}
+.mic-status{text-align:center}
+.mic-st-title{font-size:14px;font-weight:700}
+.mic-st-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.transcript{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:10px;padding:13px;min-height:80px;font-size:13px;color:var(--soft);font-style:italic;line-height:1.6;position:relative}
+.transcript.has{border-color:var(--green);background:rgba(26,158,82,0.04);font-style:normal;color:var(--text)}
+.tr-badge{position:absolute;top:8px;right:10px;font-size:10px;font-weight:700;color:var(--green);background:var(--gl);padding:2px 8px;border-radius:10px}
+.gen-btn{width:100%;padding:13px;background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+.gen-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(26,158,82,.35)}
+
+/* ── MANUEL MODE ── */
+.form-section{display:flex;flex-direction:column;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+input,select,textarea{background:var(--s2);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:14px;font-family:'Outfit',sans-serif;color:var(--text);outline:none;transition:all .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(26,158,82,.08)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* LIGNES */
+.lignes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.lignes-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.add-ligne-btn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;padding:5px 10px;border-radius:7px;border:1px solid rgba(26,158,82,.2);background:var(--gl);transition:all .15s}
+.add-ligne-btn:hover{background:rgba(26,158,82,.15)}
+
+.ligne-item{background:var(--s2);border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;transition:border-color .15s;position:relative}
+.ligne-item:hover{border-color:var(--green)}
+.ligne-grid{display:grid;grid-template-columns:1fr 80px 70px 80px 30px;gap:8px;align-items:center}
+.ligne-desc-wrap{display:flex;flex-direction:column;gap:4px}
+.ligne-desc-input{background:#fff;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);outline:none;width:100%;transition:border-color .15s}
+.ligne-desc-input:focus{border-color:var(--green)}
+.ligne-sub{font-size:11px;color:var(--muted)}
+.ligne-num-input{background:#fff;border:1.5px solid var(--border);border-radius:7px;padding:7px 8px;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text);outline:none;text-align:center;width:100%;transition:border-color .15s}
+.ligne-num-input:focus{border-color:var(--green)}
+.ligne-total{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--green);text-align:right;padding-right:4px}
+.del-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .15s;font-size:16px;line-height:1}
+.del-btn:hover{background:rgba(212,40,40,.08);border-color:rgba(212,40,40,.2);color:var(--red)}
+
+/* BIBLIO RAPIDE */
+.biblio-quick{margin-top:10px;padding-top:12px;border-top:1px dashed var(--border)}
+.biblio-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:7px}
+.biblio-pills{display:flex;flex-wrap:wrap;gap:5px}
+.bpill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--soft);transition:all .15s;font-family:'Outfit',sans-serif}
+.bpill:hover{border-color:var(--green);background:var(--gl);color:var(--green)}
+
+/* TOTAUX */
+.totaux-box{background:var(--s2);border-top:1.5px solid var(--border);padding:14px 18px}
+.tot-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--soft)}
+.tot-row.total{font-size:17px;font-weight:800;color:var(--text);border-top:1.5px solid var(--border);padding-top:10px;margin-top:6px}
+.tot-row.total span:last-child{color:var(--green);font-family:'JetBrains Mono',monospace}
+
+/* TVA SELECTOR */
+.tva-row{display:flex;gap:6px;margin-top:8px}
+.tva-btn{flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--border);background:transparent;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s;text-align:center}
+.tva-btn.active{border-color:var(--green);background:var(--gl);color:var(--green)}
+.tva-label{font-size:10px;display:block;font-weight:400;margin-top:1px;color:var(--muted)}
+
+/* RIGHT PANEL */
+.right-col{display:flex;flex-direction:column;gap:16px}
+
+/* APERÇU */
+.apercu{font-size:11px;line-height:1.7}
+.aph{display:flex;justify-content:space-between;margin-bottom:12px;align-items:flex-start}
+.ap-co{font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;color:var(--green);margin-bottom:3px}
+.ap-info{font-size:9px;color:var(--muted);line-height:1.8}
+.ap-num{font-weight:800;font-size:12px;text-align:right;margin-bottom:2px}
+.ap-meta{font-size:9px;color:var(--muted);text-align:right;line-height:1.8}
+.ap-client{background:var(--s2);border-radius:7px;padding:8px 10px;margin-bottom:10px}
+.ap-client-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:2px}
+.ap-client-name{font-size:12px;font-weight:700}
+.ap-table{width:100%;border-collapse:collapse;margin-bottom:10px}
+.ap-table th{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;padding:5px 7px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.ap-table td{padding:5px 7px;border-bottom:1px solid var(--border);font-size:10px;color:var(--soft)}
+.ap-table tr:last-child td{border-bottom:none}
+.ap-tots{margin-left:auto;width:160px}
+.ap-tot-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;color:var(--muted)}
+.ap-tot-row.ttc{font-size:12px;font-weight:800;color:var(--text);border-top:1.5px solid var(--green);padding-top:5px;margin-top:4px}
+.ap-tot-row.ttc span:last-child{color:var(--green)}
+
+/* CONFORMITE */
+.conf-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(184,223,197,.4);font-size:12px;color:var(--soft)}
+.conf-item:last-child{border-bottom:none}
+.conf-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.c-ok{background:rgba(26,158,82,.1);color:var(--green)}
+.c-warn{background:rgba(224,123,18,.1);color:var(--orange)}
+
+/* CLIENT SELECT */
+.client-select-wrap{position:relative}
+.client-select-wrap select{padding-right:36px}
+.new-client-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--gl);border:1px solid rgba(26,158,82,.2);border-radius:6px;color:var(--green);font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif}
+
+/* BOTTOM BAR */
+.bottom-bar{position:sticky;bottom:0;background:var(--surface);border-top:1.5px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 16px rgba(26,158,82,.06)}
+.bot-info{font-size:13px;color:var(--muted)}
+.bot-info strong{color:var(--text)}
+.bot-actions{display:flex;gap:8px}
+.btn{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,158,82,.35)}
+.btn-ghost{background:transparent;color:var(--soft);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--s2)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700}
+.bg{background:rgba(26,158,82,.1);color:var(--green)}
+.bo{background:rgba(224,123,18,.1);color:var(--orange)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SURL='https://uwdfytuvpujhiniotqyl.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok';
+let sb;try{sb=supabase.createClient(SURL,SKEY)}catch(e){}
+</script>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo"><div class="logo-mark">TB</div><div class="logo-name">TAYCO BAT</div></div>
+  <div class="sep"></div>
+  <div class="back">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour
+  </div>
+  <div class="top-title">Nouveau devis</div>
+  <div class="spacer"></div>
+  <!-- Langues -->
+  <div style="display:flex;gap:4px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:4px 7px">
+    <button onclick="swLang(this,'fr')" style="background:rgba(26,158,82,.15);border:none;cursor:pointer;font-size:17px;padding:2px 4px;border-radius:5px" title="Français">🇫🇷</button>
+    <button onclick="swLang(this,'ar')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Darija">🇲🇦</button>
+    <button onclick="swLang(this,'dz')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Algérien">🇩🇿</button>
+    <button onclick="swLang(this,'tn')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Tounsi">🇹🇳</button>
+    <button onclick="swLang(this,'tr')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Türkçe">🇹🇷</button>
+    <button onclick="swLang(this,'ro')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Română">🇷🇴</button>
+    <button onclick="swLang(this,'pl')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Polski">🇵🇱</button>
+    <button onclick="swLang(this,'pt')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Português">🇵🇹</button>
+    <button onclick="swLang(this,'in')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Hindi">🇮🇳</button>
+    <button onclick="swLang(this,'al')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Shqip">🇦🇱</button>
+    <button onclick="swLang(this,'hr')" style="background:none;border:none;cursor:pointer;font-size:17px;opacity:.5;padding:2px 4px;border-radius:5px;transition:all .15s" title="Hrvatski">🇭🇷</button>
+  </div>
+</header>
+
+<!-- STEPS -->
+<div class="steps-bar">
+  <div class="stp done"><div class="stp-n">✓</div> Client</div>
+  <span class="stp-arr">›</span>
+  <div class="stp active"><div class="stp-n">2</div> Travaux</div>
+  <span class="stp-arr">›</span>
+  <div class="stp"><div class="stp-n">3</div> Validation</div>
+  <span class="stp-arr">›</span>
+  <div class="stp"><div class="stp-n">4</div> Envoi</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT -->
+  <div style="display:flex;flex-direction:column;gap:16px">
+
+    <!-- CLIENT -->
+    <div class="panel">
+      <div class="ph"><div class="pt"><div class="pico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Client</div></div>
+      <div class="pb">
+        <div class="row2">
+          <div class="fg">
+            <label>Client</label>
+            <div class="client-select-wrap">
+              <select>
+                <option>M. Dupont Pierre</option>
+                <option>Résid. Les Pins</option>
+                <option>SCI Belvédère</option>
+                <option>M. Coban Taylan</option>
+              </select>
+              <button class="new-client-btn">+ Nouveau</button>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Chantier lié</label>
+            <select>
+              <option>Villa Beaumont — Lyon 6e</option>
+              <option>Extension cuisine</option>
+              <option>Nouveau chantier...</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2" style="margin-top:10px">
+          <div class="fg">
+            <label>Date du devis</label>
+            <input type="date" value="2024-11-14">
+          </div>
+          <div class="fg">
+            <label>Valable jusqu'au</label>
+            <input type="date" value="2024-12-14">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEVIS CREATION -->
+    <div class="panel">
+      <div class="ph">
+        <div class="pt">
+          <div class="pico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          Détail des travaux
+        </div>
+        <span class="badge bg">Étape 2/4</span>
+      </div>
+      <div class="pb">
+
+        <!-- ═══ MODE SWITCHER ═══ -->
+        <div class="mode-switch">
+          <button class="mode-btn active" id="btn-audio" onclick="switchMode('audio')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+            🎙️ Mode Audio IA
+          </button>
+          <button class="mode-btn" id="btn-manuel" onclick="switchMode('manuel')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="16" x2="21" y2="16"/><path d="M8 8v8"/></svg>
+            ⌨️ Mode Manuel
+          </button>
+        </div>
+
+        <!-- ══ AUDIO MODE ══ -->
+        <div class="mode-screen active" id="mode-audio">
+          <div class="audio-zone">
+            <!-- Langue pour l'IA -->
+            <div class="lang-row">
+              <div class="lp on" onclick="selLang(this)">🇫🇷 FR</div>
+              <div class="lp" onclick="selLang(this)">🇲🇦 Darija</div>
+              <div class="lp" onclick="selLang(this)">🇩🇿 Dzayer</div>
+              <div class="lp" onclick="selLang(this)">🇹🇳 Tounsi</div>
+              <div class="lp" onclick="selLang(this)">🇹🇷 TR</div>
+              <div class="lp" onclick="selLang(this)">🇷🇴 RO</div>
+              <div class="lp" onclick="selLang(this)">🇵🇱 PL</div>
+              <div class="lp" onclick="selLang(this)">🇵🇹 PT</div>
+              <div class="lp" onclick="selLang(this)">🇮🇳 HI</div>
+              <div class="lp" onclick="selLang(this)">🇦🇱 AL</div>
+              <div class="lp" onclick="selLang(this)">🇭🇷 HR</div>
+            </div>
+
+            <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+
+            <div class="mic-status">
+              <div class="mic-st-title" id="micTitle">Appuie pour parler</div>
+              <div class="mic-st-sub">Décris les travaux dans ta langue — devis en français automatiquement</div>
+            </div>
+
+            <div class="transcript has" id="transcript">
+              <span class="tr-badge">🇲🇦 Darija</span>
+              "Bghit nbeddel lcarrelage dial salon, 35 mètres carrés, w nzid painting dial plafond w les murs, w bab jdid dial bois — kolchi mzyan inchallah..."
+            </div>
+
+            <button class="gen-btn" onclick="genDevis()">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Générer le devis en français
+            </button>
+
+            <div style="font-size:12px;color:var(--muted);text-align:center">
+              ou <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="switchMode('manuel')">saisir manuellement →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ MANUEL MODE ══ -->
+        <div class="mode-screen" id="mode-manuel">
+
+          <!-- Infos générales -->
+          <div class="form-section" style="margin-bottom:16px">
+            <div class="fg">
+              <label>Intitulé du devis</label>
+              <input type="text" id="devis-titre" placeholder="Ex : Rénovation salle de bain complète" value="Rénovation salon — carrelage, peinture, menuiserie">
+            </div>
+            <div class="row2">
+              <div class="fg">
+                <label>Type de travaux</label>
+                <select id="devis-type">
+                  <option>Second œuvre — Rénovation</option>
+                  <option>Gros œuvre</option>
+                  <option>Plomberie</option>
+                  <option>Électricité</option>
+                  <option>Toiture</option>
+                  <option>Menuiserie</option>
+                  <option>Peinture</option>
+                  <option>Carrelage</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Durée estimée</label>
+                <input type="text" id="devis-duree" placeholder="Ex: 5 jours ouvrés" value="8 jours ouvrés">
+              </div>
+            </div>
+            <div class="fg">
+              <label>Description (visible sur le devis)</label>
+              <textarea id="devis-desc" rows="2" placeholder="Décris les travaux...">Fourniture et pose de carrelage grès cérame 60x60 en salon (35 m²). Peinture plafond et murs 2 couches. Remplacement porte intérieure bois avec pose complète.</textarea>
+            </div>
+          </div>
+
+          <!-- Lignes -->
+          <div class="lignes-header">
+            <div class="lignes-title">Lignes du devis</div>
+            <div class="add-ligne-btn" onclick="addLigne()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Ajouter une ligne
+            </div>
+          </div>
+
+          <div id="lignes-container">
+            <!-- Ligne 1 -->
+            <div class="ligne-item" id="ligne-1">
+              <div class="ligne-grid">
+                <div class="ligne-desc-wrap">
+                  <input class="ligne-desc-input" type="text" placeholder="Description des travaux..." value="Carrelage grès cérame 60x60 — pose complète" oninput="calcTotal()">
+                  <div class="ligne-sub">Dépose + ragréage + pose collée</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <input class="ligne-num-input" type="number" value="35" min="0" oninput="calcTotal()" title="Quantité">
+                  <select style="padding:4px 6px;font-size:11px;border-radius:6px;border:1.5px solid var(--border);background:var(--s2);font-family:'Outfit',sans-serif;color:var(--text);outline:none" onchange="calcTotal()">
+                    <option>m²</option><option>ml</option><option>u</option><option>h</option><option>forfait</option>
+                  </select>
+                </div>
+                <input class="ligne-num-input" type="number" value="48" min="0" oninput="calcTotal()" placeholder="P.U. €" title="Prix unitaire HT">
+                <div class="ligne-total" id="tot-1">1 680 €</div>
+                <button class="del-btn" onclick="delLigne('ligne-1')">×</button>
+              </div>
+            </div>
+
+            <!-- Ligne 2 -->
+            <div class="ligne-item" id="ligne-2">
+              <div class="ligne-grid">
+                <div class="ligne-desc-wrap">
+                  <input class="ligne-desc-input" type="text" value="Peinture murs et plafond — 2 couches" oninput="calcTotal()">
+                  <div class="ligne-sub">Préparation + 2 couches incluses</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <input class="ligne-num-input" type="number" value="82" oninput="calcTotal()">
+                  <select style="padding:4px 6px;font-size:11px;border-radius:6px;border:1.5px solid var(--border);background:var(--s2);font-family:'Outfit',sans-serif;color:var(--text);outline:none">
+                    <option>m²</option><option>ml</option><option>u</option>
+                  </select>
+                </div>
+                <input class="ligne-num-input" type="number" value="12" oninput="calcTotal()">
+                <div class="ligne-total" id="tot-2">984 €</div>
+                <button class="del-btn" onclick="delLigne('ligne-2')">×</button>
+              </div>
+            </div>
+
+            <!-- Ligne 3 -->
+            <div class="ligne-item" id="ligne-3">
+              <div class="ligne-grid">
+                <div class="ligne-desc-wrap">
+                  <input class="ligne-desc-input" type="text" value="Porte intérieure bois — fourniture et pose" oninput="calcTotal()">
+                  <div class="ligne-sub">Huisserie + quincaillerie incluses</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <input class="ligne-num-input" type="number" value="1" oninput="calcTotal()">
+                  <select style="padding:4px 6px;font-size:11px;border-radius:6px;border:1.5px solid var(--border);background:var(--s2);font-family:'Outfit',sans-serif;color:var(--text);outline:none">
+                    <option>u</option><option>m²</option><option>ml</option>
+                  </select>
+                </div>
+                <input class="ligne-num-input" type="number" value="680" oninput="calcTotal()">
+                <div class="ligne-total" id="tot-3">680 €</div>
+                <button class="del-btn" onclick="delLigne('ligne-3')">×</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Biblio rapide -->
+          <div class="biblio-quick">
+            <div class="biblio-label">📚 Ajouter depuis la bibliothèque</div>
+            <div class="biblio-pills">
+              <button class="bpill" onclick="addFromBiblio('Ragréage sol','m²',12)">Ragréage sol</button>
+              <button class="bpill" onclick="addFromBiblio('Enduit de lissage','m²',8)">Enduit lissage</button>
+              <button class="bpill" onclick="addFromBiblio('Faïence mural 30x60','m²',52)">Faïence mural</button>
+              <button class="bpill" onclick="addFromBiblio('Plinthes carrelage','ml',14)">Plinthes</button>
+              <button class="bpill" onclick="addFromBiblio('Parpaing creux 20cm','m²',42)">Parpaing</button>
+              <button class="bpill" onclick="addFromBiblio('Isolation thermique','m²',28)">Isolation</button>
+              <button class="bpill" onclick="addFromBiblio('Main d\'œuvre','h',45)">Main d'œuvre</button>
+              <button class="bpill" onclick="addFromBiblio('Dépose et évacuation','forfait',150)">Dépose</button>
+            </div>
+          </div>
+
+          <!-- TVA -->
+          <div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Taux de TVA</div>
+            <div class="tva-row">
+              <button class="tva-btn active" onclick="setTVA(this,5.5)">5,5%<span class="tva-label">Travaux d'isolation</span></button>
+              <button class="tva-btn" onclick="setTVA(this,10)">10%<span class="tva-label">Rénovation logement</span></button>
+              <button class="tva-btn" onclick="setTVA(this,20)">20%<span class="tva-label">Taux normal</span></button>
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center">
+            ou <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="switchMode('audio')">← utiliser l'IA audio</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TOTAUX -->
+      <div class="totaux-box">
+        <div class="tot-row"><span>Total HT</span><span id="tot-ht">3 344,00 €</span></div>
+        <div class="tot-row"><span id="tva-label">TVA 10% (rénovation)</span><span id="tot-tva">334,40 €</span></div>
+        <div class="tot-row total"><span>Total TTC</span><span id="tot-ttc">3 678,40 €</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-col">
+
+    <!-- APERÇU -->
+    <div class="panel">
+      <div class="ph"><div class="pt"><div class="pico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>Aperçu du devis</div><span class="badge bg">Conforme ✓</span></div>
+      <div class="pb apercu">
+        <div class="aph">
+          <div><div class="ap-co">TAYCO BAT SARL</div><div class="ap-info">12 rue des Artisans, 69003 Lyon<br>SIRET : 823 456 789 00012<br>TVA : FR12 823456789</div></div>
+          <div><div class="ap-num">DEVIS N° DE-2024-114</div><div class="ap-meta">Date : 14/11/2024<br>Valable : 30 jours</div></div>
+        </div>
+        <div class="ap-client"><div class="ap-client-lbl">Client</div><div class="ap-client-name">M. Dupont Pierre</div><div style="font-size:9px;color:var(--muted)">45 av. République, 69007 Lyon</div></div>
+        <table class="ap-table">
+          <thead><tr><th>Désignation</th><th>Qté</th><th>P.U.</th><th>HT</th></tr></thead>
+          <tbody id="ap-tbody">
+            <tr><td>Carrelage grès 60x60</td><td>35 m²</td><td>48 €</td><td>1 680 €</td></tr>
+            <tr><td>Peinture murs+plafond</td><td>82 m²</td><td>12 €</td><td>984 €</td></tr>
+            <tr><td>Porte intérieure bois</td><td>1 u</td><td>680 €</td><td>680 €</td></tr>
+          </tbody>
+        </table>
+        <div class="ap-tots">
+          <div class="ap-tot-row"><span>HT</span><span id="ap-ht">3 344 €</span></div>
+          <div class="ap-tot-row"><span id="ap-tva-lbl">TVA 10%</span><span id="ap-tva">334 €</span></div>
+          <div class="ap-tot-row ttc"><span>TTC</span><span id="ap-ttc">3 678 €</span></div>
+        </div>
+        <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:9px;color:var(--muted);line-height:1.7">
+          <strong>Mentions légales :</strong> Garantie décennale n°456-2024. RC Pro AXA. TVA réduite 10% — art. 279-0 bis CGI. Retenue de garantie 5% si applicable. Délai rétractation : 14 jours.
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFORMITÉ -->
+    <div class="panel">
+      <div class="ph"><div class="pt"><div class="pico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>Conformité légale</div></div>
+      <div style="padding:4px 16px 12px">
+        <div class="conf-item"><div class="conf-dot c-ok">✓</div><span>SIRET et TVA intracommunautaire</span></div>
+        <div class="conf-item"><div class="conf-dot c-ok">✓</div><span>19 mentions légales BTP</span></div>
+        <div class="conf-item"><div class="conf-dot c-ok">✓</div><span>TVA réduite 10% — rénovation</span></div>
+        <div class="conf-item"><div class="conf-dot c-ok">✓</div><span>Garantie décennale mentionnée</span></div>
+        <div class="conf-item"><div class="conf-dot c-ok">✓</div><span>Délai de rétractation 14 jours</span></div>
+        <div class="conf-item"><div class="conf-dot c-warn">!</div><span>Attestation TVA à joindre</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bot-info">Devis <strong>DE-2024-114</strong> — <strong>M. Dupont Pierre</strong> — <strong id="bot-ttc">3 678,40 € TTC</strong></div>
+  <div class="bot-actions">
+    <button class="btn btn-ghost">💾 Sauvegarder brouillon</button>
+    <button class="btn btn-ghost">👁️ Aperçu PDF</button>
+    <button class="btn btn-primary">
+      Continuer — Validation
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── MODE SWITCH ──
+function switchMode(mode) {
+  document.querySelectorAll('.mode-screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mode-' + mode).classList.add('active');
+  document.getElementById('btn-' + mode).classList.add('active');
+}
+
+// ── LANGUE ──
+function swLang(el, lang) {
+  el.parentElement.querySelectorAll('button').forEach(b => { b.style.opacity='.5'; b.style.background='none'; });
+  el.style.opacity='1'; el.style.background='rgba(26,158,82,0.15)';
+}
+function selLang(el) {
+  el.closest('.lang-row').querySelectorAll('.lp').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ── MIC ──
+let micOn = false;
+function toggleMic() {
+  micOn = !micOn;
+  const btn = document.getElementById('micBtn');
+  const title = document.getElementById('micTitle');
+  btn.classList.toggle('rec', micOn);
+  title.textContent = micOn ? 'Enregistrement en cours...' : 'Appuie pour parler';
+}
+
+// ── GÉNÉRER DEVIS ──
+function genDevis() {
+  const btn = document.querySelector('.gen-btn');
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite"></div> Génération...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '✓ Devis généré ! Basculer en mode manuel pour modifier →';
+    btn.style.background = 'linear-gradient(135deg,#0e9e52,#077a3e)';
+    btn.disabled = false;
+    setTimeout(() => switchMode('manuel'), 1500);
+  }, 1800);
+}
+
+// ── CALCUL TOTAUX ──
+let tvaPct = 10;
+let ligneCount = 3;
+
+function calcTotal() {
+  let totalHT = 0;
+  document.querySelectorAll('.ligne-item').forEach((item, i) => {
+    const inputs = item.querySelectorAll('.ligne-num-input');
+    if (inputs.length >= 2) {
+      const qty = parseFloat(inputs[0].value) || 0;
+      const pu = parseFloat(inputs[1].value) || 0;
+      const total = qty * pu;
+      totalHT += total;
+      const totEl = item.querySelector('.ligne-total');
+      if (totEl) totEl.textContent = fmt(total) + ' €';
+    }
+  });
+  const tva = totalHT * tvaPct / 100;
+  const ttc = totalHT + tva;
+  document.getElementById('tot-ht').textContent = fmt(totalHT) + ',00 €';
+  document.getElementById('tot-tva').textContent = fmt(tva) + ' €';
+  document.getElementById('tot-ttc').textContent = fmt(ttc) + ',40 €';
+  document.getElementById('ap-ht').textContent = fmt(totalHT) + ' €';
+  document.getElementById('ap-tva').textContent = fmt(tva) + ' €';
+  document.getElementById('ap-ttc').textContent = fmt(ttc) + ' €';
+  document.getElementById('bot-ttc').textContent = fmt(ttc) + ',40 € TTC';
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('fr-FR'); }
+
+// ── AJOUTER LIGNE ──
+function addLigne() {
+  ligneCount++;
+  const id = 'ligne-' + ligneCount;
+  const div = document.createElement('div');
+  div.className = 'ligne-item';
+  div.id = id;
+  div.innerHTML = `
+    <div class="ligne-grid">
+      <div class="ligne-desc-wrap">
+        <input class="ligne-desc-input" type="text" placeholder="Description des travaux..." oninput="calcTotal()">
+        <div class="ligne-sub">Nouvelle ligne</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <input class="ligne-num-input" type="number" value="1" min="0" oninput="calcTotal()" placeholder="Qté">
+        <select style="padding:4px 6px;font-size:11px;border-radius:6px;border:1.5px solid var(--border);background:var(--s2);font-family:'Outfit',sans-serif;color:var(--text);outline:none" onchange="calcTotal()">
+          <option>m²</option><option>ml</option><option>u</option><option>h</option><option>forfait</option>
+        </select>
+      </div>
+      <input class="ligne-num-input" type="number" value="0" min="0" oninput="calcTotal()" placeholder="€">
+      <div class="ligne-total">0 €</div>
+      <button class="del-btn" onclick="delLigne('${id}')">×</button>
+    </div>`;
+  document.getElementById('lignes-container').appendChild(div);
+  div.querySelector('.ligne-desc-input').focus();
+  div.style.animation = 'fu .25s ease';
+}
+
+// ── SUPPRIMER LIGNE ──
+function delLigne(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); calcTotal(); }
+}
+
+// ── BIBLIO RAPIDE ──
+function addFromBiblio(desc, unit, pu) {
+  ligneCount++;
+  const id = 'ligne-' + ligneCount;
+  const div = document.createElement('div');
+  div.className = 'ligne-item';
+  div.id = id;
+  div.style.animation = 'fu .25s ease';
+  div.innerHTML = `
+    <div class="ligne-grid">
+      <div class="ligne-desc-wrap">
+        <input class="ligne-desc-input" type="text" value="${desc}" oninput="calcTotal()">
+        <div class="ligne-sub">Depuis bibliothèque BTP</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <input class="ligne-num-input" type="number" value="1" min="0" oninput="calcTotal()">
+        <select style="padding:4px 6px;font-size:11px;border-radius:6px;border:1.5px solid var(--border);background:var(--s2);font-family:'Outfit',sans-serif;color:var(--text);outline:none">
+          <option>${unit}</option><option>m²</option><option>ml</option><option>u</option><option>h</option>
+        </select>
+      </div>
+      <input class="ligne-num-input" type="number" value="${pu}" min="0" oninput="calcTotal()">
+      <div class="ligne-total">${pu} €</div>
+      <button class="del-btn" onclick="delLigne('${id}')">×</button>
+    </div>`;
+  document.getElementById('lignes-container').appendChild(div);
+  if (document.getElementById('mode-manuel').classList.contains('active') === false) switchMode('manuel');
+  calcTotal();
+}
+
+// ── TVA ──
+function setTVA(btn, pct) {
+  tvaPct = pct;
+  document.querySelectorAll('.tva-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels = { 5.5: 'TVA 5,5% (isolation)', 10: 'TVA 10% (rénovation)', 20: 'TVA 20% (normal)' };
+  document.getElementById('tva-label').textContent = labels[pct];
+  document.getElementById('ap-tva-lbl').textContent = `TVA ${pct}%`;
+  calcTotal();
+}
+
+// CSS spinner
+const st = document.createElement('style');
+st.textContent = '@keyframes sp{to{transform:rotate(360deg)}}';
+document.head.appendChild(st);
+</script>
+
+</body>
+</html>

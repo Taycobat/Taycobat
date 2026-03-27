@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Bibliothèque de libellés BTP</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2faf5;--surface:#fff;--s2:#e4f5eb;--border:#b8dfc5;
+  --green:#1a9e52;--green2:#0e7a3c;--gl:rgba(26,158,82,0.09);
+  --text:#0d2d1a;--muted:#4a7a5e;--soft:#1e5c38;
+  --red:#d42828;--orange:#e07b12;--blue:#1a6fd4;
+  --shadow:0 2px 14px rgba(26,158,82,0.08);--r:12px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.logo-mark{width:34px;height:34px;background:linear-gradient(135deg,#1a9e52,#0e7a3c);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.logo-name{font-size:17px;font-weight:800;color:var(--green)}
+.sep{width:1px;height:22px;background:var(--border)}
+.top-title{font-size:15px;font-weight:700}
+.spacer{flex:1}
+.search-wrap{position:relative;width:280px}
+.search-wrap input{background:var(--s2);border:1.5px solid var(--border);border-radius:9px;padding:8px 14px 8px 36px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);outline:none;width:100%;transition:all .2s}
+.search-wrap input:focus{border-color:var(--green);background:#fff}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.badge-count{background:var(--gl);color:var(--green);border:1px solid rgba(26,158,82,.2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 54px)}
+
+/* SIDEBAR MÉTIERS */
+.metiers-sidebar{background:var(--surface);border-right:1.5px solid var(--border);padding:16px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
+.metiers-sidebar::-webkit-scrollbar{width:3px}
+.metiers-sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sidebar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 18px 6px}
+.metier-btn{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:13px;font-weight:500;color:var(--soft)}
+.metier-btn:hover{background:var(--gl);color:var(--green)}
+.metier-btn.active{background:var(--gl);color:var(--green);border-left-color:var(--green);font-weight:700}
+.metier-icon{font-size:20px;width:28px;text-align:center}
+.metier-count{margin-left:auto;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;color:var(--muted)}
+.metier-btn.active .metier-count{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* CONTENT */
+.content{padding:20px 24px;overflow-y:auto}
+.content-header{margin-bottom:18px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.content-title{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px}
+.content-sub{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* SOUS-CATÉGORIES */
+.sous-cat{margin-bottom:22px}
+.sous-cat-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid var(--border)}
+.sous-cat-title{font-size:14px;font-weight:700;color:var(--text)}
+.sous-cat-badge{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;color:var(--muted)}
+.select-all-btn{margin-left:auto;font-size:11px;font-weight:600;color:var(--green);cursor:pointer;padding:3px 9px;border-radius:6px;border:1px solid rgba(26,158,82,.2);background:var(--gl);transition:all .15s;font-family:'Outfit',sans-serif}
+.select-all-btn:hover{background:rgba(26,158,82,.15)}
+
+/* LIBELLÉ CARDS */
+.libelles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.libelle-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:10px}
+.libelle-card:hover{border-color:var(--green);background:rgba(26,158,82,0.02);transform:translateY(-1px);box-shadow:0 3px 12px rgba(26,158,82,0.09)}
+.libelle-card.selected{border-color:var(--green);background:var(--gl);box-shadow:0 2px 8px rgba(26,158,82,0.12)}
+.libelle-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;font-size:10px}
+.libelle-card.selected .libelle-check{background:var(--green);border-color:var(--green);color:#fff}
+.libelle-info{flex:1}
+.libelle-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4}
+.libelle-card.selected .libelle-name{color:var(--green2)}
+.libelle-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lib-unit{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--muted)}
+.lib-price{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--green)}
+.lib-tag{font-size:10px;background:rgba(26,111,212,0.08);color:var(--blue);border:1px solid rgba(26,111,212,0.15);border-radius:4px;padding:1px 6px}
+
+/* PANIER */
+.panier{position:fixed;bottom:20px;right:24px;z-index:100;transition:all .3s}
+.panier-btn{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;border:none;border-radius:14px;padding:14px 20px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(26,158,82,0.35);transition:all .2s}
+.panier-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,158,82,0.45)}
+.panier-count{background:rgba(255,255,255,0.25);border-radius:20px;padding:2px 9px;font-size:12px;font-weight:800}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:200;display:none;backdrop-filter:blur(2px)}
+.drawer-overlay.show{display:block}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:480px;background:var(--surface);border-left:1.5px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;box-shadow:-6px 0 30px rgba(0,0,0,0.1)}
+.drawer.open{transform:translateX(0)}
+.drawer-header{padding:18px 20px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(26,158,82,.04),transparent)}
+.drawer-title{font-size:16px;font-weight:800}
+.drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all .15s}
+.drawer-close:hover{background:var(--s2)}
+.drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
+.drawer-body::-webkit-scrollbar{width:3px}
+.drawer-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(184,223,197,.4)}
+.drawer-item:last-child{border-bottom:none}
+.drawer-item-name{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+.drawer-item-inputs{display:flex;gap:6px;align-items:center}
+.drawer-item-inputs input{width:70px;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:'JetBrains Mono',monospace;text-align:center;background:var(--s2);outline:none;color:var(--text)}
+.drawer-item-inputs input:focus{border-color:var(--green)}
+.drawer-item-unit{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.drawer-item-total{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--green);width:70px;text-align:right}
+.drawer-del{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.drawer-del:hover{background:rgba(212,40,40,.08);color:var(--red);border-color:rgba(212,40,40,.2)}
+.drawer-footer{padding:16px 20px;border-top:1.5px solid var(--border);background:var(--s2)}
+.drawer-tots{margin-bottom:14px}
+.drawer-tot-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--soft)}
+.drawer-tot-row.total{font-size:16px;font-weight:800;color:var(--text);border-top:1.5px solid var(--border);padding-top:9px;margin-top:5px}
+.drawer-tot-row.total span:last-child{color:var(--green)}
+.tva-btns{display:flex;gap:5px;margin-bottom:14px}
+.tva-b{flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--border);background:transparent;font-size:11px;font-weight:700;font-family:'Outfit',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s;text-align:center}
+.tva-b.on{border-color:var(--green);background:var(--gl);color:var(--green)}
+.tva-b small{display:block;font-weight:400;font-size:9px;margin-top:1px;color:var(--muted)}
+.btn-add-devis{width:100%;padding:13px;background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-add-devis:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(26,158,82,.35)}
+.btn-vider{width:100%;padding:8px;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:7px;transition:all .15s}
+.btn-vider:hover{background:var(--s2)}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.empty-text{font-size:14px;font-weight:500}
+
+/* SEARCH HIGHLIGHT */
+.hl{background:rgba(26,158,82,0.2);border-radius:3px;padding:0 2px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.libelle-card{animation:fadeUp .2s ease}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo-mark">TB</div>
+  <div class="logo-name">TAYCO BAT</div>
+  <div class="sep"></div>
+  <div class="top-title">📚 Bibliothèque de libellés BTP</div>
+  <div class="spacer"></div>
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Rechercher un libellé..." oninput="doSearch(this.value)">
+  </div>
+  <span class="badge-count" id="totalCount">0 libellés</span>
+</header>
+
+<div class="layout">
+
+  <!-- MÉTIERS SIDEBAR -->
+  <aside class="metiers-sidebar">
+    <div class="sidebar-label">Spécialités</div>
+    <div id="metiersList"></div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content" id="mainContent">
+    <div class="content-header">
+      <div>
+        <div class="content-title" id="contentTitle">Tous les libellés</div>
+        <div class="content-sub" id="contentSub">Sélectionnez les libellés à ajouter à votre devis</div>
+      </div>
+      <button onclick="selectAllVisible()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;color:var(--soft);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">Tout sélectionner</button>
+    </div>
+    <div id="libellesContent"></div>
+  </main>
+</div>
+
+<!-- PANIER BTN -->
+<div class="panier" id="panierBtn" style="display:none">
+  <button class="panier-btn" onclick="openDrawer()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+    Ajouter au devis
+    <span class="panier-count" id="panierCount">0</span>
+  </button>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">Devis — Lignes sélectionnées</div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer">
+    <div class="tva-btns">
+      <button class="tva-b on" onclick="setTVA(this,5.5)">5,5%<small>Isolation</small></button>
+      <button class="tva-b" onclick="setTVA(this,10)">10%<small>Rénovation</small></button>
+      <button class="tva-b" onclick="setTVA(this,20)">20%<small>Normal</small></button>
+    </div>
+    <div class="drawer-tots">
+      <div class="drawer-tot-row"><span>Total HT</span><span id="d-ht">0 €</span></div>
+      <div class="drawer-tot-row"><span id="d-tva-lbl">TVA 10%</span><span id="d-tva">0 €</span></div>
+      <div class="drawer-tot-row total"><span>Total TTC</span><span id="d-ttc">0 €</span></div>
+    </div>
+    <button class="btn-add-devis" onclick="exportDevis()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      Insérer dans le devis
+    </button>
+    <button class="btn-vider" onclick="viderPanier()">Vider la sélection</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// BASE DE DONNÉES COMPLÈTE DES LIBELLÉS BTP
+// ══════════════════════════════════════════════════════
+const METIERS = [
+  {
+    id: 'maconnerie', nom: 'Maçonnerie', icon: '🧱', color: '#8B6914',
+    categories: [
+      { nom: 'Terrassement & fondations', items: [
+        { lib: 'Terrassement manuel en tranchée', unit: 'm³', pu: 45 },
+        { lib: 'Terrassement mécanisé', unit: 'm³', pu: 22 },
+        { lib: 'Béton de propreté dosé à 150 kg/m³', unit: 'm³', pu: 110 },
+        { lib: 'Béton armé fondations dosé 350 kg/m³', unit: 'm³', pu: 280 },
+        { lib: 'Semelle filante béton armé', unit: 'ml', pu: 85 },
+        { lib: 'Évacuation des gravois et déblais', unit: 'm³', pu: 35 },
+      ]},
+      { nom: 'Gros œuvre — Murs', items: [
+        { lib: 'Parpaing creux 20cm — pose mortier', unit: 'm²', pu: 42 },
+        { lib: 'Parpaing plein 20cm', unit: 'm²', pu: 48 },
+        { lib: 'Brique de parement extérieure', unit: 'm²', pu: 95 },
+        { lib: 'Mur en béton banché épaisseur 20cm', unit: 'm²', pu: 120 },
+        { lib: 'Poteau béton armé 20x20cm', unit: 'ml', pu: 95 },
+        { lib: 'Linteau béton armé préfabriqué', unit: 'u', pu: 65 },
+        { lib: 'Chaînage horizontal béton armé', unit: 'ml', pu: 55 },
+      ]},
+      { nom: 'Dalles & planchers', items: [
+        { lib: 'Dalle béton armé coulée en place ep.12cm', unit: 'm²', pu: 85 },
+        { lib: 'Plancher hourdis + poutrelles béton', unit: 'm²', pu: 72 },
+        { lib: 'Chape ciment dosée 350 kg/m³ ep.5cm', unit: 'm²', pu: 18 },
+        { lib: 'Ragréage autolissant ep.3mm', unit: 'm²', pu: 12 },
+        { lib: 'Forme de pente légère béton', unit: 'm²', pu: 22 },
+      ]},
+      { nom: 'Enduits & façades', items: [
+        { lib: 'Enduit monocouche OC — façade', unit: 'm²', pu: 28 },
+        { lib: 'Enduit traditionnel 3 couches', unit: 'm²', pu: 38 },
+        { lib: 'Ravalement façade — piquage + enduit', unit: 'm²', pu: 55 },
+        { lib: 'Rejointoiement de façade pierre', unit: 'm²', pu: 65 },
+        { lib: 'Doublage intérieur plaque plâtre 72/50', unit: 'm²', pu: 28 },
+        { lib: 'Cloison plaque plâtre 72mm', unit: 'm²', pu: 32 },
+      ]},
+    ]
+  },
+  {
+    id: 'couverture', nom: 'Couverture', icon: '🏠', color: '#7B3F00',
+    categories: [
+      { nom: 'Charpente', items: [
+        { lib: 'Charpente traditionnelle bois résineux', unit: 'm²', pu: 95 },
+        { lib: 'Fermette industrielle — fourniture et pose', unit: 'm²', pu: 65 },
+        { lib: 'Chevron 63x75 — fourniture et pose', unit: 'ml', pu: 18 },
+        { lib: 'Panne sablière — fourniture et pose', unit: 'ml', pu: 22 },
+        { lib: 'Traitement fongicide et insecticide charpente', unit: 'm²', pu: 12 },
+        { lib: 'Renforcement charpente existante', unit: 'forfait', pu: 850 },
+        { lib: 'Dépose ancienne charpente', unit: 'm²', pu: 18 },
+      ]},
+      { nom: 'Couverture tuiles', items: [
+        { lib: 'Tuiles canal — dépose et repose', unit: 'm²', pu: 35 },
+        { lib: 'Tuiles mécaniques — fourniture et pose', unit: 'm²', pu: 55 },
+        { lib: 'Tuiles plates — fourniture et pose', unit: 'm²', pu: 62 },
+        { lib: 'Faîtage en tuiles — pose mortier', unit: 'ml', pu: 28 },
+        { lib: 'Raccord tuiles cheminée — solin', unit: 'ml', pu: 45 },
+        { lib: 'Liteaux + contre-liteaux', unit: 'm²', pu: 14 },
+        { lib: 'Écran sous-toiture HPV', unit: 'm²', pu: 8 },
+      ]},
+      { nom: 'Couverture zinc / ardoise', items: [
+        { lib: 'Ardoise naturelle — fourniture et pose', unit: 'm²', pu: 85 },
+        { lib: 'Ardoise fibrociment — fourniture et pose', unit: 'm²', pu: 48 },
+        { lib: 'Zinc à joint debout — couverture', unit: 'm²', pu: 95 },
+        { lib: 'Gouttière zinc demi-ronde', unit: 'ml', pu: 42 },
+        { lib: 'Descente zinc ronde D80', unit: 'ml', pu: 38 },
+        { lib: 'Chéneau zinc encaissé', unit: 'ml', pu: 75 },
+      ]},
+      { nom: 'Zinguerie & étanchéité toiture', items: [
+        { lib: 'Noue zinc — étanchéité', unit: 'ml', pu: 55 },
+        { lib: 'Solin zinc — raccord mur', unit: 'ml', pu: 42 },
+        { lib: 'Bavette zinc fenêtre de toit', unit: 'u', pu: 120 },
+        { lib: 'Trappe de visite toiture', unit: 'u', pu: 280 },
+        { lib: 'Fenêtre de toit Velux — pose', unit: 'u', pu: 450 },
+        { lib: 'Écran sous-toiture + pose', unit: 'm²', pu: 12 },
+      ]},
+    ]
+  },
+  {
+    id: 'plomberie', nom: 'Plomberie', icon: '🚿', color: '#1a6fd4',
+    categories: [
+      { nom: 'Alimentation eau froide/chaude', items: [
+        { lib: 'Tube cuivre D12 — fourniture et pose', unit: 'ml', pu: 22 },
+        { lib: 'Tube cuivre D14 — fourniture et pose', unit: 'ml', pu: 26 },
+        { lib: 'Tube PER D16 sous fourreau', unit: 'ml', pu: 14 },
+        { lib: 'Tube multicouche D16 — pose', unit: 'ml', pu: 18 },
+        { lib: 'Robinet d\'arrêt quart de tour 15/21', unit: 'u', pu: 45 },
+        { lib: 'Nourrice distribution 4 départs', unit: 'u', pu: 185 },
+        { lib: 'Réducteur de pression — pose', unit: 'u', pu: 195 },
+        { lib: 'Compteur eau froide — branchement', unit: 'u', pu: 320 },
+      ]},
+      { nom: 'Évacuations & EP', items: [
+        { lib: 'Tuyau PVC D32 — évacuation lavabo', unit: 'ml', pu: 16 },
+        { lib: 'Tuyau PVC D40 — évacuation evier', unit: 'ml', pu: 18 },
+        { lib: 'Tuyau PVC D100 — chute WC', unit: 'ml', pu: 38 },
+        { lib: 'Siphon de sol D75 — fourniture et pose', unit: 'u', pu: 85 },
+        { lib: 'Regard de visite EU — maçonné', unit: 'u', pu: 350 },
+        { lib: 'Boîte de branchement EU extérieure', unit: 'u', pu: 280 },
+        { lib: 'Raccordement réseau EU existant', unit: 'forfait', pu: 450 },
+      ]},
+      { nom: 'Sanitaires', items: [
+        { lib: 'WC suspendu — fourniture et pose complète', unit: 'u', pu: 680 },
+        { lib: 'WC à poser — fourniture et pose', unit: 'u', pu: 420 },
+        { lib: 'Lavabo céramique — fourniture et pose', unit: 'u', pu: 350 },
+        { lib: 'Double vasque — fourniture et pose', unit: 'u', pu: 650 },
+        { lib: 'Baignoire acrylique — fourniture et pose', unit: 'u', pu: 750 },
+        { lib: 'Douche à l\'italienne — receveur et pose', unit: 'u', pu: 1200 },
+        { lib: 'Bac à douche 90x90 — pose', unit: 'u', pu: 380 },
+        { lib: 'Robinetterie lavabo mitigeur', unit: 'u', pu: 180 },
+        { lib: 'Robinetterie douche mitigeur', unit: 'u', pu: 220 },
+        { lib: 'Évier inox 1 bac — fourniture et pose', unit: 'u', pu: 380 },
+      ]},
+      { nom: 'Chauffage eau — Production', items: [
+        { lib: 'Chauffe-eau électrique 150L — pose', unit: 'u', pu: 850 },
+        { lib: 'Chauffe-eau thermodynamique 200L', unit: 'u', pu: 2200 },
+        { lib: 'Chaudière gaz condensation — pose', unit: 'u', pu: 2800 },
+        { lib: 'Ballon tampon 200L — pose', unit: 'u', pu: 680 },
+        { lib: 'Circulateur de chauffage — remplacement', unit: 'u', pu: 350 },
+      ]},
+    ]
+  },
+  {
+    id: 'electricite', nom: 'Électricité', icon: '⚡', color: '#E8A020',
+    categories: [
+      { nom: 'Tableaux électriques', items: [
+        { lib: 'Tableau électrique 13 modules — fourniture et pose', unit: 'u', pu: 380 },
+        { lib: 'Tableau électrique 26 modules', unit: 'u', pu: 520 },
+        { lib: 'Disjoncteur différentiel 30mA', unit: 'u', pu: 85 },
+        { lib: 'Disjoncteur 16A — fourniture et pose', unit: 'u', pu: 35 },
+        { lib: 'Coffret de répartition secondaire', unit: 'u', pu: 280 },
+        { lib: 'Mise à la terre — fourniture et pose', unit: 'forfait', pu: 280 },
+      ]},
+      { nom: 'Câblage', items: [
+        { lib: 'Câble 1,5mm² — éclairage sous tube', unit: 'ml', pu: 8 },
+        { lib: 'Câble 2,5mm² — prises courant sous tube', unit: 'ml', pu: 10 },
+        { lib: 'Câble 6mm² — gros consommateurs', unit: 'ml', pu: 16 },
+        { lib: 'Câble VDI — réseau informatique', unit: 'ml', pu: 12 },
+        { lib: 'Goulotte PVC 20x20 — pose', unit: 'ml', pu: 14 },
+        { lib: 'Tube IRO D16 encastré', unit: 'ml', pu: 6 },
+        { lib: 'Saignée et rebouchage — câble encastré', unit: 'ml', pu: 22 },
+      ]},
+      { nom: 'Appareillage', items: [
+        { lib: 'Prise 2P+T 16A — fourniture et pose', unit: 'u', pu: 28 },
+        { lib: 'Prise USB double — fourniture et pose', unit: 'u', pu: 55 },
+        { lib: 'Interrupteur simple allumage', unit: 'u', pu: 22 },
+        { lib: 'Interrupteur double allumage (va-et-vient)', unit: 'u', pu: 35 },
+        { lib: 'Variateur d\'éclairage', unit: 'u', pu: 65 },
+        { lib: 'Détecteur de présence — éclairage', unit: 'u', pu: 85 },
+        { lib: 'Alarme incendie — détecteur', unit: 'u', pu: 95 },
+        { lib: 'Prise RJ45 Cat6 — pose', unit: 'u', pu: 45 },
+      ]},
+      { nom: 'Éclairage', items: [
+        { lib: 'Spot LED encastré — fourniture et pose', unit: 'u', pu: 55 },
+        { lib: 'Plafonnier LED — fourniture et pose', unit: 'u', pu: 75 },
+        { lib: 'Réglette LED 120cm — pose', unit: 'u', pu: 65 },
+        { lib: 'Hublot extérieur IP65 — pose', unit: 'u', pu: 85 },
+        { lib: 'Borne éclairage extérieur', unit: 'u', pu: 120 },
+        { lib: 'Bandeau LED sous meuble — pose', unit: 'ml', pu: 35 },
+      ]},
+    ]
+  },
+  {
+    id: 'carrelage', nom: 'Carrelage', icon: '🔲', color: '#555',
+    categories: [
+      { nom: 'Sols', items: [
+        { lib: 'Carrelage grès cérame 60x60 — pose collée', unit: 'm²', pu: 48 },
+        { lib: 'Carrelage grès cérame 30x30 — pose', unit: 'm²', pu: 42 },
+        { lib: 'Carrelage extérieur antidérapant — pose', unit: 'm²', pu: 55 },
+        { lib: 'Dalle en pierre naturelle — pose', unit: 'm²', pu: 75 },
+        { lib: 'Dépose carrelage existant + évacuation', unit: 'm²', pu: 18 },
+        { lib: 'Ragréage autolissant avant carrelage', unit: 'm²', pu: 12 },
+        { lib: 'Colle carrelage gros format', unit: 'm²', pu: 8 },
+        { lib: 'Joint époxy carrelage — application', unit: 'm²', pu: 14 },
+      ]},
+      { nom: 'Murs & faïence', items: [
+        { lib: 'Faïence murale 30x60 — fourniture et pose', unit: 'm²', pu: 52 },
+        { lib: 'Faïence murale 60x120 grand format', unit: 'm²', pu: 78 },
+        { lib: 'Pierre naturelle mur — parement', unit: 'm²', pu: 95 },
+        { lib: 'Mosaïque — pose', unit: 'm²', pu: 85 },
+        { lib: 'Dépose carrelage mural existant', unit: 'm²', pu: 15 },
+        { lib: 'Préparation support — ragréage mur', unit: 'm²', pu: 10 },
+      ]},
+      { nom: 'Finitions', items: [
+        { lib: 'Plinthe carrelage assortie — pose', unit: 'ml', pu: 14 },
+        { lib: 'Seuil de porte carrelage — pose', unit: 'u', pu: 45 },
+        { lib: 'Joint de dilatation — pose', unit: 'ml', pu: 18 },
+        { lib: 'Profilé de finition inox', unit: 'ml', pu: 22 },
+        { lib: 'Niche carrelée douche — fourniture et pose', unit: 'u', pu: 180 },
+        { lib: 'Bande d\'étanchéité périmétrique', unit: 'ml', pu: 12 },
+      ]},
+    ]
+  },
+  {
+    id: 'peinture', nom: 'Peinture', icon: '🎨', color: '#9B59B6',
+    categories: [
+      { nom: 'Préparation des supports', items: [
+        { lib: 'Ponçage et dépoussiérage murs', unit: 'm²', pu: 6 },
+        { lib: 'Décapage peinture ancienne', unit: 'm²', pu: 12 },
+        { lib: 'Rebouchage fissures et trous', unit: 'forfait', pu: 180 },
+        { lib: 'Enduit de lissage intérieur', unit: 'm²', pu: 8 },
+        { lib: 'Sous-couche d\'accrochage', unit: 'm²', pu: 5 },
+        { lib: 'Bâche et protection sols', unit: 'm²', pu: 2 },
+      ]},
+      { nom: 'Peinture intérieure', items: [
+        { lib: 'Peinture murs 2 couches — blanc mat', unit: 'm²', pu: 12 },
+        { lib: 'Peinture murs 2 couches — teinte', unit: 'm²', pu: 15 },
+        { lib: 'Peinture plafond 2 couches — blanc', unit: 'm²', pu: 14 },
+        { lib: 'Peinture boiseries — portes et fenêtres', unit: 'u', pu: 120 },
+        { lib: 'Peinture radiateur — dépose + repose', unit: 'u', pu: 95 },
+        { lib: 'Vernis parquet — ponçage + application', unit: 'm²', pu: 22 },
+        { lib: 'Lasure bois — 2 couches', unit: 'm²', pu: 18 },
+      ]},
+      { nom: 'Peinture extérieure', items: [
+        { lib: 'Peinture façade — 2 couches + impression', unit: 'm²', pu: 32 },
+        { lib: 'Peinture anti-humidité sous-sol', unit: 'm²', pu: 22 },
+        { lib: 'Peinture sol extérieur antidérapante', unit: 'm²', pu: 18 },
+        { lib: 'Traitement rouille ferronnerie', unit: 'm²', pu: 28 },
+        { lib: 'Peinture volets bois — dépose + repose', unit: 'u', pu: 145 },
+      ]},
+      { nom: 'Revêtements muraux', items: [
+        { lib: 'Papier peint — dépose et pose', unit: 'm²', pu: 22 },
+        { lib: 'Toile de verre — pose et peinture', unit: 'm²', pu: 28 },
+        { lib: 'Lambris PVC — fourniture et pose', unit: 'm²', pu: 35 },
+        { lib: 'Lambris bois — fourniture et pose', unit: 'm²', pu: 55 },
+        { lib: 'Béton ciré décoratif — application', unit: 'm²', pu: 85 },
+        { lib: 'Stuc vénitien', unit: 'm²', pu: 95 },
+      ]},
+    ]
+  },
+  {
+    id: 'menuiserie', nom: 'Menuiserie', icon: '🪟', color: '#8B4513',
+    categories: [
+      { nom: 'Portes intérieures', items: [
+        { lib: 'Porte intérieure bois + huisserie — pose', unit: 'u', pu: 680 },
+        { lib: 'Porte coulissante galandage — pose complète', unit: 'u', pu: 950 },
+        { lib: 'Porte de garage basculante — fourniture et pose', unit: 'u', pu: 1850 },
+        { lib: 'Porte de garage sectionnelle motorisée', unit: 'u', pu: 2800 },
+        { lib: 'Quincaillerie porte — serrure + poignée', unit: 'u', pu: 145 },
+        { lib: 'Dépose ancienne porte — évacuation', unit: 'u', pu: 85 },
+      ]},
+      { nom: 'Menuiseries extérieures', items: [
+        { lib: 'Fenêtre PVC double vitrage — fourniture et pose', unit: 'u', pu: 850 },
+        { lib: 'Fenêtre aluminium — fourniture et pose', unit: 'u', pu: 1200 },
+        { lib: 'Baie vitrée coulissante PVC 2 vantaux', unit: 'u', pu: 2200 },
+        { lib: 'Velux fenêtre de toit — fourniture et pose', unit: 'u', pu: 950 },
+        { lib: 'Porte-fenêtre PVC 2 vantaux', unit: 'u', pu: 1400 },
+        { lib: 'Volet roulant électrique — pose', unit: 'u', pu: 550 },
+        { lib: 'Volet bois battant — fourniture et pose', unit: 'u', pu: 380 },
+        { lib: 'Dépose menuiserie existante', unit: 'u', pu: 95 },
+      ]},
+      { nom: 'Aménagements bois', items: [
+        { lib: 'Escalier bois — fourniture et pose', unit: 'forfait', pu: 4500 },
+        { lib: 'Parquet massif 14mm — pose', unit: 'm²', pu: 65 },
+        { lib: 'Parquet flottant — pose', unit: 'm²', pu: 28 },
+        { lib: 'Plinthe bois — pose', unit: 'ml', pu: 12 },
+        { lib: 'Terrasse bois — fourniture et pose', unit: 'm²', pu: 85 },
+        { lib: 'Bardage bois façade — pose', unit: 'm²', pu: 75 },
+        { lib: 'Pergola bois — fourniture et pose', unit: 'm²', pu: 180 },
+      ]},
+    ]
+  },
+  {
+    id: 'etancheite', nom: 'Étanchéité', icon: '💧', color: '#1a6fd4',
+    categories: [
+      { nom: 'Étanchéité toiture terrasse', items: [
+        { lib: 'Étanchéité bicouche SBS — toiture terrasse', unit: 'm²', pu: 55 },
+        { lib: 'Étanchéité monocouche TPO — soudée', unit: 'm²', pu: 48 },
+        { lib: 'Relevé d\'étanchéité acrotère', unit: 'ml', pu: 35 },
+        { lib: 'Isolation sous étanchéité PSE', unit: 'm²', pu: 22 },
+        { lib: 'Protection gravillon roulé — pose', unit: 'm²', pu: 12 },
+        { lib: 'Natte drainante + géotextile', unit: 'm²', pu: 18 },
+        { lib: 'Dépose ancienne étanchéité', unit: 'm²', pu: 15 },
+      ]},
+      { nom: 'Étanchéité terrasse accessible', items: [
+        { lib: 'Complexe d\'étanchéité terrasse accessible', unit: 'm²', pu: 75 },
+        { lib: 'Membrane d\'étanchéité liquide PMMA', unit: 'm²', pu: 65 },
+        { lib: 'Revêtement résine terrasse', unit: 'm²', pu: 85 },
+        { lib: 'Dalle sur plot — fourniture et pose', unit: 'm²', pu: 55 },
+        { lib: 'Siphon de terrasse — fourniture et pose', unit: 'u', pu: 185 },
+      ]},
+      { nom: 'Étanchéité sous-sol & murs', items: [
+        { lib: 'Cuvelage béton armé — injection', unit: 'm²', pu: 95 },
+        { lib: 'Badigeon bitumineux — fondations', unit: 'm²', pu: 18 },
+        { lib: 'Drain périphérique — pose', unit: 'ml', pu: 45 },
+        { lib: 'Membrane d\'étanchéité mur enterré', unit: 'm²', pu: 28 },
+        { lib: 'Traitement anti-remontée capillaire', unit: 'ml', pu: 55 },
+        { lib: 'Injection résine fissure béton', unit: 'ml', pu: 85 },
+      ]},
+    ]
+  },
+  {
+    id: 'isolation', nom: 'Isolation', icon: '🏡', color: '#27AE60',
+    categories: [
+      { nom: 'Isolation thermique intérieure (ITI)', items: [
+        { lib: 'Doublage laine de verre 100mm — pose', unit: 'm²', pu: 28 },
+        { lib: 'Doublage laine de roche 80mm', unit: 'm²', pu: 32 },
+        { lib: 'Isolation sous rampants laine de verre', unit: 'm²', pu: 22 },
+        { lib: 'Isolation plancher bas laine de roche', unit: 'm²', pu: 18 },
+        { lib: 'Isolation thermique combles perdus', unit: 'm²', pu: 15 },
+        { lib: 'Soufflage ouate de cellulose combles', unit: 'm²', pu: 18 },
+        { lib: 'Pare-vapeur — pose', unit: 'm²', pu: 6 },
+      ]},
+      { nom: 'Isolation thermique extérieure (ITE)', items: [
+        { lib: 'ITE PSE 100mm — pose + finition', unit: 'm²', pu: 95 },
+        { lib: 'ITE laine de roche 120mm — pose', unit: 'm²', pu: 110 },
+        { lib: 'Bardage rapporté ITE — finition bois', unit: 'm²', pu: 145 },
+        { lib: 'Rail de départ ITE — pose', unit: 'ml', pu: 12 },
+        { lib: 'Enduit de finition sur ITE', unit: 'm²', pu: 22 },
+      ]},
+      { nom: 'Isolation phonique', items: [
+        { lib: 'Cloison phonique 98mm', unit: 'm²', pu: 55 },
+        { lib: 'Sous-couche phonique plancher', unit: 'm²', pu: 8 },
+        { lib: 'Résilience phonique — bandes', unit: 'ml', pu: 6 },
+        { lib: 'Traitement phonique salle de bain', unit: 'forfait', pu: 450 },
+      ]},
+    ]
+  },
+  {
+    id: 'chauffage', nom: 'Chauffage', icon: '🔥', color: '#E74C3C',
+    categories: [
+      { nom: 'Plancher chauffant', items: [
+        { lib: 'Plancher chauffant hydraulique — pose', unit: 'm²', pu: 45 },
+        { lib: 'Plancher chauffant électrique — pose', unit: 'm²', pu: 32 },
+        { lib: 'Collecteur plancher chauffant — pose', unit: 'u', pu: 380 },
+        { lib: 'Chape sur plancher chauffant', unit: 'm²', pu: 22 },
+        { lib: 'Régulation thermostat — pose', unit: 'u', pu: 185 },
+      ]},
+      { nom: 'Radiateurs', items: [
+        { lib: 'Radiateur à eau — fourniture et pose', unit: 'u', pu: 380 },
+        { lib: 'Radiateur électrique à inertie', unit: 'u', pu: 420 },
+        { lib: 'Sèche-serviette électrique — pose', unit: 'u', pu: 280 },
+        { lib: 'Robinet thermostatique — remplacement', unit: 'u', pu: 85 },
+        { lib: 'Purge du circuit de chauffage', unit: 'forfait', pu: 150 },
+      ]},
+      { nom: 'Pompe à chaleur', items: [
+        { lib: 'PAC air/air — fourniture et pose', unit: 'u', pu: 3500 },
+        { lib: 'PAC air/eau — fourniture et pose', unit: 'u', pu: 8500 },
+        { lib: 'PAC géothermique — installation complète', unit: 'forfait', pu: 18000 },
+        { lib: 'Climatisation réversible — split system', unit: 'u', pu: 2200 },
+        { lib: 'Unité intérieure split — pose', unit: 'u', pu: 350 },
+      ]},
+    ]
+  },
+  {
+    id: 'demolition', nom: 'Démolition', icon: '🔨', color: '#7F8C8D',
+    categories: [
+      { nom: 'Démolition intérieure', items: [
+        { lib: 'Démolition cloison plâtre', unit: 'm²', pu: 22 },
+        { lib: 'Démolition mur parpaing', unit: 'm²', pu: 45 },
+        { lib: 'Démolition mur porteur — étaiement', unit: 'm²', pu: 180 },
+        { lib: 'Démolition chape béton', unit: 'm²', pu: 18 },
+        { lib: 'Démolition carrelage mural', unit: 'm²', pu: 15 },
+        { lib: 'Démolition faux-plafond', unit: 'm²', pu: 12 },
+        { lib: 'Ouverture baie dans mur porteur', unit: 'u', pu: 950 },
+      ]},
+      { nom: 'Évacuation gravois', items: [
+        { lib: 'Location benne à gravois 8m³', unit: 'u', pu: 320 },
+        { lib: 'Évacuation gravois en décharge', unit: 'm³', pu: 45 },
+        { lib: 'Broyage et évacuation végétaux', unit: 'm³', pu: 35 },
+        { lib: 'Nettoyage chantier fin de travaux', unit: 'forfait', pu: 280 },
+      ]},
+    ]
+  },
+  {
+    id: 'vrd', nom: 'VRD / Extérieur', icon: '🌳', color: '#2ECC71',
+    categories: [
+      { nom: 'Voirie & revêtements', items: [
+        { lib: 'Terrassement allée — nivellement', unit: 'm²', pu: 12 },
+        { lib: 'Enrobé bitumineux — fourniture et pose', unit: 'm²', pu: 38 },
+        { lib: 'Pavés béton — fourniture et pose', unit: 'm²', pu: 55 },
+        { lib: 'Dalles béton 50x50 — pose', unit: 'm²', pu: 32 },
+        { lib: 'Gravillon décoratif — pose', unit: 'm²', pu: 18 },
+        { lib: 'Bordure béton T2 — pose', unit: 'ml', pu: 22 },
+      ]},
+      { nom: 'Réseaux enterrés', items: [
+        { lib: 'Tranchée réseau EU — terrassement', unit: 'ml', pu: 28 },
+        { lib: 'Tuyau PVC D100 EP — pose', unit: 'ml', pu: 22 },
+        { lib: 'Fosse septique 3000L — fourniture et pose', unit: 'u', pu: 4500 },
+        { lib: 'Regard béton DN300 — pose', unit: 'u', pu: 320 },
+        { lib: 'Branchement eau potable — réseau public', unit: 'forfait', pu: 1200 },
+        { lib: 'Remblai et compactage tranchée', unit: 'ml', pu: 15 },
+      ]},
+      { nom: 'Clôtures & portails', items: [
+        { lib: 'Grillage soudé sur poteaux — pose', unit: 'ml', pu: 38 },
+        { lib: 'Portail aluminium motorisé', unit: 'u', pu: 2800 },
+        { lib: 'Portillon aluminium — fourniture et pose', unit: 'u', pu: 650 },
+        { lib: 'Mur de clôture parpaing 1m — pose', unit: 'ml', pu: 185 },
+        { lib: 'Fondation poteau de clôture', unit: 'u', pu: 45 },
+      ]},
+    ]
+  },
+];
+
+// ══ STATE ══
+let activeMetier = 'all';
+let selected = {};
+let tvaPct = 10;
+let searchQuery = '';
+
+// ══ INIT ══
+function init() {
+  buildSidebar();
+  showAll();
+  updateCount();
+}
+
+function buildSidebar() {
+  const container = document.getElementById('metiersList');
+  let totalLibs = 0;
+  METIERS.forEach(m => {
+    let count = m.categories.reduce((a,c) => a + c.items.length, 0);
+    totalLibs += count;
+    const div = document.createElement('div');
+    div.className = 'metier-btn';
+    div.id = 'metier-' + m.id;
+    div.innerHTML = `<span class="metier-icon">${m.icon}</span>${m.nom}<span class="metier-count">${count}</span>`;
+    div.onclick = () => showMetier(m.id);
+    container.appendChild(div);
+  });
+  // Ajouter "Tous" en premier
+  const allBtn = document.createElement('div');
+  allBtn.className = 'metier-btn active';
+  allBtn.id = 'metier-all';
+  allBtn.innerHTML = `<span class="metier-icon">📋</span>Tous les métiers<span class="metier-count">${totalLibs}</span>`;
+  allBtn.onclick = () => showMetier('all');
+  container.prepend(allBtn);
+  document.getElementById('totalCount').textContent = totalLibs + ' libellés';
+}
+
+function showMetier(id) {
+  activeMetier = id;
+  document.querySelectorAll('.metier-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('metier-' + id).classList.add('active');
+  renderContent();
+}
+
+function showAll() { renderContent(); }
+
+function renderContent() {
+  const container = document.getElementById('libellesContent');
+  container.innerHTML = '';
+  const metiersToShow = activeMetier === 'all' ? METIERS : METIERS.filter(m => m.id === activeMetier);
+  const q = searchQuery.toLowerCase();
+
+  let totalShown = 0;
+  metiersToShow.forEach(metier => {
+    metier.categories.forEach(cat => {
+      const items = q ? cat.items.filter(i => i.lib.toLowerCase().includes(q)) : cat.items;
+      if (items.length === 0) return;
+      totalShown += items.length;
+
+      const section = document.createElement('div');
+      section.className = 'sous-cat';
+
+      const header = document.createElement('div');
+      header.className = 'sous-cat-header';
+      header.innerHTML = `
+        <div class="sous-cat-title">${activeMetier === 'all' ? metier.icon + ' ' : ''}${cat.nom}</div>
+        <span class="sous-cat-badge">${items.length} libellés</span>
+        <button class="select-all-btn" onclick="selectAllCat(this, '${metier.id}', '${cat.nom}')">Tout sélectionner</button>
+      `;
+      section.appendChild(header);
+
+      const grid = document.createElement('div');
+      grid.className = 'libelles-grid';
+
+      items.forEach(item => {
+        const key = metier.id + '||' + cat.nom + '||' + item.lib;
+        const isSelected = !!selected[key];
+        const card = document.createElement('div');
+        card.className = 'libelle-card' + (isSelected ? ' selected' : '');
+        card.dataset.key = key;
+        card.innerHTML = `
+          <div class="libelle-check">${isSelected ? '✓' : ''}</div>
+          <div class="libelle-info">
+            <div class="libelle-name">${q ? item.lib.replace(new RegExp(q,'gi'), m => `<span class="hl">${m}</span>`) : item.lib}</div>
+            <div class="libelle-meta">
+              <span class="lib-unit">${item.unit}</span>
+              <span class="lib-price">${item.pu} €/${item.unit}</span>
+            </div>
+          </div>
+        `;
+        card.onclick = () => toggleItem(key, item, metier, cat, card);
+        grid.appendChild(card);
+      });
+
+      section.appendChild(grid);
+      container.appendChild(section);
+    });
+  });
+
+  if (totalShown === 0) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Aucun libellé trouvé pour "${q}"</div></div>`;
+  }
+
+  // Update title
+  if (activeMetier === 'all') {
+    document.getElementById('contentTitle').textContent = '📋 Tous les libellés';
+    document.getElementById('contentSub').textContent = q ? `Résultats pour "${q}"` : 'Sélectionnez les libellés à ajouter à votre devis';
+  } else {
+    const m = METIERS.find(x => x.id === activeMetier);
+    document.getElementById('contentTitle').textContent = m.icon + ' ' + m.nom;
+    document.getElementById('contentSub').textContent = q ? `Résultats pour "${q}"` : m.categories.length + ' catégories · ' + m.categories.reduce((a,c) => a+c.items.length, 0) + ' libellés';
+  }
+}
+
+function toggleItem(key, item, metier, cat, card) {
+  if (selected[key]) {
+    delete selected[key];
+    card.classList.remove('selected');
+    card.querySelector('.libelle-check').textContent = '';
+  } else {
+    selected[key] = { ...item, metier: metier.nom, cat: cat.nom, qty: 1 };
+    card.classList.add('selected');
+    card.querySelector('.libelle-check').textContent = '✓';
+  }
+  updatePanier();
+}
+
+function selectAllCat(btn, metierId, catNom) {
+  const metier = METIERS.find(m => m.id === metierId);
+  const cat = metier.categories.find(c => c.nom === catNom);
+  cat.items.forEach(item => {
+    const key = metierId + '||' + catNom + '||' + item.lib;
+    selected[key] = { ...item, metier: metier.nom, cat: catNom, qty: 1 };
+  });
+  renderContent();
+  updatePanier();
+}
+
+function selectAllVisible() {
+  const cards = document.querySelectorAll('.libelle-card');
+  cards.forEach(card => {
+    const key = card.dataset.key;
+    if (!selected[key]) {
+      const [metierId, catNom, lib] = key.split('||');
+      const metier = METIERS.find(m => m.id === metierId);
+      const cat = metier?.categories.find(c => c.nom === catNom);
+      const item = cat?.items.find(i => i.lib === lib);
+      if (item) selected[key] = { ...item, metier: metier.nom, cat: catNom, qty: 1 };
+    }
+  });
+  renderContent();
+  updatePanier();
+}
+
+function updatePanier() {
+  const count = Object.keys(selected).length;
+  const btn = document.getElementById('panierBtn');
+  document.getElementById('panierCount').textContent = count;
+  btn.style.display = count > 0 ? 'block' : 'none';
+  if (document.getElementById('drawer').classList.contains('open')) renderDrawer();
+}
+
+function updateCount() {}
+
+// ── DRAWER ──
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('show');
+  renderDrawer();
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('show');
+}
+
+function renderDrawer() {
+  const body = document.getElementById('drawerBody');
+  const items = Object.entries(selected);
+  if (items.length === 0) {
+    body.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Aucun libellé sélectionné</div></div>';
+    updateTotals();
+    return;
+  }
+  body.innerHTML = '';
+
+  // Grouper par métier
+  const byMetier = {};
+  items.forEach(([key, item]) => {
+    if (!byMetier[item.metier]) byMetier[item.metier] = [];
+    byMetier[item.metier].push([key, item]);
+  });
+
+  Object.entries(byMetier).forEach(([metierNom, mItems]) => {
+    const metierDiv = document.createElement('div');
+    metierDiv.style.marginBottom = '16px';
+    const metierHeader = document.createElement('div');
+    metierHeader.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px 0 6px;border-bottom:1px dashed var(--border);margin-bottom:6px';
+    metierHeader.textContent = metierNom;
+    metierDiv.appendChild(metierHeader);
+
+    mItems.forEach(([key, item]) => {
+      const row = document.createElement('div');
+      row.className = 'drawer-item';
+      row.id = 'ditem-' + key.replace(/\W/g, '_');
+      row.innerHTML = `
+        <div class="drawer-item-name">${item.lib}</div>
+        <div class="drawer-item-inputs">
+          <input type="number" value="${item.qty||1}" min="0.1" step="0.1" onchange="updateQty('${key}', this.value)" title="Quantité">
+          <span class="drawer-item-unit">${item.unit}</span>
+          <input type="number" value="${item.pu}" min="0" onchange="updatePU('${key}', this.value)" title="Prix unitaire €">
+          <span class="drawer-item-unit">€</span>
+          <div class="drawer-item-total" id="dtot-${key.replace(/\W/g,'_')}">${fmt(item.qty*item.pu)} €</div>
+        </div>
+        <button class="drawer-del" onclick="removeFromDrawer('${key}')">×</button>
+      `;
+      metierDiv.appendChild(row);
+    });
+    body.appendChild(metierDiv);
+  });
+  updateTotals();
+}
+
+function updateQty(key, val) {
+  if (selected[key]) { selected[key].qty = parseFloat(val)||1; updateTotals(); updateItemTotal(key); }
+}
+function updatePU(key, val) {
+  if (selected[key]) { selected[key].pu = parseFloat(val)||0; updateTotals(); updateItemTotal(key); }
+}
+function updateItemTotal(key) {
+  const el = document.getElementById('dtot-' + key.replace(/\W/g,'_'));
+  if (el && selected[key]) el.textContent = fmt(selected[key].qty * selected[key].pu) + ' €';
+}
+function removeFromDrawer(key) {
+  delete selected[key];
+  renderDrawer();
+  updatePanier();
+  renderContent();
+}
+function viderPanier() {
+  selected = {};
+  renderDrawer();
+  updatePanier();
+  renderContent();
+  closeDrawer();
+}
+
+function updateTotals() {
+  let ht = Object.values(selected).reduce((a,i) => a + (i.qty||1)*i.pu, 0);
+  const tva = ht * tvaPct / 100;
+  document.getElementById('d-ht').textContent = fmt(ht) + ' €';
+  document.getElementById('d-tva').textContent = fmt(tva) + ' €';
+  document.getElementById('d-ttc').textContent = fmt(ht+tva) + ' €';
+}
+
+function setTVA(btn, pct) {
+  tvaPct = pct;
+  document.querySelectorAll('.tva-b').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('d-tva-lbl').textContent = `TVA ${pct}%`;
+  updateTotals();
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('fr-FR'); }
+
+function exportDevis() {
+  const count = Object.keys(selected).length;
+  alert(`✅ ${count} lignes insérées dans le devis !\n\nRetourne sur la page devis pour voir les lignes ajoutées.`);
+  closeDrawer();
+}
+
+// ── SEARCH ──
+function doSearch(q) {
+  searchQuery = q;
+  renderContent();
+}
+
+// ── GO ──
+init();
+</script>
+</body>
+</html>

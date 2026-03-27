@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Logiciel BTP</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f6ff;--surface:#fff;--surface2:#e8f1fd;--border:#c5d9f5;
+  --accent:#1a6fd4;--accent2:#0a4fa8;--accent-light:rgba(26,111,212,0.08);
+  --text:#0d1f3c;--muted:#5a7a9e;--soft:#2d5080;
+  --green:#0e9e52;--green-bg:rgba(14,158,82,0.08);
+  --orange:#e07b12;--orange-bg:rgba(224,123,18,0.08);
+  --red:#d42828;--red-bg:rgba(212,40,40,0.08);
+  --shadow:0 2px 16px rgba(26,111,212,0.07);
+  --radius:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;background:var(--surface);border-right:1.5px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;box-shadow:var(--shadow);z-index:10}
+.sb-logo{padding:18px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{width:36px;height:36px;background:linear-gradient(135deg,#1a6fd4,#0a4fa8);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.sb-logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--accent)}
+.sb-logo-sub{font-size:10px;color:var(--muted);margin-top:-1px}
+.sb-user{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1a6fd4,#0a4fa8);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff;flex-shrink:0}
+.sb-user-name{font-size:12px;font-weight:700;color:var(--text)}
+.sb-user-co{font-size:10px;color:var(--muted)}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.sb-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 18px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:13px;font-weight:500;color:var(--soft);transition:all .15s;border-left:3px solid transparent;margin:1px 0}
+.nav-item:hover{background:var(--accent-light);color:var(--accent)}
+.nav-item.active{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active svg,.nav-item:hover svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sb-bottom{padding:12px 16px;border-top:1px solid var(--border)}
+.btn-new{width:100%;padding:10px;background:linear-gradient(135deg,#1a6fd4,#0a4fa8);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.btn-new:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,111,212,.3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.topbar-spacer{flex:1}
+.search{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:7px 13px;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;width:260px;cursor:text}
+.tb-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .15s}
+.tb-btn:hover{background:var(--surface2);color:var(--accent)}
+.content{flex:1;overflow-y:auto;padding:22px 24px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── SCREENS ── */
+.screen{display:none}
+.screen.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── UTILS ── */
+.row{display:flex;gap:16px}
+.col{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(26,111,212,.03),transparent)}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px}
+.card-action{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600}
+.card-body{padding:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* KPI */
+.kpi{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;box-shadow:var(--shadow);cursor:default;transition:border-color .2s}
+.kpi:hover{border-color:var(--accent)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.blue::after{background:var(--accent)}
+.kpi.green::after{background:var(--green)}
+.kpi.orange::after{background:var(--orange)}
+.kpi.red::after{background:var(--red)}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px}
+.kpi.blue .kpi-val{color:var(--accent)}
+.kpi.green .kpi-val{color:var(--green)}
+.kpi.orange .kpi-val{color:var(--orange)}
+.kpi.red .kpi-val{color:var(--red)}
+.kpi-trend{font-size:11px;color:var(--muted)}
+.kpi-trend .up{color:var(--green)}
+.kpi-trend .down{color:var(--red)}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:rgba(26,111,212,.03);border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid rgba(197,217,245,.5);transition:background .12s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--accent-light)}
+td{padding:11px 14px;font-size:13px;color:var(--soft)}
+td.bold{color:var(--text);font-weight:600}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%}
+.b-green{background:var(--green-bg);color:var(--green)}.b-green::before{background:var(--green)}
+.b-blue{background:var(--accent-light);color:var(--accent)}.b-blue::before{background:var(--accent)}
+.b-orange{background:var(--orange-bg);color:var(--orange)}.b-orange::before{background:var(--orange)}
+.b-red{background:var(--red-bg);color:var(--red)}.b-red::before{background:var(--red)}
+.b-gray{background:rgba(90,122,158,.1);color:var(--muted)}.b-gray::before{background:var(--muted)}
+
+/* FORM */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+input,select,textarea{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff}
+input::placeholder{color:var(--muted)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+
+/* BTN */
+.btn{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,#1a6fd4,#0a4fa8);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,111,212,.35)}
+.btn-ghost{background:transparent;color:var(--soft);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2)}
+.btn-success{background:linear-gradient(135deg,#0e9e52,#077a3e);color:#fff}
+.btn-success:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(14,158,82,.3)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid rgba(212,40,40,.2)}
+
+/* PROGRESS */
+.progress{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#1a6fd4,#0a4fa8)}
+
+/* CHART BARS */
+.chart-wrap{padding:0 18px 18px;overflow:hidden}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:opacity .2s;cursor:pointer;min-height:4px}
+.bar:hover{opacity:.8}
+.bar-label{font-size:9px;color:var(--muted);font-weight:500}
+.chart-line{border-top:1px solid var(--border);margin:0 18px 8px}
+
+/* TOGGLE */
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.toggle.on .toggle-thumb{left:21px}
+
+/* SECTION TITLE */
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+
+/* CHANTIER CARD */
+.chantier-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.chantier-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,111,212,.12)}
+.ch-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.ch-name{font-weight:700;font-size:14px;color:var(--text)}
+.ch-client{font-size:11px;color:var(--muted);margin-top:2px}
+.ch-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--accent)}
+.ch-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+
+/* CONTACT CARD */
+.contact-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);display:flex;gap:12px;align-items:flex-start}
+.contact-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.contact-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1a6fd4,#0a4fa8);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.contact-name{font-weight:700;font-size:13px;color:var(--text)}
+.contact-info{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.6}
+.contact-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+
+/* ACHAT ROW */
+.achat-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(197,217,245,.5)}
+.achat-row:last-child{border-bottom:none}
+.achat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.achat-info{flex:1}
+.achat-name{font-size:13px;font-weight:600;color:var(--text)}
+.achat-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.achat-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--red)}
+
+/* BIBLIO */
+.biblio-item{padding:12px 0;border-bottom:1px solid rgba(197,217,245,.5);display:flex;align-items:center;gap:12px;cursor:pointer}
+.biblio-item:last-child{border-bottom:none}
+.biblio-item:hover .biblio-name{color:var(--accent)}
+.biblio-code{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:4px;font-family:monospace;flex-shrink:0}
+.biblio-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.biblio-unit{font-size:11px;color:var(--muted)}
+.biblio-price{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0}
+
+/* SITUATION */
+.sit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sit-line{display:grid;grid-template-columns:1fr 80px 80px 90px 90px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(197,217,245,.5)}
+.sit-line:last-child{border-bottom:none}
+.sit-desc{font-size:13px;font-weight:500;color:var(--text)}
+.sit-num{font-size:13px;color:var(--soft);text-align:center}
+.sit-pct input{width:100%;padding:5px 8px;text-align:center;font-size:13px}
+.sit-total{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);text-align:right}
+
+/* AI WIDGET */
+.ai-bar{background:linear-gradient(135deg,rgba(26,111,212,.06),rgba(10,79,168,.04));border:1.5px solid rgba(26,111,212,.15);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.ai-bar-icon{width:38px;height:38px;background:linear-gradient(135deg,#1a6fd4,#0a4fa8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-bar-text{flex:1}
+.ai-bar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text)}
+.ai-bar-sub{font-size:11px;color:var(--muted)}
+.lang-flags{display:flex;gap:4px}
+.lang-flag{font-size:18px;cursor:pointer;padding:3px 5px;border-radius:6px;border:1.5px solid transparent;transition:all .15s}
+.lang-flag:hover,.lang-flag.on{border-color:var(--accent);background:var(--accent-light)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SURL='https://uwdfytuvpujhiniotqyl.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok';
+let sb;try{sb=supabase.createClient(SURL,SKEY)}catch(e){}
+</script>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">TB</div>
+    <div>
+      <div class="sb-logo-name">TAYCO BAT</div>
+      <div class="sb-logo-sub">Logiciel BTP intelligent</div>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">HA</div>
+    <div>
+      <div class="sb-user-name">Hassan Aslan</div>
+      <div class="sb-user-co">TAYCO BAT SARL</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <div class="nav-item active" onclick="go('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Accueil
+    </div>
+    <div class="nav-item" onclick="go('chantiers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Chantiers
+      <span class="nav-badge">5</span>
+    </div>
+    <div class="sb-section">Documents</div>
+    <div class="nav-item" onclick="go('devis')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Devis
+    </div>
+    <div class="nav-item" onclick="go('factures')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Factures
+      <span class="nav-badge" style="background:var(--red)">3</span>
+    </div>
+    <div class="nav-item" onclick="go('situations')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Situations de travaux
+    </div>
+    <div class="sb-section">Gestion</div>
+    <div class="nav-item" onclick="go('achats')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      Achats & Dépenses
+    </div>
+    <div class="nav-item" onclick="go('contacts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Contacts
+    </div>
+    <div class="nav-item" onclick="go('banque')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Banque
+    </div>
+    <div class="sb-section">Outils</div>
+    <div class="nav-item" onclick="go('bibliotheque')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      Bibliothèque BTP
+    </div>
+    <div class="nav-item" onclick="go('ia')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7h1a1 1 0 010 2h-1v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1H2a1 1 0 010-2h1a7 7 0 017-7h1V5.73A2 2 0 0110 4a2 2 0 012-2z"/></svg>
+      Assistant IA
+      <span class="nav-badge" style="background:var(--green)">NEW</span>
+    </div>
+  </nav>
+  <div class="sb-bottom">
+    <button class="btn-new" onclick="go('ia')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau devis IA
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="topbarTitle">Accueil</div>
+    <div class="topbar-spacer"></div>
+    <div class="search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Accès rapide — chantier, client, document…
+    </div>
+    <button class="tb-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    </button>
+    <button class="tb-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+    </button>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══════════ DASHBOARD ═══════════ -->
+    <div class="screen active" id="s-dashboard">
+      <div class="ai-bar">
+        <div class="ai-bar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7h1a1 1 0 010 2h-1v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1H2a1 1 0 010-2h1a7 7 0 017-7h1V5.73A2 2 0 0110 4a2 2 0 012-2z"/></svg></div>
+        <div class="ai-bar-text">
+          <div class="ai-bar-title">Bonjour Hassan 👋 — Assistant IA prêt</div>
+          <div class="ai-bar-sub">Parle en arabe, turc, roumain ou polonais — tes devis sont générés en français automatiquement</div>
+        </div>
+        <div class="lang-flags">
+          <span class="lang-flag on" title="Arabe">🇲🇦</span>
+          <span class="lang-flag" title="Turc">🇹🇷</span>
+          <span class="lang-flag" title="Roumain">🇷🇴</span>
+          <span class="lang-flag" title="Polonais">🇵🇱</span>
+          <span class="lang-flag" title="Portugais">🇵🇹</span>
+        </div>
+        <button class="btn btn-primary" onclick="go('ia')">Créer un devis IA</button>
+      </div>
+
+      <div class="grid4" style="margin-bottom:18px">
+        <div class="kpi blue"><div class="kpi-label">CA Mars 2026</div><div class="kpi-val">48 200 €</div><div class="kpi-trend"><span class="up">↑ +12%</span> vs fév.</div></div>
+        <div class="kpi green"><div class="kpi-label">Encaissé</div><div class="kpi-val">31 500 €</div><div class="kpi-trend"><span class="up">↑ 65%</span> du CA</div></div>
+        <div class="kpi orange"><div class="kpi-label">Reste à encaisser</div><div class="kpi-val">16 700 €</div><div class="kpi-trend">7 factures en attente</div></div>
+        <div class="kpi red"><div class="kpi-label">Impayés</div><div class="kpi-val">7 850 €</div><div class="kpi-trend"><span class="down">↓ 3 factures</span> en retard</div></div>
+      </div>
+
+      <div class="row" style="margin-bottom:18px">
+        <div class="card" style="flex:2">
+          <div class="card-header"><div class="card-title">Chiffre d'affaires 2026</div><div class="card-action">Voir détail</div></div>
+          <div class="chart-wrap">
+            <div class="chart-bars">
+              <div class="bar-group"><div class="bar" style="height:60%;background:var(--accent);opacity:.4"></div><div class="bar-label">Jan</div></div>
+              <div class="bar-group"><div class="bar" style="height:75%;background:var(--accent);opacity:.5"></div><div class="bar-label">Fév</div></div>
+              <div class="bar-group"><div class="bar" style="height:90%;background:var(--accent)"></div><div class="bar-label">Mar</div></div>
+              <div class="bar-group"><div class="bar" style="height:20%;background:var(--border)"></div><div class="bar-label">Avr</div></div>
+              <div class="bar-group"><div class="bar" style="height:10%;background:var(--border)"></div><div class="bar-label">Mai</div></div>
+              <div class="bar-group"><div class="bar" style="height:5%;background:var(--border)"></div><div class="bar-label">Jun</div></div>
+            </div>
+            <div class="chart-line"></div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">Reste à encaisser</div></div>
+          <div class="card-body" style="text-align:center">
+            <div style="width:120px;height:120px;border-radius:50%;border:10px solid var(--border);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(var(--accent) 0% 65%, var(--border) 65% 100%)">
+              <div style="width:90px;height:90px;background:white;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--accent)">65%</div>
+                <div style="font-size:9px;color:var(--muted)">encaissé</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted)">En retard : <span style="color:var(--red);font-weight:700">7 850 €</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">Chantiers actifs</div><div class="card-action" onclick="go('chantiers')">Voir tout →</div></div>
+          <div style="padding:8px 0">
+            <div style="padding:12px 18px;border-bottom:1px solid rgba(197,217,245,.5)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:600">Villa Beaumont — Réno complète</span><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--accent)">38 500 €</span></div>
+              <div class="progress"><div class="progress-fill" style="width:75%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px"><span>Sit. 3/4</span><span>75%</span></div>
+            </div>
+            <div style="padding:12px 18px;border-bottom:1px solid rgba(197,217,245,.5)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:600">Extension cuisine — M. Bernard</span><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--accent)">12 200 €</span></div>
+              <div class="progress"><div class="progress-fill" style="width:40%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px"><span>Sit. 1/3</span><span>40%</span></div>
+            </div>
+            <div style="padding:12px 18px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:600">Toiture + isolation — Les Pins</span><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--green)">22 800 €</span></div>
+              <div class="progress"><div class="progress-fill" style="width:92%;background:linear-gradient(90deg,var(--green),#077a3e)"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px"><span>Sit. 4/4</span><span>92%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">Derniers devis</div><div class="card-action" onclick="go('devis')">Voir tout →</div></div>
+          <table><thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead><tbody>
+            <tr><td class="bold">DE-2024-114</td><td>M. Dupont</td><td class="bold">3 678 €</td><td><span class="badge b-orange">Envoyé</span></td></tr>
+            <tr><td class="bold">DE-2024-113</td><td>Résid. Les Pins</td><td class="bold">22 800 €</td><td><span class="badge b-green">Signé</span></td></tr>
+            <tr><td class="bold">DE-2024-112</td><td>SCI Belvédère</td><td class="bold">15 400 €</td><td><span class="badge b-green">Signé</span></td></tr>
+            <tr><td class="bold">DE-2024-111</td><td>Mme Martin</td><td class="bold">2 100 €</td><td><span class="badge b-gray">Brouillon</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ CHANTIERS ═══════════ -->
+    <div class="screen" id="s-chantiers">
+      <div class="section-title">Chantiers <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">+ Nouveau chantier</button></div>
+      <div class="grid3" style="margin-bottom:18px">
+        <div class="kpi blue"><div class="kpi-label">Chantiers actifs</div><div class="kpi-val">5</div><div class="kpi-trend">2 livraisons ce mois</div></div>
+        <div class="kpi green"><div class="kpi-label">CA chantiers</div><div class="kpi-val">142 500 €</div><div class="kpi-trend">En cours</div></div>
+        <div class="kpi orange"><div class="kpi-label">Retenue de garantie</div><div class="kpi-val">4 325 €</div><div class="kpi-trend">3 libérables bientôt</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+        <div class="chantier-card">
+          <div class="ch-top"><div><div class="ch-name">Villa Beaumont — Rénovation complète</div><div class="ch-client">M. Beaumont Pierre • Lyon 6e</div></div><div class="ch-amount">38 500 €</div></div>
+          <div class="progress"><div class="progress-fill" style="width:75%"></div></div>
+          <div class="ch-meta"><span>Situation 3/4 • 75% avancé</span><span><span class="badge b-blue">En cours</span></span></div>
+        </div>
+        <div class="chantier-card">
+          <div class="ch-top"><div><div class="ch-name">Extension cuisine — M. Bernard</div><div class="ch-client">M. Bernard Marc • Villeurbanne</div></div><div class="ch-amount">12 200 €</div></div>
+          <div class="progress"><div class="progress-fill" style="width:40%"></div></div>
+          <div class="ch-meta"><span>Situation 1/3 • 40% avancé</span><span><span class="badge b-blue">En cours</span></span></div>
+        </div>
+        <div class="chantier-card">
+          <div class="ch-top"><div><div class="ch-name">Toiture + isolation — Résid. Les Pins</div><div class="ch-client">Résidence Les Pins • Caluire</div></div><div class="ch-amount">22 800 €</div></div>
+          <div class="progress"><div class="progress-fill" style="width:92%;background:linear-gradient(90deg,var(--green),#077a3e)"></div></div>
+          <div class="ch-meta"><span>Situation 4/4 • 92% avancé</span><span><span class="badge b-green">Finition</span></span></div>
+        </div>
+        <div class="chantier-card">
+          <div class="ch-top"><div><div class="ch-name">SDB + WC — Appt Leblanc</div><div class="ch-client">Mme Leblanc • Lyon 3e</div></div><div class="ch-amount">6 400 €</div></div>
+          <div class="progress"><div class="progress-fill" style="width:20%"></div></div>
+          <div class="ch-meta"><span>Démarrage • 20% avancé</span><span><span class="badge b-orange">Démarrage</span></span></div>
+        </div>
+        <div class="chantier-card">
+          <div class="ch-top"><div><div class="ch-name">Ravalement façade — M. Coban</div><div class="ch-client">M. Taylan Coban • Sarcelles</div></div><div class="ch-amount">62 600 €</div></div>
+          <div class="progress"><div class="progress-fill" style="width:55%"></div></div>
+          <div class="ch-meta"><span>Situation 2/4 • 55% avancé</span><span><span class="badge b-blue">En cours</span></span></div>
+        </div>
+        <div class="chantier-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;box-shadow:none;opacity:.6" onclick="go('ia')">
+          <div style="font-size:28px">+</div>
+          <div style="font-size:13px;font-weight:600;color:var(--muted)">Nouveau chantier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ DEVIS ═══════════ -->
+    <div class="screen" id="s-devis">
+      <div class="section-title">Devis <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="go('ia')">+ Nouveau devis IA</button></div>
+      <div class="grid4" style="margin-bottom:18px">
+        <div class="kpi blue"><div class="kpi-label">Total devis</div><div class="kpi-val">11</div><div class="kpi-trend">Ce mois</div></div>
+        <div class="kpi green"><div class="kpi-label">Acceptés</div><div class="kpi-val">8</div><div class="kpi-trend"><span class="up">72%</span> taux</div></div>
+        <div class="kpi orange"><div class="kpi-label">En attente</div><div class="kpi-val">2</div><div class="kpi-trend">Réponse client</div></div>
+        <div class="kpi gray"><div class="kpi-label">Brouillons</div><div class="kpi-val">1</div><div class="kpi-trend">À finaliser</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tous les devis</div>
+          <div style="display:flex;gap:8px">
+            <select style="width:auto;padding:5px 10px;font-size:12px"><option>Tous les statuts</option><option>Brouillon</option><option>Envoyé</option><option>Signé</option><option>Refusé</option></select>
+          </div>
+        </div>
+        <table><thead><tr><th>Numéro</th><th>Client</th><th>Chantier</th><th>Montant HT</th><th>Date</th><th>Statut</th><th></th></tr></thead><tbody>
+          <tr><td class="bold">DE-2024-114</td><td>M. Dupont Pierre</td><td>Réno salon</td><td class="bold">3 344 €</td><td>14/11/2024</td><td><span class="badge b-orange">Envoyé</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">Voir</button></td></tr>
+          <tr><td class="bold">DE-2024-113</td><td>Résid. Les Pins</td><td>Toiture</td><td class="bold">20 727 €</td><td>02/11/2024</td><td><span class="badge b-green">Signé</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">Voir</button></td></tr>
+          <tr><td class="bold">DE-2024-112</td><td>SCI Belvédère</td><td>Réno appt</td><td class="bold">14 000 €</td><td>28/10/2024</td><td><span class="badge b-green">Signé</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">Voir</button></td></tr>
+          <tr><td class="bold">DE-2024-111</td><td>Mme Martin</td><td>SDB</td><td class="bold">1 909 €</td><td>25/10/2024</td><td><span class="badge b-gray">Brouillon</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">Voir</button></td></tr>
+          <tr><td class="bold">DE-2024-110</td><td>M. Leblanc</td><td>Cuisine</td><td class="bold">8 200 €</td><td>20/10/2024</td><td><span class="badge b-red">Refusé</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">Voir</button></td></tr>
+          <tr><td class="bold">DE-2024-109</td><td>M. Coban</td><td>Façade</td><td class="bold">56 909 €</td><td>15/10/2024</td><td><span class="badge b-green">Signé</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">Voir</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ═══════════ FACTURES ═══════════ -->
+    <div class="screen" id="s-factures">
+      <div class="section-title">Factures <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">+ Nouvelle facture</button></div>
+      <div class="grid4" style="margin-bottom:18px">
+        <div class="kpi blue"><div class="kpi-label">Total facturé</div><div class="kpi-val">89 400 €</div><div class="kpi-trend">Ce mois</div></div>
+        <div class="kpi green"><div class="kpi-label">Payées</div><div class="kpi-val">12</div><div class="kpi-trend"><span class="up">67 200 €</span></div></div>
+        <div class="kpi orange"><div class="kpi-label">En attente</div><div class="kpi-val">7</div><div class="kpi-trend">14 350 €</div></div>
+        <div class="kpi red"><div class="kpi-label">En retard</div><div class="kpi-val">3</div><div class="kpi-trend"><span class="down">7 850 €</span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Toutes les factures</div>
+          <div style="display:flex;gap:8px">
+            <select style="width:auto;padding:5px 10px;font-size:12px"><option>Tous</option><option>Payées</option><option>En attente</option><option>En retard</option></select>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px">Relancer les impayés</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Numéro</th><th>Client</th><th>Montant TTC</th><th>Émise le</th><th>Échéance</th><th>Statut</th><th></th></tr></thead><tbody>
+          <tr><td class="bold">FA-2024-089</td><td>M. Dupont Pierre</td><td class="bold">4 620 €</td><td>12/11/2024</td><td>12/12/2024</td><td><span class="badge b-green">Payée</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">PDF</button></td></tr>
+          <tr><td class="bold">FA-2024-088</td><td>Résid. Les Pins</td><td class="bold">14 080 €</td><td>05/11/2024</td><td>05/12/2024</td><td><span class="badge b-orange">En attente</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">PDF</button></td></tr>
+          <tr><td class="bold">FA-2024-087</td><td>Mme Martin Sophie</td><td class="bold">2 145 €</td><td>01/11/2024</td><td>01/11/2024</td><td><span class="badge b-red">En retard</span></td><td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px">Relancer</button></td></tr>
+          <tr><td class="bold">FA-2024-086</td><td>SCI Belvédère</td><td class="bold">9 240 €</td><td>28/10/2024</td><td>28/11/2024</td><td><span class="badge b-green">Payée</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">PDF</button></td></tr>
+          <tr><td class="bold">FA-2024-085</td><td>M. Coban Taylan</td><td class="bold">34 210 €</td><td>20/10/2024</td><td>20/11/2024</td><td><span class="badge b-orange">En attente</span></td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px">PDF</button></td></tr>
+          <tr><td class="bold">FA-2024-084</td><td>M. Mountaga Sow</td><td class="bold">5 830 €</td><td>15/10/2024</td><td>15/10/2024</td><td><span class="badge b-red">En retard</span></td><td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px">Relancer</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ═══════════ SITUATIONS ═══════════ -->
+    <div class="screen" id="s-situations">
+      <div class="section-title">Situations de travaux <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">+ Nouvelle situation</button></div>
+      <div class="grid2" style="margin-bottom:18px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Chantier — Villa Beaumont</div><span class="badge b-blue">Situation 3/4</span></div>
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--muted)">
+              <span>Marché : <strong style="color:var(--text)">38 500 € HT</strong></span>
+              <span>Déjà facturé : <strong style="color:var(--accent)">25 000 € HT</strong></span>
+            </div>
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Lignes du marché</div>
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 80px;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted)"><span>Désignation</span><span style="text-align:center">Marché</span><span style="text-align:center">% cette sit.</span><span style="text-align:right">Montant</span></div>
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 80px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(197,217,245,.4)">
+              <span style="font-size:13px">Maçonnerie — gros œuvre</span>
+              <span style="font-size:12px;color:var(--muted);text-align:center">18 000 €</span>
+              <input type="number" value="25" style="width:100%;padding:5px 8px;text-align:center;font-size:12px">
+              <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);text-align:right">4 500 €</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 80px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(197,217,245,.4)">
+              <span style="font-size:13px">Charpente + toiture</span>
+              <span style="font-size:12px;color:var(--muted);text-align:center">12 500 €</span>
+              <input type="number" value="30" style="width:100%;padding:5px 8px;text-align:center;font-size:12px">
+              <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);text-align:right">3 750 €</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 80px;gap:8px;align-items:center;padding:9px 0">
+              <span style="font-size:13px">Second œuvre — finitions</span>
+              <span style="font-size:12px;color:var(--muted);text-align:center">8 000 €</span>
+              <input type="number" value="0" style="width:100%;padding:5px 8px;text-align:center;font-size:12px">
+              <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted);text-align:right">0 €</span>
+            </div>
+            <div style="border-top:2px solid var(--border);padding-top:12px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:11px;color:var(--muted)">Cette situation</div>
+                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--accent)">8 250 € HT</div>
+                <div style="font-size:11px;color:var(--muted)">Retenue 5% : <strong style="color:var(--orange)">412,50 €</strong></div>
+              </div>
+              <button class="btn btn-success">Générer la facture de situation</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Historique des situations</div></div>
+          <table><thead><tr><th>Situation</th><th>Montant HT</th><th>Date</th><th>Statut</th></tr></thead><tbody>
+            <tr><td class="bold">Sit. 1/4</td><td class="bold">9 500 €</td><td>15/08/2024</td><td><span class="badge b-green">Payée</span></td></tr>
+            <tr><td class="bold">Sit. 2/4</td><td class="bold">7 750 €</td><td>10/09/2024</td><td><span class="badge b-green">Payée</span></td></tr>
+            <tr><td class="bold">Sit. 3/4</td><td class="bold">8 250 €</td><td>En cours</td><td><span class="badge b-orange">En cours</span></td></tr>
+            <tr><td class="bold">Sit. 4/4 (solde)</td><td class="bold">~13 000 €</td><td>—</td><td><span class="badge b-gray">À venir</span></td></tr>
+          </tbody></table>
+          <div style="padding:14px 16px;background:var(--surface2);border-top:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Retenue de garantie totale</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span>Retenue cumulée</span><span style="font-weight:700;color:var(--orange)">1 925 €</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span>Libérable le</span><span style="font-weight:600">15/10/2025</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ ACHATS ═══════════ -->
+    <div class="screen" id="s-achats">
+      <div class="section-title">Achats & Dépenses <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">+ Ajouter une dépense</button></div>
+      <div class="grid4" style="margin-bottom:18px">
+        <div class="kpi red"><div class="kpi-label">Dépenses du mois</div><div class="kpi-val">18 240 €</div><div class="kpi-trend">Matériaux + MO</div></div>
+        <div class="kpi orange"><div class="kpi-label">Matériaux</div><div class="kpi-val">11 850 €</div><div class="kpi-trend">65% des achats</div></div>
+        <div class="kpi blue"><div class="kpi-label">Sous-traitants</div><div class="kpi-val">4 800 €</div><div class="kpi-trend">2 factures</div></div>
+        <div class="kpi green"><div class="kpi-label">Marge brute</div><div class="kpi-val">62%</div><div class="kpi-trend"><span class="up">↑ +3%</span> vs mois dernier</div></div>
+      </div>
+      <div class="row">
+        <div class="card" style="flex:2">
+          <div class="card-header"><div class="card-title">Dépenses récentes</div><div class="card-action">Voir tout</div></div>
+          <div style="padding:6px 16px">
+            <div class="achat-row"><div class="achat-icon" style="background:rgba(224,123,18,.1)">🏗️</div><div class="achat-info"><div class="achat-name">Parpaings + ciment — Chantier Beaumont</div><div class="achat-meta">Fournisseur : Point P • 14/11/2024</div></div><div class="achat-amount">2 340 €</div></div>
+            <div class="achat-row"><div class="achat-icon" style="background:rgba(26,111,212,.1)">🪟</div><div class="achat-info"><div class="achat-name">Menuiseries PVC double vitrage</div><div class="achat-meta">Fournisseur : Leroy Merlin • 12/11/2024</div></div><div class="achat-amount">1 850 €</div></div>
+            <div class="achat-row"><div class="achat-icon" style="background:rgba(14,158,82,.1)">🔧</div><div class="achat-info"><div class="achat-name">Sous-traitant plomberie — M. Hassan</div><div class="achat-meta">Chantier Bernard • 10/11/2024</div></div><div class="achat-amount">2 400 €</div></div>
+            <div class="achat-row"><div class="achat-icon" style="background:rgba(212,40,40,.1)">⚡</div><div class="achat-info"><div class="achat-name">Câblage électrique + tableau</div><div class="achat-meta">Fournisseur : Rexel • 08/11/2024</div></div><div class="achat-amount">780 €</div></div>
+            <div class="achat-row"><div class="achat-icon" style="background:rgba(224,123,18,.1)">🎨</div><div class="achat-info"><div class="achat-name">Peinture + enduit — 40 litres</div><div class="achat-meta">Fournisseur : Tollens • 05/11/2024</div></div><div class="achat-amount">320 €</div></div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">Répartition dépenses</div></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Matériaux</span><span style="font-weight:700;color:var(--orange)">11 850 €</span></div><div class="progress"><div class="progress-fill" style="width:65%;background:linear-gradient(90deg,var(--orange),#c06810)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Sous-traitants</span><span style="font-weight:700;color:var(--accent)">4 800 €</span></div><div class="progress"><div class="progress-fill" style="width:26%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Outillage & Location</span><span style="font-weight:700;color:var(--green)">1 590 €</span></div><div class="progress"><div class="progress-fill" style="width:9%;background:linear-gradient(90deg,var(--green),#077a3e)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ CONTACTS ═══════════ -->
+    <div class="screen" id="s-contacts">
+      <div class="section-title">Contacts <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">+ Nouveau contact</button></div>
+      <div style="display:flex;gap:10px;margin-bottom:18px">
+        <button class="btn btn-primary" style="font-size:12px">Clients (14)</button>
+        <button class="btn btn-ghost" style="font-size:12px">Fournisseurs (8)</button>
+        <button class="btn btn-ghost" style="font-size:12px">Sous-traitants (5)</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div class="contact-card">
+          <div class="contact-avatar">DP</div>
+          <div><div class="contact-name">M. Dupont Pierre</div><div class="contact-info">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f1819894838394df9584819e9f85b1969c90989ddf929e9c">[email&#160;protected]</a><br>📱 06 98 76 54 32<br>📍 69007 Lyon</div><div class="contact-tags"><span class="badge b-blue">Client</span><span class="badge b-green">Actif</span></div></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#0e9e52,#077a3e)">TC</div>
+          <div><div class="contact-name">M. Taylan Coban</div><div class="contact-info">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="22560c414d40434c624a4d564f434b4e0c4450">[email&#160;protected]</a><br>📱 06 12 45 78 90<br>📍 Sarcelles 95200</div><div class="contact-tags"><span class="badge b-blue">Client</span><span class="badge b-orange">Devis en cours</span></div></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,var(--orange),#c06810)">MS</div>
+          <div><div class="contact-name">M. Mountaga Sow</div><div class="contact-info">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c3aeacb6adb7a2a4a2edb0acb483a4aea2aaafeda0acae">[email&#160;protected]</a><br>📱 07 65 43 21 09<br>📍 Sarcelles 95200</div><div class="contact-tags"><span class="badge b-blue">Client</span><span class="badge b-red">Impayé</span></div></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#555,#333)">PP</div>
+          <div><div class="contact-name">Point P — Lyon</div><div class="contact-info">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="402c392f2e00302f292e34306e2632">[email&#160;protected]</a><br>📱 04 72 56 89 00<br>📍 69003 Lyon</div><div class="contact-tags"><span class="badge b-gray">Fournisseur</span></div></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#e07b12,#c06810)">HB</div>
+          <div><div class="contact-name">Hassan — Plomberie</div><div class="contact-info">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ef878e9c9c8e81c19f8380828daf88828e8683c18c8082">[email&#160;protected]</a><br>📱 06 34 56 78 90<br>📍 Lyon 69</div><div class="contact-tags"><span class="badge b-green">Sous-traitant</span><span class="badge b-green">Plomberie</span></div></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">SM</div>
+          <div><div class="contact-name">Mme Martin Sophie</div><div class="contact-info">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2e5d00434f5c5a47406e415b5a42414145004d4143">[email&#160;protected]</a><br>📱 06 78 90 12 34<br>📍 69003 Lyon</div><div class="contact-tags"><span class="badge b-blue">Client</span><span class="badge b-red">Impayé</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ BANQUE ═══════════ -->
+    <div class="screen" id="s-banque">
+      <div class="section-title">Banque connectée</div>
+      <div class="grid3" style="margin-bottom:18px">
+        <div class="kpi green"><div class="kpi-label">Solde actuel</div><div class="kpi-val">24 380 €</div><div class="kpi-trend">Compte pro BNP</div></div>
+        <div class="kpi blue"><div class="kpi-label">Encaissements</div><div class="kpi-val">+31 500 €</div><div class="kpi-trend">Ce mois</div></div>
+        <div class="kpi red"><div class="kpi-label">Décaissements</div><div class="kpi-val">-18 240 €</div><div class="kpi-trend">Ce mois</div></div>
+      </div>
+      <div class="row">
+        <div class="card" style="flex:2">
+          <div class="card-header"><div class="card-title">Dernières transactions</div><div class="card-action">Rapprocher</div></div>
+          <table><thead><tr><th>Date</th><th>Libellé</th><th>Débit</th><th>Crédit</th><th>Rapprochement</th></tr></thead><tbody>
+            <tr><td>14/11/2024</td><td class="bold">Virement M. Dupont — FA-089</td><td>—</td><td style="color:var(--green);font-weight:700">+4 620 €</td><td><span class="badge b-green">✓ Rapproché</span></td></tr>
+            <tr><td>12/11/2024</td><td class="bold">Point P Lyon — Matériaux</td><td style="color:var(--red);font-weight:700">-2 340 €</td><td>—</td><td><span class="badge b-green">✓ Rapproché</span></td></tr>
+            <tr><td>10/11/2024</td><td class="bold">Virement SCI Belvédère</td><td>—</td><td style="color:var(--green);font-weight:700">+9 240 €</td><td><span class="badge b-green">✓ Rapproché</span></td></tr>
+            <tr><td>08/11/2024</td><td class="bold">Rexel — Électricité</td><td style="color:var(--red);font-weight:700">-780 €</td><td>—</td><td><span class="badge b-orange">À rapprocher</span></td></tr>
+            <tr><td>05/11/2024</td><td class="bold">Virement inconnu — 3 200 €</td><td>—</td><td style="color:var(--green);font-weight:700">+3 200 €</td><td><span class="badge b-orange">À identifier</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">Connexion bancaire</div></div>
+          <div class="card-body" style="text-align:center">
+            <div style="font-size:32px;margin-bottom:12px">🏦</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px">BNP Paribas Pro</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Compte : •••• 4521<br>Synchronisé il y a 2h</div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center">Synchroniser maintenant</button>
+            <div style="margin-top:10px;font-size:11px;color:var(--muted)">Connectez aussi : <span style="color:var(--accent);cursor:pointer">CIC</span> · <span style="color:var(--accent);cursor:pointer">Crédit Agricole</span> · <span style="color:var(--accent);cursor:pointer">Société Générale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ BIBLIOTHÈQUE ═══════════ -->
+    <div class="screen" id="s-bibliotheque">
+      <div class="section-title">Bibliothèque d'ouvrages BTP</div>
+      <div class="ai-bar">
+        <div class="ai-bar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="ai-bar-text">
+          <div class="ai-bar-title">+28 000 ouvrages BTP avec prix régionaux mis à jour</div>
+          <div class="ai-bar-sub">Recherche par métier, référence ou description — intégration directe dans vos devis</div>
+        </div>
+        <input type="text" placeholder="Rechercher un ouvrage…" style="width:280px;background:white">
+      </div>
+      <div class="row">
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">🧱 Maçonnerie</div></div>
+          <div style="padding:4px 16px">
+            <div class="biblio-item"><span class="biblio-code">MA001</span><span class="biblio-name">Parpaing creux 20cm — pose mortier</span><span class="biblio-unit">m²</span><span class="biblio-price">42 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">MA002</span><span class="biblio-name">Béton armé coulé en place</span><span class="biblio-unit">m³</span><span class="biblio-price">285 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">MA003</span><span class="biblio-name">Ragréage sol — épaisseur 3mm</span><span class="biblio-unit">m²</span><span class="biblio-price">12 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">MA004</span><span class="biblio-name">Doublage plâtre 72/50 — pose</span><span class="biblio-unit">m²</span><span class="biblio-price">28 €</span></div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">🔲 Carrelage</div></div>
+          <div style="padding:4px 16px">
+            <div class="biblio-item"><span class="biblio-code">CA001</span><span class="biblio-name">Carrelage grès cérame 60x60 — pose</span><span class="biblio-unit">m²</span><span class="biblio-price">48 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">CA002</span><span class="biblio-name">Dépose carrelage existant</span><span class="biblio-unit">m²</span><span class="biblio-price">18 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">CA003</span><span class="biblio-name">Faïence mural 30x60 — pose</span><span class="biblio-unit">m²</span><span class="biblio-price">52 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">CA004</span><span class="biblio-name">Plinthes carrelage — pose</span><span class="biblio-unit">ml</span><span class="biblio-price">14 €</span></div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">🎨 Peinture</div></div>
+          <div style="padding:4px 16px">
+            <div class="biblio-item"><span class="biblio-code">PE001</span><span class="biblio-name">Peinture murs — 2 couches</span><span class="biblio-unit">m²</span><span class="biblio-price">12 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">PE002</span><span class="biblio-name">Peinture plafond — 2 couches</span><span class="biblio-unit">m²</span><span class="biblio-price">14 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">PE003</span><span class="biblio-name">Enduit de lissage — préparation</span><span class="biblio-unit">m²</span><span class="biblio-price">8 €</span></div>
+            <div class="biblio-item"><span class="biblio-code">PE004</span><span class="biblio-name">Peinture façade — ravalement</span><span class="biblio-unit">m²</span><span class="biblio-price">32 €</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ ASSISTANT IA ═══════════ -->
+    <div class="screen" id="s-ia">
+      <div class="section-title">Assistant IA — Devis en 30 secondes</div>
+      <div class="row">
+        <div class="card" style="flex:1">
+          <div class="card-header">
+            <div class="card-title">
+              <div style="width:28px;height:28px;background:linear-gradient(135deg,#1a6fd4,#0a4fa8);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>
+              </div>
+              Parle dans ta langue
+            </div>
+            <div style="display:flex;gap:5px">
+              <span class="lang-flag on">🇲🇦</span>
+              <span class="lang-flag">🇹🇷</span>
+              <span class="lang-flag">🇷🇴</span>
+              <span class="lang-flag">🇵🇱</span>
+              <span class="lang-flag">🇵🇹</span>
+              <span class="lang-flag">🇫🇷</span>
+            </div>
+          </div>
+          <div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px">
+            <button id="micBtn" onclick="toggleMic()" style="width:72px;height:72px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .2s;font-size:0">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <div style="text-align:center">
+              <div id="micStatus" style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px">Appuie pour parler</div>
+              <div style="font-size:12px;color:var(--muted)">Décris les travaux en arabe — devis en français automatiquement</div>
+            </div>
+            <div style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;min-height:80px;font-size:13px;color:var(--soft);font-style:italic;line-height:1.6;position:relative">
+              <span style="position:absolute;top:8px;right:10px;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:10px">🇲🇦 Darija</span>
+              "Sidi, bghit nbeddel lcarrelage dial salon, 35 mètres, w nzid painting dial plafond w les murs, w bab jdid dial bois..."
+            </div>
+            <button onclick="showGenerated()" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Générer le devis en français
+            </button>
+          </div>
+        </div>
+        <div class="card" style="flex:1" id="generatedCard">
+          <div class="card-header"><div class="card-title">Devis généré ✓</div><span class="badge b-green">Conforme aux normes</span></div>
+          <div style="padding:16px;font-size:12px">
+            <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
+              <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);margin-bottom:4px">TAYCO BAT SARL</div>
+              <div style="font-size:10px;color:var(--muted)">SIRET : 823 456 789 00012 · TVA : FR12 823456789</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border)"><span>Désignation</span><span>Qté</span><span>P.U.</span><span style="text-align:right">Total</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(197,217,245,.4)"><span>Carrelage grès 60x60</span><span>35 m²</span><span>48 €</span><span style="text-align:right;font-weight:700">1 680 €</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(197,217,245,.4)"><span>Peinture murs + plafond</span><span>82 m²</span><span>12 €</span><span style="text-align:right;font-weight:700">984 €</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0"><span>Porte intérieure bois</span><span>1 u</span><span>680 €</span><span style="text-align:right;font-weight:700">680 €</span></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end">
+              <div style="width:180px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--muted)"><span>Total HT</span><span>3 344 €</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--muted)"><span>TVA 10%</span><span>334 €</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;padding:6px 0;border-top:2px solid var(--accent);margin-top:4px;color:var(--accent)"><span>TTC</span><span>3 678 €</span></div>
+              </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn btn-primary" style="flex:1;justify-content:center">Envoyer au client</button>
+              <button class="btn btn-ghost">PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const titles = {dashboard:'Accueil',chantiers:'Chantiers',devis:'Devis',factures:'Factures',situations:'Situations de travaux',achats:'Achats & Dépenses',contacts:'Contacts',banque:'Banque',bibliotheque:'Bibliothèque BTP',ia:'Assistant IA'};
+
+function go(page) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('s-' + page).classList.add('active');
+  document.getElementById('topbarTitle').textContent = titles[page] || page;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+page+"'")) n.classList.add('active');
+  });
+}
+
+document.querySelectorAll('.lang-flag').forEach(f => {
+  f.addEventListener('click', function(){
+    this.closest('.lang-flags, .card-header, [class*="row"]').querySelectorAll('.lang-flag').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+
+let micOn = false;
+function toggleMic() {
+  micOn = !micOn;
+  const btn = document.getElementById('micBtn');
+  const st = document.getElementById('micStatus');
+  if(micOn) {
+    btn.style.background = 'linear-gradient(135deg,#1a6fd4,#0a4fa8)';
+    btn.style.borderColor = '#1a6fd4';
+    btn.querySelector('svg').setAttribute('stroke','white');
+    st.te

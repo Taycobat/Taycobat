@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2faf5;--surface:#fff;--surface2:#e4f5eb;--border:#b8dfc5;
+  --green:#1a9e52;--green2:#0e7a3c;--gl:rgba(26,158,82,0.09);
+  --text:#0d2d1a;--muted:#4a7a5e;--soft:#1e5c38;
+  --red:#d42828;--shadow:0 4px 24px rgba(26,158,82,0.12);--r:12px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.bg-deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-c{position:absolute;border-radius:50%;filter:blur(90px)}
+.bg-c1{width:500px;height:500px;background:rgba(26,158,82,0.07);top:-120px;left:-80px}
+.bg-c2{width:400px;height:400px;background:rgba(14,122,60,0.05);bottom:-80px;right:-60px}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;width:100%;max-width:500px;box-shadow:var(--shadow);position:relative;z-index:1;overflow:hidden}
+.card-top{background:linear-gradient(135deg,#1a9e52,#0e7a3c);padding:22px 28px 18px;text-align:center}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+.logo-mark{width:42px;height:42px;background:rgba(255,255,255,0.18);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;border:2px solid rgba(255,255,255,0.28)}
+.logo-name{font-size:21px;font-weight:900;color:#fff;letter-spacing:-.3px}
+.card-sub{font-size:11px;color:rgba(255,255,255,0.72)}
+
+/* ═══ LANGUE BAR ═══ */
+.lang-bar{background:var(--surface2);border-bottom:1.5px solid var(--border);padding:10px 12px}
+.lang-bar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;margin-bottom:8px}
+.lang-flags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.lf{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;min-width:54px;position:relative}
+.lf:hover{border-color:var(--green);background:var(--gl);transform:translateY(-2px);box-shadow:0 3px 10px rgba(26,158,82,.12)}
+.lf.active{border-color:var(--green);background:var(--gl);box-shadow:0 2px 8px rgba(26,158,82,.15)}
+.lf.active::after{content:'✓';position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:var(--green);border-radius:50%;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;line-height:14px;text-align:center}
+.lf-flag{font-size:22px;line-height:1}
+.lf-name{font-size:9px;font-weight:700;color:var(--soft);white-space:nowrap}
+.lf.active .lf-name{color:var(--green)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1.5px solid var(--border)}
+.tab{flex:1;padding:13px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;border-bottom:2.5px solid transparent}
+.tab.active{color:var(--green);border-bottom-color:var(--green);background:var(--surface)}
+
+.card-body{padding:22px 26px}
+.screen{display:none}
+.screen.active{display:block;animation:fu .25s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.iw{position:relative}
+.iw svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.iw input{padding-left:38px}
+input,select,textarea{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;font-size:14px;font-family:'Outfit',sans-serif;color:var(--text);outline:none;transition:all .2s;width:100%}
+input:focus,select:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(26,158,82,.08)}
+input::placeholder{color:var(--muted)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pr{display:flex;gap:8px}
+.pr select{width:115px;flex-shrink:0;font-size:13px}
+.steps{display:flex;gap:4px;margin-bottom:16px}
+.st{height:3px;flex:1;border-radius:2px;background:var(--border);transition:background .3s}
+.st.done,.st.active{background:var(--green)}
+.st.active{opacity:.5}
+.slbl{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:13px}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:13px}
+.mb{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .15s;font-family:'Outfit',sans-serif}
+.mb:hover,.mb.on{border-color:var(--green);background:var(--gl)}
+.mb-i{font-size:20px;margin-bottom:2px}
+.mb-l{font-size:10px;font-weight:700;color:var(--soft)}
+.mb.on .mb-l{color:var(--green)}
+.lps{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:13px}
+.lp{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:var(--soft);transition:all .15s;font-family:'Outfit',sans-serif}
+.lp:hover,.lp.on{border-color:var(--green);background:var(--gl);color:var(--green);font-weight:700}
+.btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;border:none;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.bp{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff}
+.bp:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(26,158,82,.35)}
+.bo{background:transparent;color:var(--soft);border:1.5px solid var(--border);margin-top:8px;font-size:13px}
+.bo:hover{background:var(--surface2)}
+.alert{padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:12px;display:none;align-items:center;gap:7px;line-height:1.5}
+.alert.show{display:flex}
+.ae{background:rgba(212,40,40,.07);border:1px solid rgba(212,40,40,.2);color:var(--red)}
+.as{background:rgba(26,158,82,.07);border:1px solid rgba(26,158,82,.2);color:var(--green)}
+.pw-bar{height:3px;border-radius:2px;background:var(--border);margin-top:5px;overflow:hidden}
+.pw-fill{height:100%;border-radius:2px;transition:all .3s;width:0}
+.suc{text-align:center;padding:6px 0}
+.si{width:66px;height:66px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px}
+.st2{font-size:19px;font-weight:800;color:var(--text);margin-bottom:6px}
+.ss{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.sb{background:var(--surface2);border-radius:11px;padding:14px;text-align:left;margin-bottom:18px}
+.sr{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--soft)}
+.sr strong{color:var(--text)}
+.link{color:var(--green);cursor:pointer;font-weight:600}
+.ct{text-align:center;font-size:13px;color:var(--muted);margin-top:12px}
+.dv{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:13px 0}
+.dv::before,.dv::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+<div class="bg-deco"><div class="bg-c bg-c1"></div><div class="bg-c bg-c2"></div></div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="logo-wrap">
+      <div class="logo-mark">TB</div>
+      <div class="logo-name">TAYCO BAT</div>
+    </div>
+    <div class="card-sub">Logiciel BTP intelligent · Facturation multilingue IA</div>
+  </div>
+
+  <!-- ═══ SÉLECTEUR 9 LANGUES ═══ -->
+  <div class="lang-bar">
+    <div class="lang-bar-lbl" id="lang-bar-lbl">🌍 Choisir votre langue — اختر لغتك — Dil seçin — Alegeți limba</div>
+    <div class="lang-flags">
+      <button class="lf active" onclick="changeLang(this,'fr')">
+        <span class="lf-flag">🇫🇷</span><span class="lf-name">Français</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'ar')">
+        <span class="lf-flag">🇲🇦</span><span class="lf-name">Darija</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'dz')">
+        <span class="lf-flag">🇩🇿</span><span class="lf-name">Dzayer</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'tn')">
+        <span class="lf-flag">🇹🇳</span><span class="lf-name">Tounsi</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'tr')">
+        <span class="lf-flag">🇹🇷</span><span class="lf-name">Türkçe</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'ro')">
+        <span class="lf-flag">🇷🇴</span><span class="lf-name">Română</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'pl')">
+        <span class="lf-flag">🇵🇱</span><span class="lf-name">Polski</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'pt')">
+        <span class="lf-flag">🇵🇹</span><span class="lf-name">Português</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'pk')">
+        <span class="lf-flag">🇵🇰</span><span class="lf-name">اردو</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'in')">
+        <span class="lf-flag">🇮🇳</span><span class="lf-name">हिन्दी</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'al')">
+        <span class="lf-flag">🇦🇱</span><span class="lf-name">Shqip</span>
+      </button>
+      <button class="lf" onclick="changeLang(this,'hr')">
+        <span class="lf-flag">🇭🇷</span><span class="lf-name">Hrvatski</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-login" onclick="switchTab('login')">Se connecter</div>
+    <div class="tab" id="tab-register" onclick="switchTab('register')">Créer un compte</div>
+  </div>
+
+  <div class="card-body">
+
+    <!-- LOGIN -->
+    <div class="screen active" id="s-login">
+      <div class="alert ae" id="le">⚠️ <span id="le-m"></span></div>
+      <div class="fg"><label id="L1">Email</label><div class="iw"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><input type="email" id="li-email" placeholder="hassan@tayco-bat.fr"></div></div>
+      <div class="fg"><label id="L2">Mot de passe</label><div class="iw"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input type="password" id="li-pw" placeholder="••••••••"></div></div>
+      <div style="text-align:right;margin-bottom:14px;font-size:13px"><span class="link" id="L3" onclick="switchTab('reset')">Mot de passe oublié ?</span></div>
+      <button class="btn bp" id="li-btn" onclick="doLogin()">Se connecter</button>
+      <div class="dv" id="L4">ou</div>
+      <button class="btn bo" id="L5" onclick="switchTab('register')">Créer un compte gratuit — 14 jours</button>
+      <div class="ct"><span id="L6">Pas de compte ?</span> <span class="link" id="L7" onclick="switchTab('register')">S'inscrire</span></div>
+    </div>
+
+    <!-- REG STEP 1 -->
+    <div class="screen" id="s-r1">
+      <div class="steps"><div class="st active"></div><div class="st"></div><div class="st"></div><div class="st"></div></div>
+      <div class="slbl" id="R1">Étape 1/4 — Tes informations</div>
+      <div class="alert ae" id="r1e">⚠️ <span id="r1e-m"></span></div>
+      <div class="r2">
+        <div class="fg"><label id="R2">Prénom</label><input type="text" id="rg-pn" placeholder="Hassan"></div>
+        <div class="fg"><label id="R3">Nom</label><input type="text" id="rg-nn" placeholder="Aslan"></div>
+      </div>
+      <div class="fg"><label id="R4">Email professionnel</label><div class="iw"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><input type="email" id="rg-em" placeholder="hassan@monentreprise.fr"></div></div>
+      <div class="fg"><label id="R5">Téléphone</label><div class="pr"><select id="rg-ind"><option>🇫🇷 +33</option><option>🇲🇦 +212</option><option>🇩🇿 +213</option><option>🇹🇳 +216</option><option>🇹🇷 +90</option><option>🇷🇴 +40</option><option>🇵🇱 +48</option><option>🇵🇹 +351</option><option>🇵🇰 +92</option></select><input type="tel" id="rg-tel" placeholder="06 12 34 56 78" style="flex:1"></div></div>
+      <div class="fg"><label id="R6">Mot de passe</label><div class="iw"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input type="password" id="rg-pw" placeholder="Minimum 8 caractères" oninput="chkPw(this.value)"></div><div class="pw-bar"><div class="pw-fill" id="pf"></div></div></div>
+      <button class="btn bp" onclick="gS2()"><span id="RC">Continuer →</span></button>
+      <div class="ct">Déjà un compte ? <span class="link" onclick="switchTab('login')">Se connecter</span></div>
+    </div>
+
+    <!-- REG STEP 2 — LANGUE IA -->
+    <div class="screen" id="s-r2">
+      <div class="steps"><div class="st done"></div><div class="st active"></div><div class="st"></div><div class="st"></div></div>
+      <div class="slbl" id="R7">Étape 2/4 — Ta langue pour l'IA</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px" id="R8">L'IA génère tes devis en français depuis ta langue</div>
+      <div class="lps">
+        <div class="lp on" onclick="sLng(this)" data-l="fr">🇫🇷 Français</div>
+        <div class="lp" onclick="sLng(this)" data-l="ar">🇲🇦 Darija Maroc</div>
+        <div class="lp" onclick="sLng(this)" data-l="dz">🇩🇿 Darija Algérie</div>
+        <div class="lp" onclick="sLng(this)" data-l="tn">🇹🇳 Tounsi</div>
+        <div class="lp" onclick="sLng(this)" data-l="tr">🇹🇷 Türkçe</div>
+        <div class="lp" onclick="sLng(this)" data-l="ro">🇷🇴 Română</div>
+        <div class="lp" onclick="sLng(this)" data-l="pl">🇵🇱 Polski</div>
+        <div class="lp" onclick="sLng(this)" data-l="pt">🇵🇹 Português</div>
+        <div class="lp" onclick="sLng(this)" data-l="pk">🇵🇰 اردو</div>
+        <div class="lp" onclick="sLng(this)" data-l="in">🇮🇳 हिन्दी</div>
+        <div class="lp" onclick="sLng(this)" data-l="al">🇦🇱 Shqip</div>
+        <div class="lp" onclick="sLng(this)" data-l="hr">🇭🇷 Hrvatski</div>
+      </div>
+      <button class="btn bp" onclick="gS3()"><span id="RC2">Continuer →</span></button>
+      <button class="btn bo" onclick="showS('s-r1')"><span id="RB">← Retour</span></button>
+    </div>
+
+    <!-- REG STEP 3 — MÉTIER -->
+    <div class="screen" id="s-r3">
+      <div class="steps"><div class="st done"></div><div class="st done"></div><div class="st active"></div><div class="st"></div></div>
+      <div class="slbl" id="R9">Étape 3/4 — Ton métier</div>
+      <div class="mg">
+        <div class="mb on" onclick="sM(this)"><div class="mb-i">🧱</div><div class="mb-l">Maçonnerie</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">🚿</div><div class="mb-l">Plomberie</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">⚡</div><div class="mb-l">Électricité</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">🎨</div><div class="mb-l">Peinture</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">🏠</div><div class="mb-l">Toiture</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">🪟</div><div class="mb-l">Menuiserie</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">🔲</div><div class="mb-l">Carrelage</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">❄️</div><div class="mb-l">Chauffage</div></div>
+        <div class="mb" onclick="sM(this)"><div class="mb-i">🏗️</div><div class="mb-l">Gros œuvre</div></div>
+      </div>
+      <div class="fg"><label id="R10">Nom de l'entreprise</label><input type="text" id="rg-co" placeholder="MON ENTREPRISE SARL"></div>
+      <div class="fg"><label>SIRET</label><input type="text" id="rg-siret" placeholder="823 456 789 00012" maxlength="17"></div>
+      <button class="btn bp" onclick="doReg()"><span id="RC3">✓ Créer mon compte gratuit</span></button>
+      <button class="btn bo" onclick="showS('s-r2')"><span id="RB2">← Retour</span></button>
+    </div>
+
+    <!-- VERIFY -->
+    <div class="screen" id="s-verify">
+      <div class="steps"><div class="st done"></div><div class="st done"></div><div class="st done"></div><div class="st active"></div></div>
+      <div style="text-align:center;padding:6px 0">
+        <div style="font-size:38px;margin-bottom:10px">📧</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px" id="VT">Vérifie tes emails !</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Email envoyé à<br><strong id="ve" style="color:var(--green)"></strong></div>
+        <div style="background:var(--surface2);border-radius:10px;padding:13px;font-size:13px;color:var(--soft);text-align:left;line-height:1.9;margin-bottom:16px">
+          <strong id="VS">📌 Étapes :</strong><br>
+          <span id="V1">1. Ouvre ton email</span><br>
+          <span id="V2">2. Clique sur le lien de confirmation</span><br>
+          <span id="V3">3. Reviens ici et connecte-toi</span>
+        </div>
+        <button class="btn bp" onclick="switchTab('login')"><span id="VC">✓ Confirmé — Se connecter</span></button>
+        <div class="ct"><span class="link" onclick="resendMail()">Renvoyer l'email</span></div>
+      </div>
+    </div>
+
+    <!-- RESET -->
+    <div class="screen" id="s-reset">
+      <div style="text-align:center;margin-bottom:16px"><div style="font-size:28px;margin-bottom:8px">🔑</div><div style="font-size:15px;font-weight:700;color:var(--text)" id="RT">Réinitialiser le mot de passe</div></div>
+      <div class="alert as" id="ro">✅ <span id="ro-m">Email envoyé !</span></div>
+      <div class="alert ae" id="re">⚠️ <span id="re-m"></span></div>
+      <div class="fg"><label id="RL">Ton email</label><input type="email" id="re-em" placeholder="ton@email.fr"></div>
+      <button class="btn bp" onclick="doReset()"><span id="RSB">Envoyer le lien</span></button>
+      <button class="btn bo" onclick="switchTab('login')"><span id="RBK">← Retour à la connexion</span></button>
+    </div>
+
+    <!-- LOGGED -->
+    <div class="screen" id="s-ok">
+      <div class="suc">
+        <div class="si">🎉</div>
+        <div class="st2" id="WT">Bienvenue sur TAYCO BAT !</div>
+        <div class="ss" id="WS">Ton compte est actif. Crée tes devis et gère tes chantiers.</div>
+        <div class="sb">
+          <div class="sr"><span id="WL">Connecté en tant que</span><strong id="wn">—</strong></div>
+          <div class="sr"><span>Email</span><strong id="we">—</strong></div>
+          <div class="sr"><span id="WC">Entreprise</span><strong id="wco">—</strong></div>
+          <div class="sr"><span id="WTR">Essai gratuit</span><strong style="color:var(--green)">14 jours restants</strong></div>
+        </div>
+        <button class="btn bp" onclick="alert('→ Tableau de bord TAYCO BAT')">Accéder au tableau de bord →</button>
+        <button class="btn bo" onclick="doLogout()">Se déconnecter</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SURL='https://uwdfytuvpujhiniotqyl.supabase.co', SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok';
+const DEMO=SURL.includes('TON_PROJECT');
+let sb; try{sb=supabase.createClient(SURL,SKEY)}catch(e){}
+
+let cLang='fr', lngIA='fr', metier='Maçonnerie';
+
+// ══ TRADUCTIONS ══
+const T={
+  fr:{tl:'Se connecter',tr:'Créer un compte',L1:'Email',L2:'Mot de passe',L3:'Mot de passe oublié ?',btn_li:'Se connecter',L5:'Créer un compte gratuit — 14 jours',L6:'Pas de compte ?',L7:"S'inscrire",L4:'ou',R1:'Étape 1/4 — Tes informations',R2:'Prénom',R3:'Nom',R4:'Email professionnel',R5:'Téléphone',R6:'Mot de passe',R7:"Étape 2/4 — Ta langue pour l'IA",R8:"L'IA génère tes devis en français depuis ta langue",R9:'Étape 3/4 — Ton métier',R10:"Nom de l'entreprise",RC:'Continuer →',RC2:'Continuer →',RC3:'✓ Créer mon compte gratuit',RB:'← Retour',RB2:'← Retour',VT:'Vérifie tes emails !',VS:'📌 Étapes :',V1:'1. Ouvre ton email',V2:'2. Clique sur le lien de confirmation',V3:'3. Reviens ici et connecte-toi',VC:'✓ Confirmé — Se connecter',RT:'Réinitialiser le mot de passe',RL:'Ton email',RSB:'Envoyer le lien',RBK:'← Retour',WT:'Bienvenue sur TAYCO BAT !',WS:'Ton compte est actif.',WL:'Connecté en tant que',WC:'Entreprise',WTR:'Essai gratuit'},
+  // 🇲🇦 DARIJA MAROCAINE — "bghit, kayn, dyal, zwina, mzyan"
+  ar:{tl:'دخول',tr:'دير حساب جديد',L1:'L\'email',L2:'كلمة السر',L3:'نسيت كلمة السر؟',btn_li:'دخول',L5:'دير حساب مجاني — 14 يوم',L6:'ما عندكش حساب؟',L7:'سجل دابا',L4:'ولا',R1:'الخطوة 1/4 — معلوماتك',R2:'سميتك',R3:'نسبك',R4:'L\'email ديال الخدمة',R5:'النمرو ديالك',R6:'كلمة السر',R7:'الخطوة 2/4 — اللغة ديالك',R8:'L\'IA كيدير الفاتورات بالفرنساوي من اللغة ديالك — مزيان!',R9:'الخطوة 3/4 — الحرفة ديالك',R10:'اسم الشركة ديالك',RC:'زيد ←',RC2:'زيد ←',RC3:'✓ دير الحساب ديالي المجاني',RB:'→ ارجع',RB2:'→ ارجع',VT:'!شوف l\'email ديالك',VS:'📌 الخطوات:',V1:'1. حل l\'email',V2:'2. كليك على le lien',V3:'3. ارجع وادخل — كاين!',VC:'✓ شفت — دخول',RT:'بدل كلمة السر',RL:'L\'email ديالك',RSB:'ابعث le lien',RBK:'→ ارجع',WT:'!مرحبا بيك في TAYCO BAT',WS:'الحساب ديالك جاهز. دير الفاتورات ديالك بسهولة!',WL:'داخل بـ',WC:'الشركة',WTR:'تجربة مجانية'},
+
+  // 🇩🇿 DARIJA ALGÉRIENNE — "rabi, wach, ntaya, khoya, yaâni"
+  dz:{tl:'دخل',tr:'عمل حساب',L1:'L\'email',L2:'الباسوار',L3:'نسيت الباسوار؟',btn_li:'دخل',L5:'عمل حساب مجاني — 14 يوم',L6:'ما عندكش حساب؟',L7:'سجّل روحك',L4:'ولا',R1:'الخطوة 1/4 — معلوماتك',R2:'اسمك',R3:'لقبك',R4:'L\'email تاع الخدمة',R5:'رقم التليفون',R6:'الباسوار',R7:'الخطوة 2/4 — لغتك',R8:'L\'IA يدير الفواتير بالفرنساوي من لغتك — خير!',R9:'الخطوة 3/4 — حرفتك',R10:'اسم الشركة',RC:'كمّل ←',RC2:'كمّل ←',RC3:'✓ عمل حسابي المجاني',RB:'→ ارجع',RB2:'→ ارجع',VT:'!شوف l\'email تاعك',VS:'📌 الخطوات:',V1:'1. حل l\'email',V2:'2. كليك على le lien',V3:'3. ارجع وادخل — واش راك؟',VC:'✓ شفت — ادخل',RT:'بدّل الباسوار',RL:'L\'email تاعك',RSB:'ابعث le lien',RBK:'→ ارجع',WT:'!مرحبا بيك في TAYCO BAT',WS:'الحساب تاعك ناضر. دير الفواتير ديالك بسهولة!',WL:'داخل بـ',WC:'الشركة',WTR:'تجربة مجانية'},
+
+  // 🇹🇳 TOUNSI — "chneya, barcha, ena, ya3tik saha, mrigel"
+  tn:{tl:'دخل',tr:'فتح كونت',L1:'L\'email',L2:'الباصوور',L3:'نسيت الباصوور؟',btn_li:'دخل',L5:'فتح كونت بالمجان — 14 يوم',L6:'ما عندكش كونت؟',L7:'سجّل روحك',L4:'ولا',R1:'الخطوة 1/4 — معلوماتك',R2:'اسمك',R3:'لقبك',R4:'L\'email تاع الخدمة',R5:'نمرو التليفون',R6:'الباصوور',R7:'الخطوة 2/4 — لغتك',R8:'L\'IA يعمل الفواتير بالفرنسي من لغتك — برشا أحسن!',R9:'الخطوة 3/4 — حرفتك',R10:'اسم الشركة',RC:'زيد ←',RC2:'زيد ←',RC3:'✓ فتح كونتي بالمجان',RB:'→ ارجع',RB2:'→ ارجع',VT:'!شوف l\'email تاعك',VS:'📌 الخطوات:',V1:'1. حل l\'email',V2:'2. كليك على le lien',V3:'3. ارجع وادخل — ياسر مليح!',VC:'✓ شفت — دخل',RT:'بدّل الباصوور',RL:'L\'email تاعك',RSB:'ابعث le lien',RBK:'→ ارجع',WT:'!مرحبا بيك في TAYCO BAT',WS:'الكونت تاعك ناضر. برشا سهل تعمل الفواتير!',WL:'داخل بـ',WC:'الشركة',WTR:'تجربة مجانية'},
+  tr:{tl:'Giriş Yap',tr:'Hesap Oluştur',L1:'E-posta',L2:'Şifre',L3:'Şifremi Unuttum?',btn_li:'Giriş Yap',L5:'Ücretsiz Hesap — 14 Gün',L6:'Hesabın yok mu?',L7:'Kayıt Ol',L4:'veya',R1:'Adım 1/4 — Bilgileriniz',R2:'Ad',R3:'Soyad',R4:'İş E-postası',R5:'Telefon',R6:'Şifre',R7:'Adım 2/4 — AI için Diliniz',R8:'AI tekliflerinizi dilinizden Fransızcaya çevirir',R9:'Adım 3/4 — Mesleğiniz',R10:'Şirket Adı',RC:'Devam →',RC2:'Devam →',RC3:'✓ Ücretsiz Hesabımı Oluştur',RB:'← Geri',RB2:'← Geri',VT:'E-postanı Kontrol Et !',VS:'📌 Adımlar:',V1:'1. E-postanı aç',V2:'2. Onay bağlantısına tıkla',V3:'3. Buraya dön ve giriş yap',VC:'✓ Onayladım — Giriş Yap',RT:'Şifreyi Sıfırla',RL:'E-posta adresin',RSB:'Bağlantı Gönder',RBK:'← Geri Dön',WT:"TAYCO BAT'a Hoş Geldiniz !",WS:'Hesabınız aktif.',WL:'Giriş yapıldı:',WC:'Şirket',WTR:'Ücretsiz Deneme'},
+  ro:{tl:'Conectare',tr:'Creare cont',L1:'Email',L2:'Parolă',L3:'Ai uitat parola?',btn_li:'Conectare',L5:'Cont gratuit — 14 zile',L6:'Nu ai cont?',L7:'Înregistrare',L4:'sau',R1:'Pasul 1/4 — Informațiile tale',R2:'Prenume',R3:'Nume',R4:'Email profesional',R5:'Telefon',R6:'Parolă',R7:'Pasul 2/4 — Limba pentru AI',R8:'AI generează ofertele în franceză din limba ta',R9:'Pasul 3/4 — Meseria ta',R10:'Numele companiei',RC:'Continuă →',RC2:'Continuă →',RC3:'✓ Creează contul meu gratuit',RB:'← Înapoi',RB2:'← Înapoi',VT:'Verifică emailul !',VS:'📌 Pași:',V1:'1. Deschide emailul',V2:'2. Click pe linkul de confirmare',V3:'3. Revino și conectează-te',VC:'✓ Confirmat — Conectare',RT:'Resetare parolă',RL:'Emailul tău',RSB:'Trimite linkul',RBK:'← Înapoi',WT:'Bine ai venit pe TAYCO BAT !',WS:'Contul tău este activ.',WL:'Conectat ca:',WC:'Companie',WTR:'Perioadă de probă'},
+  pl:{tl:'Zaloguj się',tr:'Utwórz konto',L1:'Email',L2:'Hasło',L3:'Zapomniałeś hasła?',btn_li:'Zaloguj się',L5:'Bezpłatne konto — 14 dni',L6:'Nie masz konta?',L7:'Zarejestruj się',L4:'lub',R1:'Krok 1/4 — Twoje informacje',R2:'Imię',R3:'Nazwisko',R4:'Służbowy email',R5:'Telefon',R6:'Hasło',R7:'Krok 2/4 — Twój język dla AI',R8:'AI generuje oferty po francusku z Twojego języka',R9:'Krok 3/4 — Twój zawód',R10:'Nazwa firmy',RC:'Kontynuuj →',RC2:'Kontynuuj →',RC3:'✓ Utwórz moje konto',RB:'← Wstecz',RB2:'← Wstecz',VT:'Sprawdź swój email !',VS:'📌 Kroki:',V1:'1. Otwórz email',V2:'2. Kliknij link potwierdzający',V3:'3. Wróć i zaloguj się',VC:'✓ Potwierdziłem — Zaloguj',RT:'Resetowanie hasła',RL:'Twój email',RSB:'Wyślij link',RBK:'← Wstecz',WT:'Witaj w TAYCO BAT !',WS:'Twoje konto jest aktywne.',WL:'Zalogowany jako:',WC:'Firma',WTR:'Bezpłatny okres próbny'},
+  pt:{tl:'Entrar',tr:'Criar conta',L1:'Email',L2:'Senha',L3:'Esqueceu a senha?',btn_li:'Entrar',L5:'Conta gratuita — 14 dias',L6:'Não tem conta?',L7:'Registar',L4:'ou',R1:'Passo 1/4 — As tuas informações',R2:'Nome',R3:'Apelido',R4:'Email profissional',R5:'Telefone',R6:'Senha',R7:'Passo 2/4 — A tua língua para IA',R8:'A IA gera orçamentos em francês da tua língua',R9:'Passo 3/4 — A tua profissão',R10:'Nome da empresa',RC:'Continuar →',RC2:'Continuar →',RC3:'✓ Criar a minha conta gratuita',RB:'← Voltar',RB2:'← Voltar',VT:'Verifica o teu email !',VS:'📌 Passos:',V1:'1. Abre o email',V2:'2. Clica no link de confirmação',V3:'3. Volta aqui e entra',VC:'✓ Confirmei — Entrar',RT:'Redefinir senha',RL:'O teu email',RSB:'Enviar link',RBK:'← Voltar',WT:'Bem-vindo ao TAYCO BAT !',WS:'A tua conta está ativa.',WL:'Ligado como:',WC:'Empresa',WTR:'Período de teste'},
+  // 🇮🇳 HINDI — "karo, mera, aapka, theek hai, bahut"
+  in:{tl:'लॉग इन करें',tr:'अकाउंट बनाएं',L1:'ईमेल',L2:'पासवर्ड',L3:'पासवर्ड भूल गए?',btn_li:'लॉग इन करें',L5:'मुफ्त अकाउंट बनाएं — 14 दिन',L6:'अकाउंट नहीं है?',L7:'रजिस्टर करें',L4:'या',R1:'चरण 1/4 — आपकी जानकारी',R2:'पहला नाम',R3:'उपनाम',R4:'काम का ईमेल',R5:'फोन नंबर',R6:'पासवर्ड',R7:'चरण 2/4 — AI के लिए भाषा',R8:'AI आपकी भाषा से फ्रेंच में कोटेशन बनाता है',R9:'चरण 3/4 — आपका काम',R10:'कंपनी का नाम',RC:'आगे →',RC2:'आगे →',RC3:'✓ मेरा मुफ्त अकाउंट बनाएं',RB:'← वापस',RB2:'← वापस',VT:'अपना ईमेल चेक करें!',VS:'📌 कदम:',V1:'1. ईमेल खोलें',V2:'2. कन्फर्मेशन लिंक पर क्लिक करें',V3:'3. वापस आएं और लॉग इन करें',VC:'✓ कन्फर्म — लॉग इन',RT:'पासवर्ड रीसेट करें',RL:'आपका ईमेल',RSB:'लिंक भेजें',RBK:'← वापस',WT:'TAYCO BAT में आपका स्वागत है!',WS:'आपका अकाउंट तैयार है। अभी कोटेशन बनाएं!',WL:'लॉग इन:',WC:'कंपनी',WTR:'मुफ्त ट्रायल'},
+
+  // 🇦🇱 ALBANAIS — "mirë, punë, çfarë, faleminderit, po"
+  al:{tl:'Hyr',tr:'Krijo llogari',L1:'Email',L2:'Fjalëkalim',L3:'Harrove fjalëkalimin?',btn_li:'Hyr',L5:'Llogari falas — 14 ditë',L6:'Nuk ke llogari?',L7:'Regjistrohu',L4:'ose',R1:'Hapi 1/4 — Informacionet tuaja',R2:'Emri',R3:'Mbiemri',R4:'Email profesional',R5:'Telefon',R6:'Fjalëkalim',R7:'Hapi 2/4 — Gjuha për AI',R8:'AI gjeneron ofertat tuaja në frëngjisht nga gjuha juaj',R9:'Hapi 3/4 — Profesioni juaj',R10:'Emri i kompanisë',RC:'Vazhdo →',RC2:'Vazhdo →',RC3:'✓ Krijo llogarinë time falas',RB:'← Prapa',RB2:'← Prapa',VT:'Kontrollo emailin tënd!',VS:'📌 Hapat:',V1:'1. Hap emailin',V2:'2. Kliko linkun e konfirmimit',V3:'3. Kthehu dhe hyr',VC:'✓ Konfirmova — Hyr',RT:'Rivendos fjalëkalimin',RL:'Emaili yt',RSB:'Dërgo linkun',RBK:'← Prapa',WT:'Mirë se vini në TAYCO BAT!',WS:'Llogaria juaj është aktive. Krijoni oferta tani!',WL:'Identifikuar si:',WC:'Kompania',WTR:'Provë falas'},
+
+  // 🇭🇷 CROATE — "dobro, hvala, posao, može, naravno"
+  hr:{tl:'Prijava',tr:'Stvori račun',L1:'Email',L2:'Lozinka',L3:'Zaboravili ste lozinku?',btn_li:'Prijava',L5:'Besplatni račun — 14 dana',L6:'Nemate račun?',L7:'Registracija',L4:'ili',R1:'Korak 1/4 — Vaši podaci',R2:'Ime',R3:'Prezime',R4:'Poslovni email',R5:'Telefon',R6:'Lozinka',R7:'Korak 2/4 — Jezik za AI',R8:'AI generira vaše ponude na francuskom iz vašeg jezika',R9:'Korak 3/4 — Vaša struka',R10:'Naziv tvrtke',RC:'Nastavi →',RC2:'Nastavi →',RC3:'✓ Stvori moj besplatni račun',RB:'← Natrag',RB2:'← Natrag',VT:'Provjerite email!',VS:'📌 Koraci:',V1:'1. Otvorite email',V2:'2. Kliknite link za potvrdu',V3:'3. Vratite se i prijavite',VC:'✓ Potvrdio — Prijava',RT:'Resetiraj lozinku',RL:'Vaš email',RSB:'Pošalji link',RBK:'← Natrag',WT:'Dobrodošli u TAYCO BAT!',WS:'Vaš račun je aktivan. Napravite ponude odmah!',WL:'Prijavljeni kao:',WC:'Tvrtka',WTR:'Besplatno isprobavanje'},
+
+  pk:{tl:'لاگ ان',tr:'اکاؤنٹ بنائیں',L1:'ای میل',L2:'پاسورڈ',L3:'پاسورڈ بھول گئے؟',btn_li:'لاگ ان',L5:'مفت اکاؤنٹ — 14 دن',L6:'اکاؤنٹ نہیں ہے؟',L7:'رجسٹر کریں',L4:'یا',R1:'قدم 1/4 — آپ کی معلومات',R2:'نام',R3:'کنیت',R4:'کاروباری ای میل',R5:'فون نمبر',R6:'پاسورڈ',R7:'قدم 2/4 — AI کے لیے زبان',R8:'AI آپ کی زبان سے فرانسیسی میں کوٹیشن بناتا ہے',R9:'قدم 3/4 — آپ کا پیشہ',R10:'کمپنی کا نام',RC:'آگے →',RC2:'آگے →',RC3:'✓ میرا مفت اکاؤنٹ بنائیں',RB:'← واپس',RB2:'← واپس',VT:'اپنا ای میل چیک کریں !',VS:'📌 اقدامات:',V1:'1. ای میل کھولیں',V2:'2. تصدیقی لنک پر کلک کریں',V3:'3. واپس آئیں اور لاگ ان کریں',VC:'✓ تصدیق — لاگ ان',RT:'پاسورڈ ری سیٹ',RL:'آپ کا ای میل',RSB:'لنک بھیجیں',RBK:'← واپس',WT:'!TAYCO BAT میں خوش آمدید',WS:'آپ کا اکاؤنٹ فعال ہے۔',WL:'لاگ ان بحیثیت:',WC:'کمپنی',WTR:'مفت آزمائش'}
+};
+
+function changeLang(el, lang) {
+  document.querySelectorAll('.lf').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  cLang = lang;
+  const t = T[lang]||T.fr;
+  const rtl = ['ar','dz','tn','pk'].includes(lang);
+  document.getElementById('html-root').setAttribute('dir', rtl?'rtl':'ltr');
+  document.getElementById('tab-login').textContent = t.tl;
+  document.getElementById('tab-register').textContent = t.tr;
+  ['L1','L2','L3','L4','L5','L6','L7','R1','R2','R3','R4','R5','R6','R7','R8','R9','R10','RC','RC2','RC3','RB','RB2','VT','VS','V1','V2','V3','VC','RT','RL','RSB','RBK','WT','WS','WL','WC','WTR'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && t[id]) el.textContent=t[id];
+  });
+  document.getElementById('li-btn').textContent = t.btn_li;
+}
+
+function showS(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function switchTab(t){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));if(t==='login'){document.getElementById('tab-login').classList.add('active');showS('s-login')}else if(t==='register'){document.getElementById('tab-register').classList.add('active');showS('s-r1')}else if(t==='reset')showS('s-reset')}
+function showErr(id,msg){const e=document.getElementById(id),m=document.getElementById(id+'-m');if(m)m.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),4000)}
+function chkPw(v){let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;const f=document.getElementById('pf');f.style.width=['0%','25%','50%','75%','100%'][s];f.style.background=['','#d42828','#e07b12','#1a9e52','#0e7a3c'][s]}
+function gS2(){if(!document.getElementById('rg-pn').value)return showErr('r1e','Entre ton prénom');if(!document.getElementById('rg-em').value.includes('@'))return showErr('r1e','Email invalide');if(document.getElementById('rg-pw').value.length<8)return showErr('r1e','Mot de passe trop court');showS('s-r2')}
+function gS3(){showS('s-r3')}
+function sLng(el){document.querySelectorAll('.lp').forEach(p=>p.classList.remove('on'));el.classList.add('on');lngIA=el.dataset.l}
+function sM(el){document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));el.classList.add('on');metier=el.querySelector('.mb-l').textContent}
+async function doReg(){const em=document.getElementById('rg-em').value.trim();if(DEMO){document.getElementById('ve').textContent=em;showS('s-verify');return}try{const{error}=await sb.auth.signUp({email:em,password:document.getElementById('rg-pw').value,options:{data:{prenom:document.getElementById('rg-pn').value,nom:document.getElementById('rg-nn').value,telephone:document.getElementById('rg-ind').value+' '+document.getElementById('rg-tel').value,entreprise:document.getElementById('rg-co').value,siret:document.getElementById('rg-siret').value,metier,langue:lngIA,plan:'trial'}}});if(error)throw error;document.getElementById('ve').textContent=em;showS('s-verify')}catch(e){alert('Erreur : '+e.message)}}
+async function doLogin(){const em=document.getElementById('li-email').value.trim(),pw=document.getElementById('li-pw').value;if(!em)return showErr('le','Entre ton email');if(!pw)return showErr('le','Entre ton mot de passe');if(DEMO){document.getElementById('wn').textContent='Hassan Aslan (démo)';document.getElementById('we').textContent=em;document.getElementById('wco').textContent='TAYCO BAT SARL';showS('s-ok');return}try{const{data,error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error;const m=data.user.user_metadata;document.getElementById('wn').textContent=(m.prenom||'')+' '+(m.nom||'');document.getElementById('we').textContent=em;document.getElementById('wco').textContent=m.entreprise||'—';showS('s-ok')}catch(e){showErr('le',e.message.includes('Invalid')?'Email ou mot de passe incorrect':e.message)}}
+async function doReset(){if(DEMO){document.getElementById('ro').classList.add('show');return}const{error}=await sb.auth.resetPasswordForEmail(document.getElementById('re-em').value.trim());if(!error)document.getElementById('ro').classList.add('show')}
+async function doLogout(){if(sb)await sb.auth.signOut();switchTab('login')}
+async function resendMail(){const em=document.getElementById('rg-em').value;if(sb&&em)await sb.auth.resend({type:'signup',email:em})}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('s-login').classList.contains('active'))doLogin()});
+window.addEventListener('load',async()=>{if(DEMO)return;try{const{data}=await sb.auth.getSession();if(data.session){const m=data.session.user.user_metadata;document.getElementById('wn').textContent=(m.prenom||'')+' '+(m.nom||'');document.getElementById('we').textContent=data.session.user.email;document.getElementById('wco').textContent=m.entreprise||'—';showS('s-ok')}}catch(e){}});
+</script>
+</body>
+</html>

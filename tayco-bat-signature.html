@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Envoi & Signature</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f0f6ff;
+  --surface: #ffffff;
+  --surface2: #e8f1fd;
+  --border: #c5d9f5;
+  --accent: #1a6fd4;
+  --accent2: #0a4fa8;
+  --text: #0d1f3c;
+  --text-muted: #5a7a9e;
+  --text-soft: #2d5080;
+  --green: #0e9e52;
+  --green-bg: rgba(14,158,82,0.08);
+  --radius: 16px;
+  --shadow: 0 2px 16px rgba(26,111,212,0.08);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOPBAR */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1.5px solid var(--border);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #1a6fd4, #0a4fa8);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+}
+
+.logo-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.topbar-sep { width: 1px; height: 24px; background: var(--border); }
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.back-btn:hover { background: var(--surface2); color: var(--accent); }
+
+.topbar-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.topbar-spacer { flex: 1; }
+
+.devis-chip {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* STEPS */
+.steps-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.step-item.active {
+  background: rgba(26,111,212,0.08);
+  color: var(--accent);
+}
+
+.step-item.done { color: var(--green); }
+
+.step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.step-item.done .step-num {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.step-item.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.step-arrow {
+  color: var(--border);
+  margin: 0 4px;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  padding: 28px 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* PANELS */
+.panel {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.panel-header {
+  padding: 18px 24px;
+  border-bottom: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(26,111,212,0.03), rgba(10,79,168,0.02));
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(26,111,212,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+/* SEND SECTION */
+.send-section { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+/* RECIPIENT */
+.recipient-card {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.recipient-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a6fd4, #0a4fa8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.recipient-info { flex: 1; }
+.recipient-name { font-weight: 700; font-size: 15px; color: var(--text); }
+.recipient-contact { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+.edit-btn {
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(26,111,212,0.2);
+  background: rgba(26,111,212,0.05);
+  transition: all 0.2s;
+}
+.edit-btn:hover { background: rgba(26,111,212,0.12); }
+
+/* SEND METHODS */
+.send-methods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.method-card {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  background: var(--surface);
+  position: relative;
+}
+
+.method-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26,111,212,0.12); }
+
+.method-card.selected {
+  border-color: var(--accent);
+  background: rgba(26,111,212,0.04);
+}
+
+.method-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  background: rgba(26,111,212,0.10);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.method-icon { font-size: 26px; margin-bottom: 6px; }
+.method-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.method-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* MESSAGE */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+input, textarea, select {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  background: white;
+}
+
+textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+/* LANG MESSAGE */
+.lang-message-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lang-msg-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+.lang-flag-btn {
+  font-size: 18px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.lang-flag-btn:hover { border-color: var(--border); background: var(--surface2); }
+.lang-flag-btn.active { border-color: var(--accent); background: rgba(26,111,212,0.08); }
+
+/* SIGNATURE SECTION */
+.sig-section { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+.sig-info-box {
+  background: rgba(26,111,212,0.05);
+  border: 1.5px solid rgba(26,111,212,0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+}
+
+.sig-info-icon { font-size: 18px; flex-shrink: 0; }
+
+/* SIGNATURE PAD */
+.sig-pad-wrap {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.sig-pad-wrap:hover { border-color: var(--accent); }
+
+.sig-pad-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.sig-pad-label.hidden { opacity: 0; }
+
+.sig-pad-icon { font-size: 28px; margin-bottom: 6px; }
+.sig-pad-text { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+canvas#sigCanvas {
+  display: block;
+  width: 100%;
+  height: 160px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.sig-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sig-clear {
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.sig-clear:hover { background: var(--surface2); color: var(--text); }
+
+/* OPTIONS */
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface2);
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  transition: all 0.2s;
+}
+
+.option-row:hover { border-color: var(--border); }
+
+.option-info { display: flex; flex-direction: column; }
+.option-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.option-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* TOGGLE */
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle.on { background: var(--accent); }
+
+.toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.toggle.on .toggle-thumb { left: 23px; }
+
+/* RIGHT PANEL */
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* PREVIEW CARD */
+.preview-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.preview-doc {
+  padding: 20px;
+  font-size: 10px;
+  line-height: 1.7;
+  border-bottom: 1px solid var(--border);
+}
+
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+
+.doc-co-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.doc-co-info { color: var(--text-muted); font-size: 9px; line-height: 1.8; }
+
+.doc-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--text);
+  text-align: right;
+  margin-bottom: 4px;
+}
+
+.doc-meta { color: var(--text-muted); font-size: 9px; text-align: right; line-height: 1.8; }
+
+.doc-client-box {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  font-size: 9px;
+}
+
+.doc-client-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 2px; }
+.doc-client-name { font-size: 11px; font-weight: 700; color: var(--text); }
+
+.doc-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.doc-table th {
+  background: var(--accent);
+  color: white;
+  padding: 5px 7px;
+  text-align: left;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.doc-table td {
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  color: var(--text-soft);
+}
+.doc-table tr:last-child td { border-bottom: none; }
+
+.doc-totaux { margin-left: auto; width: 160px; }
+.doc-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  padding: 2px 0;
+  color: var(--text-muted);
+}
+.doc-total-row.ttc {
+  font-weight: 800;
+  font-size: 11px;
+  color: var(--text);
+  border-top: 1.5px solid var(--accent);
+  padding-top: 5px;
+  margin-top: 4px;
+}
+.doc-total-row.ttc span:last-child { color: var(--accent); }
+
+/* SIGNATURE ZONE ON DOC */
+.doc-sig-zone {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.doc-sig-box {
+  flex: 1;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+.doc-sig-box .sig-title { font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+.doc-sig-box .sig-line { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 4px; }
+
+.doc-sig-box.signed { border-color: var(--green); background: var(--green-bg); }
+.doc-sig-box.signed .sig-title { color: var(--green); }
+
+/* STATUS TIMELINE */
+.status-panel {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+
+.status-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.timeline { display: flex; flex-direction: column; gap: 0; }
+
+.tl-item {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.tl-item:last-child { padding-bottom: 0; }
+
+.tl-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 22px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.tl-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 1;
+}
+
+.tl-dot.done { background: var(--green); color: white; }
+.tl-dot.active { background: var(--accent); color: white; animation: pulse-dot 2s ease-in-out infinite; }
+.tl-dot.pending { background: var(--surface2); border: 1.5px solid var(--border); color: var(--text-muted); }
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26,111,212,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(26,111,212,0); }
+}
+
+.tl-content { flex: 1; }
+.tl-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.tl-time { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+/* BOTTOM BAR */
+.bottom-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  border-top: 1.5px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(26,111,212,0.08);
+}
+
+.bottom-info { font-size: 13px; color: var(--text-muted); }
+.bottom-info strong { color: var(--text); }
+
+.bottom-actions { display: flex; gap: 10px; }
+
+.btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1a6fd4, #0a4fa8);
+  color: white;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,111,212,0.35); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-soft);
+  border: 1.5px solid var(--border);
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-ghost:hover { background: var(--surface2); }
+
+.btn-success {
+  background: linear-gradient(135deg, #0e9e52, #077a3e);
+  color: white;
+}
+.btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,158,82,0.35); }
+
+/* SUCCESS OVERLAY */
+.success-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,31,60,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.success-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.success-modal {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  animation: popIn 0.3s ease;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 20px 60px rgba(26,111,212,0.2);
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.success-anim {
+  width: 72px;
+  height: 72px;
+  background: var(--green-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+}
+
+.success-modal-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.success-modal-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.success-detail {
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.success-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+  color: var(--text-soft);
+}
+
+.success-detail-row strong { color: var(--text); }
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.main > * { animation: fadeUp 0.4s ease forwards; }
+.main > *:nth-child(2) { animation-delay: 0.1s; opacity: 0; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-mark">TB</div>
+    <div class="logo-name">TAYCO BAT</div>
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour
+  </div>
+  <div class="topbar-title">Envoi & Signature électronique</div>
+  <div class="topbar-spacer"></div>
+  <div class="devis-chip">DE-2024-114 — 3 678,40 € TTC</div>
+</header>
+
+<!-- STEPS -->
+<div class="steps-bar">
+  <div class="step-item done" onclick="null">
+    <div class="step-num">✓</div> Client
+  </div>
+  <span class="step-arrow">›</span>
+  <div class="step-item done">
+    <div class="step-num">✓</div> Travaux
+  </div>
+  <span class="step-arrow">›</span>
+  <div class="step-item done">
+    <div class="step-num">✓</div> Validation
+  </div>
+  <span class="step-arrow">›</span>
+  <div class="step-item active">
+    <div class="step-num">4</div> Envoi & Signature
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- ENVOI -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </div>
+          Envoyer le devis au client
+        </div>
+      </div>
+
+      <div class="send-section">
+
+        <!-- CLIENT -->
+        <div class="recipient-card">
+          <div class="recipient-avatar">DP</div>
+          <div class="recipient-info">
+            <div class="recipient-name">M. Dupont Pierre</div>
+            <div class="recipient-contact">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="76061f130404135812030619180236111b171f1a5815191b">[email&#160;protected]</a> &nbsp;|&nbsp; 📱 06 98 76 54 32</div>
+          </div>
+          <div class="edit-btn">Modifier</div>
+        </div>
+
+        <!-- MÉTHODE -->
+        <div class="form-group">
+          <label>Méthode d'envoi</label>
+          <div class="send-methods">
+            <div class="method-card selected" onclick="selectMethod(this)">
+              <div class="method-icon">📧</div>
+              <div class="method-label">Email</div>
+              <div class="method-sub">Recommandé</div>
+            </div>
+            <div class="method-card" onclick="selectMethod(this)">
+              <div class="method-icon">💬</div>
+              <div class="method-label">SMS / WhatsApp</div>
+              <div class="method-sub">Lien sécurisé</div>
+            </div>
+            <div class="method-card" onclick="selectMethod(this)">
+              <div class="method-icon">🖨️</div>
+              <div class="method-label">Imprimer</div>
+              <div class="method-sub">Format PDF</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LANGUE MESSAGE -->
+        <div class="form-group">
+          <label>Message d'accompagnement</label>
+          <div class="lang-message-bar" style="margin-bottom:8px">
+            <span class="lang-msg-label">Langue du message :</span>
+            <span class="lang-flag-btn active" onclick="switchMsgLang(this, 'fr')" title="Français">🇫🇷</span>
+            <span class="lang-flag-btn" onclick="switchMsgLang(this, 'ar')" title="Arabe">🇲🇦</span>
+            <span class="lang-flag-btn" onclick="switchMsgLang(this, 'tr')" title="Turc">🇹🇷</span>
+            <span class="lang-flag-btn" onclick="switchMsgLang(this, 'ro')" title="Roumain">🇷🇴</span>
+            <span class="lang-flag-btn" onclick="switchMsgLang(this, 'pl')" title="Polonais">🇵🇱</span>
+          </div>
+          <textarea id="msgTextarea">Bonjour M. Dupont,
+
+Veuillez trouver ci-joint le devis n° DE-2024-114 pour les travaux de rénovation salon d'un montant de 3 678,40 € TTC.
+
+Pour l'accepter, cliquez simplement sur le bouton de signature en bas du document.
+
+Cordialement,
+Hassan Benali — TAYCO BAT</textarea>
+        </div>
+
+        <!-- OPTIONS -->
+        <div class="form-group">
+          <label>Options d'envoi</label>
+          <div class="options-grid">
+            <div class="option-row">
+              <div class="option-info">
+                <div class="option-label">Signature électronique requise</div>
+                <div class="option-sub">Le client doit signer pour accepter</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <div class="option-row">
+              <div class="option-info">
+                <div class="option-label">Relance automatique</div>
+                <div class="option-sub">Rappel si pas de réponse sous 3 jours</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <div class="option-row">
+              <div class="option-info">
+                <div class="option-label">Notification à la signature</div>
+                <div class="option-sub">SMS + email dès que le client signe</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <div class="option-row">
+              <div class="option-info">
+                <div class="option-label">Joindre attestation TVA réduite</div>
+                <div class="option-sub">Document obligatoire travaux rénovation</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          Ta signature (artisan)
+        </div>
+        <div style="font-size:12px; color:var(--text-muted)">Appose ta signature sur le devis</div>
+      </div>
+
+      <div class="sig-section">
+        <div class="sig-info-box">
+          <span class="sig-info-icon">ℹ️</span>
+          <span>Ta signature certifie que le devis est établi par <strong>Hassan Benali — TAYCO BAT</strong>. Le client recevra un lien sécurisé pour apposer la sienne.</span>
+        </div>
+
+        <div class="sig-pad-wrap">
+          <div class="sig-pad-label" id="sigLabel">
+            <div class="sig-pad-icon">✍️</div>
+            <div class="sig-pad-text">Signe ici avec ta souris ou ton doigt</div>
+          </div>
+          <canvas id="sigCanvas" width="800" height="160"></canvas>
+        </div>
+
+        <div class="sig-actions">
+          <button class="sig-clear" onclick="clearSig()">Effacer</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-col">
+
+    <!-- APERÇU DOC -->
+    <div class="preview-card">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          Aperçu du document
+        </div>
+        <div style="background:rgba(14,158,82,0.1); color:var(--green); font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">✓ Conforme</div>
+      </div>
+
+      <div class="preview-doc">
+        <div class="doc-header">
+          <div>
+            <div class="doc-co-name">TAYCO BAT</div>
+            <div class="doc-co-info">
+              12 rue des Artisans, 69003 Lyon<br>
+              SIRET : 823 456 789 00012<br>
+              Tél : 06 12 34 56 78
+            </div>
+          </div>
+          <div>
+            <div class="doc-num">DEVIS DE-2024-114</div>
+            <div class="doc-meta">
+              Date : 14/11/2024<br>
+              Valable : 30 jours
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-client-box">
+          <div class="doc-client-label">Client</div>
+          <div class="doc-client-name">M. Dupont Pierre</div>
+          <div style="font-size:9px; color:var(--text-muted)">45 av. République, 69007 Lyon</div>
+        </div>
+
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Désignation</th>
+              <th>Qté</th>
+              <th>P.U.</th>
+              <th>Total HT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Carrelage grès cérame — pose</td>
+              <td>35 m²</td>
+              <td>48 €</td>
+              <td>1 680 €</td>
+            </tr>
+            <tr>
+              <td>Peinture murs et plafond</td>
+              <td>82 m²</td>
+              <td>12 €</td>
+              <td>984 €</td>
+            </tr>
+            <tr>
+              <td>Porte intérieure bois</td>
+              <td>1 u</td>
+              <td>680 €</td>
+              <td>680 €</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="doc-totaux">
+          <div class="doc-total-row"><span>HT</span><span>3 344 €</span></div>
+          <div class="doc-total-row"><span>TVA 10%</span><span>334 €</span></div>
+          <div class="doc-total-row ttc"><span>TTC</span><span>3 678 €</span></div>
+        </div>
+
+        <div class="doc-sig-zone">
+          <div class="doc-sig-box signed">
+            <div class="sig-title">Artisan</div>
+            <div style="font-size:9px; color:var(--green); font-weight:600;">✓ Hassan Benali</div>
+            <div class="sig-line">TAYCO BAT</div>
+          </div>
+          <div class="doc-sig-box">
+            <div class="sig-title">Client</div>
+            <div style="height:20px;"></div>
+            <div class="sig-line">En attente...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="status-panel">
+      <div class="status-title">Suivi du devis</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot done">✓</div>
+          <div class="tl-content">
+            <div class="tl-label">Devis créé</div>
+            <div class="tl-time">Aujourd'hui 14:32</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done">✓</div>
+          <div class="tl-content">
+            <div class="tl-label">Signature artisan</div>
+            <div class="tl-time">Aujourd'hui 14:45</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot active">→</div>
+          <div class="tl-content">
+            <div class="tl-label">Envoi au client</div>
+            <div class="tl-time">En cours...</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot pending">4</div>
+          <div class="tl-content">
+            <div class="tl-label">Ouverture par le client</div>
+            <div class="tl-time">En attente</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot pending">5</div>
+          <div class="tl-content">
+            <div class="tl-label">Signature client</div>
+            <div class="tl-time">En attente</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot pending">6</div>
+          <div class="tl-content">
+            <div class="tl-label">Devis accepté ✓</div>
+            <div class="tl-time">En attente</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-info">Devis <strong>DE-2024-114</strong> — <strong>M. Dupont Pierre</strong> — <strong>3 678,40 € TTC</strong></div>
+  <div class="bottom-actions">
+    <button class="btn btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Télécharger PDF
+    </button>
+    <button class="btn btn-primary" onclick="sendDevis()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Envoyer le devis
+    </button>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-modal">
+    <div class="success-anim">🎉</div>
+    <div class="success-modal-title">Devis envoyé !</div>
+    <div class="success-modal-sub">M. Dupont Pierre recevra le devis par email avec un lien de signature sécurisé. Tu seras notifié dès qu'il l'aura signé.</div>
+    <div class="success-detail">
+      <div class="success-detail-row"><span>Destinataire</span><strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="215148445353440f4554514e4f5561464c40484d0f424e4c">[email&#160;protected]</a></strong></div>
+      <div class="success-detail-row"><span>Montant</span><strong>3 678,40 € TTC</strong></div>
+      <div class="success-detail-row"><span>Relance auto</span><strong>Dans 3 jours si pas de réponse</strong></div>
+      <div class="success-detail-row"><span>Valable jusqu'au</span><strong>14 décembre 2024</strong></div>
+    </div>
+    <button class="btn btn-success" style="width:100%; justify-content:center;" onclick="document.getElementById('successOverlay').classList.remove('show')">
+      ✓ Parfait, retour au tableau de bord
+    </button>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// SIGNATURE PAD
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let hasSig = false;
+
+canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(pos(e).x, pos(e).y); });
+canvas.addEventListener('mousemove', e => {
+  if (!drawing) return;
+  hasSig = true;
+  document.getElementById('sigLabel').classList.add('hidden');
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#0d1f3c';
+  ctx.lineTo(pos(e).x, pos(e).y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pos(e).x, pos(e).y);
+});
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseleave', () => drawing = false);
+
+// Touch
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); ctx.moveTo(posTouch(e).x, posTouch(e).y); });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!drawing) return;
+  hasSig = true;
+  document.getElementById('sigLabel').classList.add('hidden');
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#0d1f3c';
+  ctx.lineTo(posTouch(e).x, posTouch(e).y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(posTouch(e).x, posTouch(e).y);
+});
+canvas.addEventListener('touchend', () => drawing = false);
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY };
+}
+
+function posTouch(e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  return { x: (e.touches[0].clientX - r.left) * scaleX, y: (e.touches[0].clientY - r.top) * scaleY };
+}
+
+function clearSig() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasSig = false;
+  document.getElementById('sigLabel').classList.remove('hidden');
+}
+
+// SEND METHODS
+function selectMethod(el) {
+  document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// MSG LANG
+const messages = {
+  fr: `Bonjour M. Dupont,\n\nVeuillez trouver ci-joint le devis n° DE-2024-114 pour les travaux de rénovation salon d'un montant de 3 678,40 € TTC.\n\nPour l'accepter, cliquez simplement sur le bouton de signature en bas du document.\n\nCordialement,\nHassan Benali — TAYCO BAT`,
+  ar: `مرحباً السيد دوبون،\n\nيرجى الاطلاع على عرض الأسعار رقم DE-2024-114 لأعمال تجديد الصالون بمبلغ 3 678,40 € شاملاً الضريبة.\n\nللقبول، انقر فقط على زر التوقيع في أسفل الوثيقة.\n\nمع التحيات،\nحسن بنعلي — TAYCO BAT`,
+  tr: `Sayın Bay Dupont,\n\nDE-2024-114 nolu, 3.678,40 € tutarındaki salon yenileme teklifi ektedir.\n\nKabul etmek için belgenin altındaki imza düğmesine tıklayın.\n\nSaygılarımla,\nHassan Benali — TAYCO BAT`,
+  ro: `Bună ziua, Dl. Dupont,\n\nVă transmit oferta nr. DE-2024-114 pentru renovarea salonului în valoare de 3.678,40 € TTC.\n\nPentru acceptare, apăsați butonul de semnătură din josul documentului.\n\nCu stimă,\nHassan Benali — TAYCO BAT`,
+  pl: `Szanowny Panie Dupont,\n\nW załączeniu przesyłam ofertę nr DE-2024-114 na remont salonu na kwotę 3 678,40 € brutto.\n\nAby zaakceptować, kliknij przycisk podpisu na dole dokumentu.\n\nZ poważaniem,\nHassan Benali — TAYCO 

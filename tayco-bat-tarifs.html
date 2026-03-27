@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAYCO BAT — Tarifs</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2faf5;--surface:#fff;--s2:#e4f5eb;--border:#b8dfc5;
+  --green:#1a9e52;--green2:#0e7a3c;--gl:rgba(26,158,82,0.09);
+  --text:#0d2d1a;--muted:#4a7a5e;--soft:#1e5c38;
+  --gold:#e07b12;--gold-bg:rgba(224,123,18,0.08);
+  --shadow:0 4px 24px rgba(26,158,82,0.10);--r:16px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{height:56px;background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:12px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,#1a9e52,#0e7a3c);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.logo-name{font-size:18px;font-weight:900;color:var(--green)}
+.spacer{flex:1}
+.back-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:transparent;font-size:13px;font-weight:600;color:var(--soft);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.back-btn:hover{background:var(--s2);border-color:var(--green);color:var(--green)}
+
+/* HERO */
+.hero{text-align:center;padding:52px 24px 40px}
+.hero-label{display:inline-flex;align-items:center;gap:6px;background:var(--gl);border:1px solid rgba(26,158,82,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--green);margin-bottom:16px;text-transform:uppercase;letter-spacing:.06em}
+.hero-title{font-size:40px;font-weight:900;letter-spacing:-.5px;line-height:1.15;margin-bottom:12px}
+.hero-title span{color:var(--green)}
+.hero-sub{font-size:16px;color:var(--muted);max-width:520px;margin:0 auto 32px;line-height:1.7}
+
+/* TOGGLE MENSUEL/ANNUEL */
+.billing-toggle{display:inline-flex;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:4px;gap:3px;margin-bottom:48px;box-shadow:var(--shadow)}
+.bill-btn{padding:10px 24px;border-radius:9px;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted);background:transparent;display:flex;align-items:center;gap:8px}
+.bill-btn.active{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;box-shadow:0 3px 12px rgba(26,158,82,.3)}
+.save-badge{background:var(--gold-bg);color:var(--gold);border:1px solid rgba(224,123,18,.2);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:800}
+.bill-btn.active .save-badge{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)}
+
+/* VS OBAT BANNER */
+.vs-banner{max-width:900px;margin:0 auto 36px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.vs-item{text-align:center}
+.vs-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.vs-price{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
+.vs-price.obat{color:var(--muted);text-decoration:line-through}
+.vs-price.tayco{color:var(--green);font-size:22px;font-weight:900}
+.vs-sep{width:1px;height:40px;background:var(--border)}
+.vs-arrow{font-size:24px;color:var(--green)}
+.vs-saving{background:rgba(224,123,18,.08);border:1px solid rgba(224,123,18,.2);border-radius:8px;padding:6px 14px;text-align:center}
+.vs-saving-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.vs-saving-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:var(--gold)}
+
+/* PLANS */
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1060px;margin:0 auto;padding:0 24px 60px}
+
+.plan-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);position:relative;transition:all .2s}
+.plan-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(26,158,82,.14)}
+.plan-card.popular{border:2px solid var(--green);transform:translateY(-6px);box-shadow:0 14px 40px rgba(26,158,82,.18)}
+
+.popular-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;font-size:11px;font-weight:800;padding:5px 18px;border-radius:0 0 10px 10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+
+.plan-header{padding:28px 24px 20px;border-bottom:1.5px solid var(--border)}
+.plan-icon{font-size:32px;margin-bottom:10px}
+.plan-name{font-size:20px;font-weight:900;margin-bottom:4px}
+.plan-desc{font-size:13px;color:var(--muted);line-height:1.5}
+
+.plan-price-block{padding:20px 24px;border-bottom:1.5px solid var(--border);background:linear-gradient(135deg,rgba(26,158,82,.03),transparent)}
+.plan-obat-price{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.obat-strike{text-decoration:line-through;font-family:'JetBrains Mono',monospace;font-weight:600}
+.obat-logo{background:rgba(90,122,158,.1);color:var(--muted);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700}
+.plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:4px}
+.plan-amount{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:900;color:var(--green);line-height:1}
+.plan-curr{font-size:18px;font-weight:700;color:var(--green);margin-bottom:8px}
+.plan-period{font-size:13px;color:var(--muted)}
+.plan-annual-note{font-size:12px;color:var(--gold);font-weight:600;margin-top:4px;display:none}
+.plan-annual-note.show{display:block}
+.economy-tag{display:inline-flex;align-items:center;gap:4px;background:var(--gold-bg);border:1px solid rgba(224,123,18,.2);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--gold);margin-top:6px}
+
+.plan-features{padding:20px 24px}
+.features-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px}
+.feature-item{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;font-size:13px;color:var(--soft);line-height:1.5}
+.feat-check{width:18px;height:18px;border-radius:50%;background:var(--gl);color:var(--green);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-weight:800}
+.feat-check.no{background:rgba(90,122,158,.1);color:var(--muted)}
+.feature-item.no{color:var(--muted)}
+.feat-new{background:rgba(26,158,82,.1);color:var(--green);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:800;margin-left:4px}
+
+.plan-cta{padding:0 24px 24px}
+.cta-btn{width:100%;padding:13px;border-radius:10px;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.cta-primary{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff}
+.cta-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(26,158,82,.35)}
+.cta-outline{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.cta-outline:hover{background:var(--gl)}
+.cta-ghost{background:var(--s2);color:var(--soft);border:1.5px solid var(--border)}
+.cta-ghost:hover{border-color:var(--green);color:var(--green)}
+
+/* TRIAL NOTE */
+.trial-note{text-align:center;font-size:13px;color:var(--muted);padding-bottom:16px}
+.trial-note strong{color:var(--text)}
+
+/* FACTURATION AUTO SECTION */
+.facturation-section{max-width:1060px;margin:0 auto 60px;padding:0 24px}
+.section-title{font-size:24px;font-weight:900;margin-bottom:6px;text-align:center}
+.section-sub{font-size:14px;color:var(--muted);text-align:center;margin-bottom:28px}
+
+.factu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.factu-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.factu-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.factu-title{font-size:14px;font-weight:800;margin-bottom:6px}
+.factu-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* FACTURE PREVIEW */
+.facture-preview{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:28px;box-shadow:var(--shadow)}
+.fp-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--green)}
+.fp-logo{font-size:22px;font-weight:900;color:var(--green)}
+.fp-tagline{font-size:11px;color:var(--muted);margin-top:2px}
+.fp-num{text-align:right}
+.fp-num-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;margin-bottom:3px}
+.fp-num-date{font-size:12px;color:var(--muted)}
+.fp-client{background:var(--s2);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;justify-content:space-between}
+.fp-client-name{font-size:13px;font-weight:700}
+.fp-client-info{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.6}
+.fp-plan-badge{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:800;align-self:flex-start}
+.fp-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.fp-table th{background:linear-gradient(135deg,#1a9e52,#0e7a3c);color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fp-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--soft)}
+.fp-totaux{display:flex;justify-content:flex-end}
+.fp-tots-inner{width:200px}
+.fp-tot-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--muted)}
+.fp-tot-row.ttc{font-size:16px;font-weight:900;color:var(--text);border-top:2px solid var(--green);padding-top:8px;margin-top:6px}
+.fp-tot-row.ttc span:last-child{color:var(--green);font-family:'JetBrains Mono',monospace}
+.fp-footer{margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);font-size:11px;color:var(--muted);line-height:1.7}
+.fp-auto-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gl);border:1px solid rgba(26,158,82,.2);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--green);margin-bottom:12px}
+
+/* FAQ */
+.faq-section{max-width:700px;margin:0 auto 60px;padding:0 24px}
+.faq-item{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:14px 18px;font-size:14px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.faq-q:hover{background:var(--gl)}
+.faq-arrow{font-size:18px;color:var(--green);transition:transform .2s}
+.faq-a{padding:0 18px;max-height:0;overflow:hidden;transition:all .3s;font-size:13px;color:var(--muted);line-height:1.7}
+.faq-item.open .faq-a{padding:0 18px 14px;max-height:200px}
+.faq-item.open .faq-arrow{transform:rotate(45deg)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.plan-card{animation:fadeUp .4s ease forwards}
+.plan-card:nth-child(1){animation-delay:.05s;opacity:0}
+.plan-card:nth-child(2){animation-delay:.1s;opacity:0}
+.plan-card:nth-child(3){animation-delay:.15s;opacity:0}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo"><div class="logo-mark">TB</div><div class="logo-name">TAYCO BAT</div></div>
+  <div class="spacer"></div>
+  <button class="back-btn">← Retour au tableau de bord</button>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">💰 Tarifs transparents · Sans engagement</div>
+  <h1 class="hero-title">Moins cher qu'Obat.<br><span>Mieux que tout le reste.</span></h1>
+  <p class="hero-sub">TAYCO BAT propose les mêmes fonctionnalités qu'Obat — plus l'IA audio multilingue — à un prix systématiquement inférieur de 10%.</p>
+
+  <!-- TOGGLE -->
+  <div class="billing-toggle">
+    <button class="bill-btn active" id="btn-mensuel" onclick="setBilling('mensuel')">
+      Mensuel
+    </button>
+    <button class="bill-btn" id="btn-annuel" onclick="setBilling('annuel')">
+      Annuel
+      <span class="save-badge">-15% 🎁</span>
+    </button>
+  </div>
+
+  <!-- VS OBAT BANNER -->
+  <div class="vs-banner" id="vs-banner">
+    <div class="vs-item">
+      <div class="vs-label">Obat Solo</div>
+      <div class="vs-price obat" id="vs-obat-solo">39 €/mois</div>
+    </div>
+    <div class="vs-arrow">→</div>
+    <div class="vs-item">
+      <div class="vs-label">TAYCO BAT Solo</div>
+      <div class="vs-price tayco" id="vs-tayco-solo">35 €/mois</div>
+    </div>
+    <div class="vs-sep"></div>
+    <div class="vs-saving">
+      <div class="vs-saving-label">Économie annuelle</div>
+      <div class="vs-saving-val" id="vs-saving">-48 € / an</div>
+    </div>
+    <div class="vs-sep"></div>
+    <div class="vs-item">
+      <div class="vs-label">Obat Business</div>
+      <div class="vs-price obat" id="vs-obat-biz">89 €/mois</div>
+    </div>
+    <div class="vs-arrow">→</div>
+    <div class="vs-item">
+      <div class="vs-label">TAYCO BAT Business</div>
+      <div class="vs-price tayco" id="vs-tayco-biz">80 €/mois</div>
+    </div>
+  </div>
+</div>
+
+<!-- PLANS -->
+<div class="plans-grid" id="plansGrid">
+
+  <!-- SOLO -->
+  <div class="plan-card">
+    <div class="plan-header">
+      <div class="plan-icon">👷</div>
+      <div class="plan-name">Solo</div>
+      <div class="plan-desc">Artisan indépendant ou micro-entrepreneur. Tout ce qu'il faut pour bien facturer.</div>
+    </div>
+    <div class="plan-price-block">
+      <div class="plan-obat-price">
+        Obat Solo : <span class="obat-strike" id="obat-solo">39 €</span>
+        <span class="obat-logo">Obat</span>
+      </div>
+      <div class="plan-price">
+        <span class="plan-curr">€</span>
+        <span class="plan-amount" id="price-solo">35</span>
+      </div>
+      <div class="plan-period">HT / mois — <strong style="color:var(--green)">-10% vs Obat</strong></div>
+      <div class="plan-annual-note" id="note-solo">Soit <strong>357 €/an</strong> — économisez 63 €</div>
+      <div class="economy-tag" id="eco-solo" style="display:none">
+        🎁 2 mois offerts vs mensuel
+      </div>
+    </div>
+    <div class="plan-features">
+      <div class="features-title">Inclus dans Solo</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Devis & factures illimités</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Situations de travaux</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Retenue de garantie</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Signature électronique</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Bibliothèque 300+ libellés BTP</div>
+      <div class="feature-item"><div class="feat-check">✓</div><span>IA audio multilingue 🎙️ <span class="feat-new">NEW</span></span></div>
+      <div class="feature-item"><div class="feat-check">✓</div>12 langues + drapeaux</div>
+      <div class="feature-item"><div class="feat-check">✓</div>App mobile iOS / Android</div>
+      <div class="feature-item"><div class="feat-check">✓</div>PDP — Facturation électronique 2026</div>
+      <div class="feature-item no"><div class="feat-check no">—</div>Multi-utilisateurs</div>
+      <div class="feature-item no"><div class="feat-check no">—</div>Gestion équipe</div>
+    </div>
+    <div class="plan-cta">
+      <button class="cta-btn cta-ghost">Essai gratuit 14 jours</button>
+    </div>
+  </div>
+
+  <!-- PRO — POPULAIRE -->
+  <div class="plan-card popular">
+    <div class="popular-badge">⭐ Le plus populaire</div>
+    <div class="plan-header" style="padding-top:40px">
+      <div class="plan-icon">🏗️</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-desc">TPE du bâtiment avec 2 à 5 personnes. Gestion complète des chantiers et de l'équipe.</div>
+    </div>
+    <div class="plan-price-block">
+      <div class="plan-obat-price">
+        Obat Team : <span class="obat-strike" id="obat-pro">59 €</span>
+        <span class="obat-logo">Obat</span>
+      </div>
+      <div class="plan-price">
+        <span class="plan-curr">€</span>
+        <span class="plan-amount" id="price-pro">53</span>
+      </div>
+      <div class="plan-period">HT / mois — <strong style="color:var(--green)">-10% vs Obat</strong></div>
+      <div class="plan-annual-note" id="note-pro">Soit <strong>540 €/an</strong> — économisez 96 €</div>
+      <div class="economy-tag" id="eco-pro" style="display:none">
+        🎁 2 mois offerts vs mensuel
+      </div>
+    </div>
+    <div class="plan-features">
+      <div class="features-title">Tout Solo, plus :</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Jusqu'à 5 utilisateurs</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Planning chantier avancé</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Gestion sous-traitants</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Suivi rentabilité chantier</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Relances automatiques clients</div>
+      <div class="feature-item"><div class="feat-check">✓</div><span>IA audio pour toute l'équipe <span class="feat-new">NEW</span></span></div>
+      <div class="feature-item"><div class="feat-check">✓</div>Connexion bancaire</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Export comptable FEC</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Accès comptable gratuit</div>
+      <div class="feature-item no"><div class="feat-check no">—</div>Utilisateurs illimités</div>
+    </div>
+    <div class="plan-cta">
+      <button class="cta-btn cta-primary">Commencer — Essai gratuit 14 jours</button>
+    </div>
+  </div>
+
+  <!-- BUSINESS -->
+  <div class="plan-card">
+    <div class="plan-header">
+      <div class="plan-icon">🏢</div>
+      <div class="plan-name">Business</div>
+      <div class="plan-desc">PME du bâtiment avec équipes multiples et gestion avancée des ressources.</div>
+    </div>
+    <div class="plan-price-block">
+      <div class="plan-obat-price">
+        Obat Business : <span class="obat-strike" id="obat-biz">89 €</span>
+        <span class="obat-logo">Obat</span>
+      </div>
+      <div class="plan-price">
+        <span class="plan-curr">€</span>
+        <span class="plan-amount" id="price-biz">80</span>
+      </div>
+      <div class="plan-period">HT / mois — <strong style="color:var(--green)">-10% vs Obat</strong></div>
+      <div class="plan-annual-note" id="note-biz">Soit <strong>816 €/an</strong> — économisez 144 €</div>
+      <div class="economy-tag" id="eco-biz" style="display:none">
+        🎁 2 mois offerts vs mensuel
+      </div>
+    </div>
+    <div class="plan-features">
+      <div class="features-title">Tout Pro, plus :</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Utilisateurs illimités</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Gestion multi-chantiers avancée</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Droits d'accès personnalisés</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Tableau de bord dirigeant</div>
+      <div class="feature-item"><div class="feat-check">✓</div><span>IA audio prioritaire <span class="feat-new">NEW</span></span></div>
+      <div class="feature-item"><div class="feat-check">✓</div>Support téléphonique dédié</div>
+      <div class="feature-item"><div class="feat-check">✓</div>Formation onboarding incluse</div>
+      <div class="feature-item"><div class="feat-check">✓</div>API & intégrations sur mesure</div>
+      <div class="feature-item"><div class="feat-check">✓</div>SLA garanti 99,9% uptime</div>
+    </div>
+    <div class="plan-cta">
+      <button class="cta-btn cta-outline">Contacter l'équipe commerciale</button>
+    </div>
+  </div>
+
+</div>
+<div class="trial-note">Essai gratuit <strong>14 jours</strong> sans carte bancaire · Résiliation à tout moment · Données hébergées en France 🇫🇷</div>
+
+<!-- FACTURATION AUTOMATIQUE -->
+<div class="facturation-section">
+  <h2 class="section-title">🔄 Facturation automatique des abonnements</h2>
+  <p class="section-sub">Chaque mois, TAYCO BAT génère et envoie automatiquement la facture à chaque client abonné — exactement comme Obat te facture toi.</p>
+
+  <div class="factu-grid">
+    <div class="factu-card">
+      <div class="factu-icon" style="background:rgba(26,158,82,.1)">📅</div>
+      <div class="factu-title">Génération automatique</div>
+      <div class="factu-desc">Le 1er de chaque mois, le système génère la facture de chaque abonné avec le bon plan, la bonne TVA et les mentions légales.</div>
+    </div>
+    <div class="factu-card">
+      <div class="factu-icon" style="background:rgba(224,123,18,.1)">💳</div>
+      <div class="factu-title">Paiement par Stripe</div>
+      <div class="factu-desc">Le prélèvement par carte bancaire est géré par Stripe. Sécurisé, automatique, et les artisans reçoivent leur facture par email.</div>
+    </div>
+    <div class="factu-card">
+      <div class="factu-icon" style="background:rgba(26,111,212,.1)">📧</div>
+      <div class="factu-title">Envoi automatique</div>
+      <div class="factu-desc">La facture est envoyée par email avec le PDF en pièce jointe. En cas d'échec de paiement, une relance automatique est déclenchée.</div>
+    </div>
+  </div>
+
+  <!-- APERÇU FACTURE AUTO -->
+  <div class="facture-preview">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div class="fp-auto-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Facture générée automatiquement le 01/04/2026
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Envoyée par email à <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e363f2d2d3f301e2a3f273d31733c3f2a70382c">[email&#160;protected]</a></div>
+    </div>
+
+    <div class="fp-header">
+      <div>
+        <div class="fp-logo">TAYCO BAT</div>
+        <div class="fp-tagline">Logiciel BTP intelligent · tayco-bat.fr</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.7">
+          TAYCO BAT SAS · SIRET : 123 456 789 00010<br>
+          TVA : FR12 123456789
+        </div>
+      </div>
+      <div class="fp-num">
+        <div class="fp-num-val">FA-TAYCO-2026-00089</div>
+        <div class="fp-num-date">Émise le 01/04/2026</div>
+        <div class="fp-num-date" style="margin-top:2px">Payée par carte bancaire ✓</div>
+      </div>
+    </div>
+
+    <div class="fp-client">
+      <div>
+        <div class="fp-client-name">Hassan Aslan — TAYCO BAT SARL</div>
+        <div class="fp-client-info">
+          12 rue des Artisans, 69003 Lyon<br>
+          SIRET : 823 456 789 00012 · TVA : FR12 823456789
+        </div>
+      </div>
+      <div class="fp-plan-badge">Plan Pro</div>
+    </div>
+
+    <table class="fp-table">
+      <thead>
+        <tr><th>Produit</th><th>Période</th><th>TVA</th><th>P.U. HT</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>TAYCO BAT Pro — Abonnement mensuel</td>
+          <td>01/04/2026 → 30/04/2026</td>
+          <td>20%</td>
+          <td><strong style="font-family:'JetBrains Mono',monospace">53,10 €</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="fp-totaux">
+      <div class="fp-tots-inner">
+        <div class="fp-tot-row"><span>Total HT</span><span style="font-family:'JetBrains Mono',monospace">53,10 €</span></div>
+        <div class="fp-tot-row"><span>TVA 20%</span><span style="font-family:'JetBrains Mono',monospace">10,62 €</span></div>
+        <div class="fp-tot-row ttc"><span>Total TTC</span><span>63,72 €</span></div>
+      </div>
+    </div>
+
+    <div class="fp-footer">
+      Payée par carte bancaire le 01/04/2026. Les pénalités pour retard de paiement seront calculées par application du taux d'intérêt légal augmenté de 3 points. Indemnité forfaitaire de 40 € en cas de retard. Pas d'escompte en cas de paiement anticipé.<br>
+      CGU disponibles sur <strong>tayco-bat.fr/cgu</strong>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <h2 class="section-title" style="margin-bottom:6px">Questions fréquentes</h2>
+  <p class="section-sub" style="margin-bottom:24px">Tout ce que tu dois savoir sur les tarifs TAYCO BAT</p>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Pourquoi TAYCO BAT est moins cher qu'Obat ?<span class="faq-arrow">+</span></div>
+    <div class="faq-a">TAYCO BAT est un logiciel nouvelle génération avec des coûts d'infrastructure plus bas. On répercute ces économies directement sur le prix — 10% de moins sur chaque plan, sans compromettre les fonctionnalités.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Comment fonctionne l'essai gratuit 14 jours ?<span class="faq-arrow">+</span></div>
+    <div class="faq-a">Tu accèdes à toutes les fonctionnalités du plan choisi pendant 14 jours. Aucune carte bancaire requise. À la fin de l'essai, tu choisis de t'abonner ou non — aucun prélèvement automatique.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Puis-je changer de plan en cours d'abonnement ?<span class="faq-arrow">+</span></div>
+    <div class="faq-a">Oui, tu peux passer à un plan supérieur ou inférieur à tout moment depuis ton espace client. La différence de prix est calculée au prorata du mois en cours.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Comment fonctionne la remise annuelle de 15% ?<span class="faq-arrow">+</span></div>
+    <div class="faq-a">En choisissant le paiement annuel, tu paies 12 mois en une fois avec une réduction de 15%. Par exemple le plan Pro passe de 53 €/mois à 45 €/mois. Tu économises jusqu'à 96 € par an sur le plan Pro.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Ma facture d'abonnement est-elle conforme ?<span class="faq-arrow">+</span></div>
+    <div class="faq-a">Oui, chaque facture générée automatiquement inclut toutes les mentions légales obligatoires — SIRET, TVA, période de service, mentions de retard. Elle est envoyée en PDF par email le 1er de chaque mois.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Puis-je migrer depuis Obat ?<span class="faq-arrow">+</span></div>
+    <div class="faq-a">Oui ! On t'accompagne dans la migration de tes données depuis Obat. Notre équipe importe tes clients, chantiers et historiques de factures gratuitement pour les plans Pro et Business.</div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ══ TARIFS ══
+const TARIFS = {
+  // Obat original
+  obat: { solo: 39, pro: 59, biz: 89 },
+  // Mensuel -10%
+  mensuel: { solo: 35, pro: 53, biz: 80 },
+  // Annuel -15% sur le mensuel TAYCO BAT (soit /mois)
+  annuel: { solo: 30, pro: 45, biz: 68 }
+};
+
+// Économies annuelles vs Obat mensuel
+const SAVINGS = {
+  mensuel: { solo: 48, pro: 72, biz: 108 },
+  annuel:  { solo: 108, pro: 168, biz: 252 }
+};
+
+let mode = 'mensuel';
+
+function setBilling(m) {
+  mode = m;
+  document.querySelectorAll('.bill-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + m).classList.add('active');
+  updatePrices();
+}
+
+function updatePrices() {
+  const t = TARIFS[mode];
+  const s = SAVINGS[mode];
+  const isAnnuel = mode === 'annuel';
+
+  // Prix plans
+  document.getElementById('price-solo').textContent = t.solo;
+  document.getElementById('price-pro').textContent = t.pro;
+  document.getElementById('price-biz').textContent = t.biz;
+
+  // Obat comparaison (toujours le même)
+  document.getElementById('obat-solo').textContent = TARIFS.obat.solo + ' €';
+  document.getElementById('obat-pro').textContent = TARIFS.obat.pro + ' €';
+  document.getElementById('obat-biz').textContent = TARIFS.obat.biz + ' €';
+
+  // Notes annuelles
+  ['solo', 'pro', 'biz'].forEach(plan => {
+    const noteEl = document.getElementById('note-' + plan);
+    const ecoEl = document.getElementById('eco-' + plan);
+    if (isAnnuel) {
+      const annualTotal = t[plan] * 12;
+      const saving = (TARIFS.mensuel[plan] * 12) - annualTotal;
+      noteEl.innerHTML = `Soit <strong>${annualTotal} €/an</strong> — économisez ${saving} €`;
+      noteEl.classList.add('show');
+      ecoEl.style.display = 'inline-flex';
+    } else {
+      noteEl.classList.remove('show');
+      ecoEl.style.display = 'none';
+    }
+  });
+
+  // VS banner
+  const soloLabel = isAnnuel ? t.solo + ' €/mois (annuel)' : t.solo + ' €/mois';
+  const bizLabel = isAnnuel ? t.biz + ' €/mois (annuel)' : t.biz + ' €/mois';
+  document.getElementById('vs-tayco-solo').textContent = soloLabel;
+  document.getElementById('vs-tayco-biz').textContent = bizLabel;
+  document.getElementById('vs-saving').textContent = '-' + s.solo + ' € / an (Solo)';
+
+  // Period text
+  document.querySelectorAll('.plan-period').forEach((el, i) => {
+    const plans = ['solo', 'pro', 'biz'];
+    const pct = isAnnuel ? '-15%' : '-10%';
+    el.innerHTML = `HT / mois <span style="font-size:11px;color:var(--muted)">${isAnnuel ? '(facturé annuellement)' : ''}</span> — <strong style="color:var(--green)">${pct} vs Obat</strong>`;
+  });
+}
+
+// ══ FAQ ══
+function toggleFaq(el) {
+  const item = el.parentElement;
+  
