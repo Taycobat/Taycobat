@@ -343,6 +343,22 @@ function buildApercuHTML(d) {
     </div>`;
 }
 
+// ══ FORMAT NOMBRES POUR PDF ══
+function fmtPDF(n) {
+  const rounded = Math.round(n * 100) / 100;
+  const str = rounded.toFixed(2);
+  const parts = str.split('.');
+  let intPart = parts[0];
+  let result = '';
+  let count = 0;
+  for (let i = intPart.length - 1; i >= 0; i--) {
+    result = intPart[i] + result;
+    count++;
+    if (count % 3 === 0 && i !== 0) result = ' ' + result;
+  }
+  return result + ',' + parts[1];
+}
+
 // ══ GÉNÉRER PDF AVEC jsPDF ══
 async function genererPDF(devis) {
   showToast('Génération du PDF...', 'info');
