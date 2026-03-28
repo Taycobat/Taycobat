@@ -1,0 +1,321 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { supabase } from '../lib/supabase'
+import { t, languages } from '../lib/i18n'
+import { useLangStore } from '../store/langStore'
+import LanguageSelector from '../components/LanguageSelector'
+
+export default function Login() {
+  const navigate = useNavigate()
+  const { lang } = useLangStore()
+  const dir = languages.find((l) => l.code === lang)?.dir ?? 'ltr'
+  const isRtl = dir === 'rtl'
+
+  const [mode, setMode] = useState<'login' | 'signup'>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(false)
+    if (error) {
+      setError(t(lang, 'loginError'))
+    } else {
+      navigate('/dashboard')
+    }
+  }
+
+  async function handleSignup(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+
+    if (password !== confirmPassword) {
+      setError(t(lang, 'passwordMismatch'))
+      return
+    }
+
+    setLoading(true)
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    })
+    setLoading(false)
+    if (error) {
+      setError(t(lang, 'signupError'))
+    } else {
+      setSuccess(t(lang, 'signupSuccess'))
+    }
+  }
+
+  return (
+    <div dir={dir} className="min-h-screen flex">
+      {/* Left panel - branding */}
+      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1a9e52] via-[#15803d] to-[#0d5c2b]">
+        {/* Decorative shapes */}
+        <div className="absolute inset-0">
+          <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-white/5" />
+          <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-white/5" />
+          <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] rounded-full bg-white/3" />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                <svg className="w-7 h-7 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span className="text-white text-2xl font-bold tracking-tight">TAYCO BAT</span>
+            </div>
+          </motion.div>
+
+          {/* Hero text */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="space-y-6"
+          >
+            <h1 className="text-5xl xl:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+              {t(lang, 'welcome').split('TAYCO BAT')[0]}
+              <span className="text-emerald-200">TAYCO BAT</span>
+              {t(lang, 'welcome').split('TAYCO BAT')[1]}
+            </h1>
+            <p className="text-xl text-emerald-100/80 max-w-md leading-relaxed">
+              {t(lang, 'subtitle')}
+            </p>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex gap-12"
+          >
+            {[
+              { value: '500+', label: 'Chantiers' },
+              { value: '12', label: 'Pays' },
+              { value: '99.9%', label: 'Uptime' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-3xl font-bold text-white">{stat.value}</div>
+                <div className="text-emerald-200/60 text-sm mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Right panel - form */}
+      <div className="flex-1 flex flex-col bg-gray-50 min-h-screen">
+        {/* Top bar */}
+        <div className={`flex items-center justify-between p-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2">
+            <div className="w-9 h-9 bg-[#1a9e52] rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <span className="font-bold text-gray-900">TAYCO BAT</span>
+          </div>
+          <div className="lg:block hidden" />
+          <LanguageSelector />
+        </div>
+
+        {/* Form */}
+        <div className="flex-1 flex items-center justify-center px-6 pb-12">
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, x: isRtl ? -20 : 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="w-full max-w-[420px]"
+          >
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+                {mode === 'login' ? t(lang, 'login') : t(lang, 'signup')}
+              </h2>
+              <p className="text-gray-500 mt-2">
+                {mode === 'login' ? t(lang, 'subtitle') : t(lang, 'subtitle')}
+              </p>
+            </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm"
+              >
+                {success}
+              </motion.div>
+            )}
+
+            <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-4">
+              {mode === 'signup' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t(lang, 'fullName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                    required
+                    dir={dir}
+                  />
+                </motion.div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t(lang, 'email')}
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="vous@exemple.com"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                  required
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t(lang, 'password')}
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                  required
+                  dir="ltr"
+                />
+              </div>
+
+              {mode === 'signup' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t(lang, 'confirmPassword')}
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                    required
+                    dir="ltr"
+                  />
+                </motion.div>
+              )}
+
+              {mode === 'login' && (
+                <div className={`flex justify-end ${isRtl ? 'justify-start' : ''}`}>
+                  <button
+                    type="button"
+                    className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer"
+                  >
+                    {t(lang, 'forgotPassword')}
+                  </button>
+                </div>
+              )}
+
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer"
+              >
+                {loading ? (
+                  <svg className="animate-spin h-5 w-5 mx-auto text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : mode === 'login' ? (
+                  t(lang, 'login')
+                ) : (
+                  t(lang, 'signup')
+                )}
+              </motion.button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-sm text-gray-400">{t(lang, 'or')}</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            {/* Toggle mode */}
+            <p className="text-center text-sm text-gray-500">
+              {mode === 'login' ? t(lang, 'noAccount') : t(lang, 'hasAccount')}{' '}
+              <button
+                onClick={() => {
+                  setMode(mode === 'login' ? 'signup' : 'login')
+                  setError('')
+                  setSuccess('')
+                }}
+                className="text-[#1a9e52] hover:text-emerald-700 font-semibold transition-colors cursor-pointer"
+              >
+                {mode === 'login' ? t(lang, 'signup') : t(lang, 'login')}
+              </button>
+            </p>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  )
+}
