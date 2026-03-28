@@ -2,28 +2,24 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 
-// Colonnes réelles de la table devis dans Supabase
-export interface Devis {
-  id: string
-  numero: string
-  montant_ht: number
-  montant_ttc: number
-  tva_pct: number
-  statut: string
-  user_id: string
-  created_at: string
-}
-
 export interface KpiData {
   caMonth: number
+  facturesImpayees: number
+  clientsActifs: number
   devisEnAttente: number
-  devisTotal: number
-  devisAcceptes: number
 }
 
 export interface CaDataPoint {
   mois: string
   montant: number
+}
+
+export interface RecentDevis {
+  id: string
+  numero: string
+  montant_ttc: number
+  statut: string
+  created_at: string
 }
 
 function toNumber(val: unknown): number {
@@ -36,88 +32,86 @@ export function useDashboardData() {
   const { user } = useAuthStore()
   const [kpis, setKpis] = useState<KpiData>({
     caMonth: 0,
+    facturesImpayees: 0,
+    clientsActifs: 0,
     devisEnAttente: 0,
-    devisTotal: 0,
-    devisAcceptes: 0,
   })
-  const [recentDevis, setRecentDevis] = useState<Devis[]>([])
+  const [recentDevis, setRecentDevis] = useState<RecentDevis[]>([])
   const [caData, setCaData] = useState<CaDataPoint[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user) {
-      setLoading(false)
-      return
-    }
+    if (!user) { setLoading(false); return }
 
     async function fetchData() {
       setLoading(true)
       const uid = user!.id
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-      const [devisAttente, devisTotal, devisAcceptes, allDevis, caDevisMois] =
+      const [caRes, impayeesRes, clientsRes, devisAttenteRes, recentDevisRes] =
         await Promise.all([
-          // Devis en attente
+          // 1. CA du mois = factures payee ou envoyee du mois en cours
+          supabase
+            .from('factures')
+            .select('montant_ttc')
+            .eq('user_id', uid)
+            .in('statut', ['payee', 'envoyee'])
+            .gte('created_at', startOfMonth),
+
+          // 3. Factures impayées = statut envoyee depuis plus de 30 jours
+          supabase
+            .from('factures')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', uid)
+            .eq('statut', 'envoyee')
+            .lte('created_at', thirtyDaysAgo),
+
+          // 4. Clients actifs = clients ayant au moins une facture
+          supabase
+            .from('factures')
+            .select('client_id')
+            .eq('user_id', uid)
+            .not('client_id', 'is', null),
+
+          // Devis en attente (brouillon ou envoye)
           supabase
             .from('devis')
             .select('id', { count: 'exact', head: true })
             .eq('user_id', uid)
-            .eq('statut', 'en_attente'),
+            .in('statut', ['brouillon', 'envoye', 'en_attente']),
 
-          // Total devis
+          // 5 derniers devis
           supabase
             .from('devis')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', uid),
-
-          // Devis acceptés
-          supabase
-            .from('devis')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', uid)
-            .eq('statut', 'accepte'),
-
-          // 5 derniers devis — colonnes explicites
-          supabase
-            .from('devis')
-            .select('id, numero, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at')
+            .select('id, numero, montant_ttc, statut, created_at')
             .eq('user_id', uid)
             .order('created_at', { ascending: false })
             .limit(5),
-
-          // CA du mois = somme montant_ttc des devis acceptés ce mois
-          supabase
-            .from('devis')
-            .select('montant_ttc')
-            .eq('user_id', uid)
-            .eq('statut', 'accepte')
-            .gte('created_at', startOfMonth),
         ])
 
-      const caMonth = caDevisMois.data?.reduce(
-        (sum, row) => sum + toNumber(row.montant_ttc),
-        0,
-      ) ?? 0
+      // CA du mois
+      const caMonth = caRes.data?.reduce((sum, row) => sum + toNumber(row.montant_ttc), 0) ?? 0
+
+      // Clients actifs = nombre de client_id distincts dans factures
+      const uniqueClients = new Set((clientsRes.data ?? []).map((r) => r.client_id).filter(Boolean))
 
       setKpis({
         caMonth,
-        devisEnAttente: devisAttente.count ?? 0,
-        devisTotal: devisTotal.count ?? 0,
-        devisAcceptes: devisAcceptes.count ?? 0,
+        facturesImpayees: impayeesRes.count ?? 0,
+        clientsActifs: uniqueClients.size,
+        devisEnAttente: devisAttenteRes.count ?? 0,
       })
 
-      // Derniers devis avec montants parsés en number
       setRecentDevis(
-        (allDevis.data ?? []).map((d) => ({
+        (recentDevisRes.data ?? []).map((d) => ({
           ...d,
-          montant_ht: toNumber(d.montant_ht),
           montant_ttc: toNumber(d.montant_ttc),
-          tva_pct: toNumber(d.tva_pct),
         })),
       )
 
-      // CA par mois (6 derniers mois)
+      // 2. Graphique CA 6 mois = somme factures payee/envoyee par mois
       const months: CaDataPoint[] = []
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
@@ -125,10 +119,10 @@ export function useDashboardData() {
         const label = d.toLocaleDateString('fr-FR', { month: 'short' })
 
         const { data } = await supabase
-          .from('devis')
+          .from('factures')
           .select('montant_ttc')
           .eq('user_id', uid)
-          .eq('statut', 'accepte')
+          .in('statut', ['payee', 'envoyee'])
           .gte('created_at', d.toISOString())
           .lte('created_at', end.toISOString())
 

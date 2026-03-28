@@ -73,25 +73,25 @@ const kpiConfig = [
     textColor: 'text-amber-600',
   },
   {
-    key: 'devisAcceptes' as const,
-    label: 'Devis acceptés',
+    key: 'facturesImpayees' as const,
+    label: 'Factures impayées',
     format: (n: number) => String(n),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
     ),
-    color: 'from-[#1a9e52] to-emerald-400',
-    bgLight: 'bg-emerald-50',
-    textColor: 'text-emerald-600',
+    color: 'from-red-500 to-rose-400',
+    bgLight: 'bg-red-50',
+    textColor: 'text-red-500',
   },
   {
-    key: 'devisTotal' as const,
-    label: 'Total devis',
+    key: 'clientsActifs' as const,
+    label: 'Clients actifs',
     format: (n: number) => String(n),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
     color: 'from-blue-500 to-indigo-400',
@@ -290,7 +290,7 @@ export default function Dashboard() {
                       {statutBadge(devis.statut)}
                     </div>
                     <div className="text-xs text-gray-400 mt-0.5">
-                      HT {formatMoney(devis.montant_ht)} &middot; TVA {devis.tva_pct}% &middot; {new Date(devis.created_at).toLocaleDateString('fr-FR')}
+                      {devis.numero} &middot; {new Date(devis.created_at).toLocaleDateString('fr-FR')}
                     </div>
                   </div>
                   <span className="text-sm font-semibold text-gray-900 flex-shrink-0">
