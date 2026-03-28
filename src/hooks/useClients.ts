@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
+import { logAudit } from '../lib/auditLog'
 
 // Colonnes réelles de la table clients dans Supabase
 export interface Client {
@@ -52,10 +53,13 @@ export function useClients() {
 
   async function createClient(form: ClientForm) {
     if (!user) return { error: 'Non connecté' }
-    const { error: err } = await supabase
+    const { data, error: err } = await supabase
       .from('clients')
       .insert({ ...form, user_id: user.id })
+      .select('id')
+      .single()
     if (err) return { error: err.message }
+    await logAudit({ user_id: user.id, action: 'create', table_name: 'clients', record_id: data.id, details: `Client ${form.prenom} ${form.nom} créé` })
     await fetchClients()
     return { error: null }
   }
@@ -66,16 +70,19 @@ export function useClients() {
       .update(form)
       .eq('id', id)
     if (err) return { error: err.message }
+    await logAudit({ user_id: user!.id, action: 'update', table_name: 'clients', record_id: id, details: `Client ${form.prenom} ${form.nom} modifié` })
     await fetchClients()
     return { error: null }
   }
 
   async function deleteClient(id: string) {
+    const target = clients.find((c) => c.id === id)
     const { error: err } = await supabase
       .from('clients')
       .delete()
       .eq('id', id)
     if (err) return { error: err.message }
+    if (user && target) await logAudit({ user_id: user.id, action: 'delete', table_name: 'clients', record_id: id, details: `Client ${target.prenom} ${target.nom} supprimé` })
     await fetchClients()
     return { error: null }
   }

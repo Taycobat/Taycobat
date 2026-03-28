@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
+import { logAudit } from '../lib/auditLog'
 
 // Colonnes réelles de la table devis dans Supabase
 export interface DevisRow {
@@ -137,6 +138,8 @@ export function useDevis() {
 
     if (errDevis) return { error: errDevis.message }
 
+    await logAudit({ user_id: user.id, action: 'create', table_name: 'devis', record_id: devisData.id, details: `Devis ${numero} créé — ${totalTTC.toFixed(2)} € TTC` })
+
     if (payload.lignes.length > 0) {
       const lignes = payload.lignes.map((l, i) => ({
         devis_id: devisData.id,
@@ -156,9 +159,11 @@ export function useDevis() {
   }
 
   async function deleteDevis(id: string) {
+    const target = devisList.find((d) => d.id === id)
     await supabase.from('devis_lignes').delete().eq('devis_id', id)
     const { error: err } = await supabase.from('devis').delete().eq('id', id)
     if (err) return { error: err.message }
+    if (user && target) await logAudit({ user_id: user.id, action: 'delete', table_name: 'devis', record_id: id, details: `Devis ${target.numero} supprimé` })
     await fetchDevis()
     return { error: null }
   }
@@ -166,6 +171,8 @@ export function useDevis() {
   async function updateStatut(id: string, statut: string) {
     const { error: err } = await supabase.from('devis').update({ statut }).eq('id', id)
     if (err) return { error: err.message }
+    const target = devisList.find((d) => d.id === id)
+    if (user && target) await logAudit({ user_id: user.id, action: 'update', table_name: 'devis', record_id: id, details: `Devis ${target.numero} → statut ${statut}` })
     await fetchDevis()
     return { error: null }
   }

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
+import { logAudit } from '../lib/auditLog'
 
 // Colonnes réelles de la table factures dans Supabase :
 // id, user_id, numero, client_id, devis_id, type, montant_ht, montant_ttc, tva_pct,
@@ -104,6 +105,7 @@ export function useFactures() {
       retenue_garantie_pct: 0, user_id: user.id,
     })
     if (error) return { error: error.message }
+    await logAudit({ user_id: user.id, action: 'create', table_name: 'factures', record_id: devisId, details: `Facture ${numero} créée depuis devis` })
     await fetchFactures()
     return { error: null }
   }
@@ -189,8 +191,10 @@ export function useFactures() {
       avoir_facture_id: factureId, user_id: user.id,
     })
     if (error) return { error: error.message }
+    await logAudit({ user_id: user.id, action: 'create', table_name: 'factures', record_id: factureId, details: `Avoir ${numero} de ${montantAvoir.toFixed(2)} € sur facture ${source.numero}` })
     if (montantAvoir >= source.montant_ttc) {
       await supabase.from('factures').update({ statut: 'annulee' }).eq('id', factureId)
+      await logAudit({ user_id: user.id, action: 'update', table_name: 'factures', record_id: factureId, details: `Facture ${source.numero} annulée par avoir ${numero}` })
     }
     await fetchFactures()
     return { error: null }
@@ -207,6 +211,7 @@ export function useFactures() {
       statut: isTotal ? 'payee' : 'impayee',
     }).eq('id', id)
     if (error) return { error: error.message }
+    if (facture) await logAudit({ user_id: user.id, action: 'update', table_name: 'factures', record_id: id, details: `Paiement ${params.montant.toFixed(2)} € sur ${facture.numero} par ${params.mode}` })
     await fetchFactures()
     return { error: null }
   }
@@ -214,6 +219,8 @@ export function useFactures() {
   async function updateStatut(id: string, statut: string) {
     const { error } = await supabase.from('factures').update({ statut }).eq('id', id)
     if (error) return { error: error.message }
+    const target = factures.find((f) => f.id === id)
+    if (user && target) await logAudit({ user_id: user.id, action: 'update', table_name: 'factures', record_id: id, details: `Facture ${target.numero} → statut ${statut}` })
     await fetchFactures()
     return { error: null }
   }
