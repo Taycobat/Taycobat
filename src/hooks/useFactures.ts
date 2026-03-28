@@ -2,29 +2,31 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 
+// Colonnes réelles de la table factures dans Supabase :
+// id, user_id, numero, client_id, devis_id, type, montant_ht, montant_ttc, tva_pct,
+// statut, date_emission, date_echeance, avancement_pct, retenue_garantie_pct,
+// avoir_facture_id, date_paiement, mode_paiement, montant_paye, created_at
 export interface Facture {
   id: string
   numero: string
   devis_id: string | null
   client_id: string | null
-  type: string // facture | acompte | situation | avoir | solde
+  type: string
   montant_ht: number
   montant_ttc: number
   tva_pct: number
-  statut: string // brouillon | envoyee | payee | impayee | annulee
+  statut: string
   date_emission: string
   date_echeance: string | null
-  situation_numero: number | null     // 1, 2, 3, 4...
-  situation_total: number | null      // total situations (ex: 4)
-  avancement_pct: number | null       // % avancement cumulé
-  retenue_garantie: number            // montant retenue 5%
-  montant_avoir: number | null        // pour avoirs: montant annulé
-  avoir_facture_id: string | null     // facture annulée par cet avoir
-  paiement_date: string | null
-  paiement_mode: string | null        // virement | cheque | especes | cb
-  paiement_montant: number | null     // paiement partiel possible
+  avancement_pct: number
+  retenue_garantie_pct: number
+  avoir_facture_id: string | null
+  date_paiement: string | null
+  mode_paiement: string | null
+  montant_paye: number
   user_id: string
   created_at: string
+  // Résolu côté client
   client_display?: string
   devis_display?: string
 }
@@ -35,9 +37,6 @@ function toNum(v: unknown): number {
   return isNaN(n) ? 0 : n
 }
 
-// Colonnes réelles de la table factures dans Supabase
-const FACTURE_COLUMNS = 'id, numero, devis_id, client_id, type, montant_ht, montant_ttc, tva_pct, statut, date_emission, date_echeance, situation_numero, situation_total, avancement_pct, retenue_garantie, montant_avoir, avoir_facture_id, paiement_date, paiement_mode, paiement_montant, user_id, created_at'
-
 export function useFactures() {
   const { user } = useAuthStore()
   const [factures, setFactures] = useState<Facture[]>([])
@@ -46,36 +45,12 @@ export function useFactures() {
   const fetchFactures = useCallback(async () => {
     if (!user) return
     setLoading(true)
-    const { data, error } = await supabase
+
+    const { data } = await supabase
       .from('factures')
-      .select(FACTURE_COLUMNS)
+      .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-
-    if (error) {
-      // Fallback: table might not have all columns yet, try minimal
-      const { data: fallback } = await supabase
-        .from('factures')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-      const rows = fallback ?? []
-      const clientIds = [...new Set(rows.map((f: Record<string, unknown>) => f.client_id).filter(Boolean))] as string[]
-      let clientMap: Record<string, string> = {}
-      if (clientIds.length > 0) {
-        const { data: clients } = await supabase.from('clients').select('id, nom, prenom').in('id', clientIds)
-        for (const c of clients ?? []) clientMap[c.id] = `${c.prenom ?? ''} ${c.nom ?? ''}`.trim()
-      }
-      setFactures(rows.map((f: Record<string, unknown>) => ({
-        ...f,
-        montant_ht: toNum(f.montant_ht), montant_ttc: toNum(f.montant_ttc), tva_pct: toNum(f.tva_pct),
-        retenue_garantie: toNum(f.retenue_garantie), avancement_pct: toNum(f.avancement_pct),
-        paiement_montant: toNum(f.paiement_montant), montant_avoir: toNum(f.montant_avoir),
-        client_display: f.client_id ? clientMap[f.client_id as string] ?? '' : '',
-      } as Facture)))
-      setLoading(false)
-      return
-    }
 
     const rows = data ?? []
     const clientIds = [...new Set(rows.map((f) => f.client_id).filter(Boolean))] as string[]
@@ -94,9 +69,13 @@ export function useFactures() {
 
     setFactures(rows.map((f) => ({
       ...f,
-      montant_ht: toNum(f.montant_ht), montant_ttc: toNum(f.montant_ttc), tva_pct: toNum(f.tva_pct),
-      retenue_garantie: toNum(f.retenue_garantie), avancement_pct: toNum(f.avancement_pct),
-      paiement_montant: toNum(f.paiement_montant), montant_avoir: toNum(f.montant_avoir),
+      type: f.type ?? 'facture',
+      montant_ht: toNum(f.montant_ht),
+      montant_ttc: toNum(f.montant_ttc),
+      tva_pct: toNum(f.tva_pct),
+      avancement_pct: toNum(f.avancement_pct),
+      retenue_garantie_pct: toNum(f.retenue_garantie_pct),
+      montant_paye: toNum(f.montant_paye),
       client_display: f.client_id ? clientMap[f.client_id] ?? '' : '',
       devis_display: f.devis_id ? devisMap[f.devis_id] ?? '' : '',
     })))
@@ -122,7 +101,7 @@ export function useFactures() {
       numero, devis_id: devisId, client_id: devis.client_id, type: 'facture',
       montant_ht: devis.montant_ht, montant_ttc: devis.montant_ttc, tva_pct: devis.tva_pct,
       statut: 'brouillon', date_emission: new Date().toISOString().split('T')[0],
-      retenue_garantie: 0, user_id: user.id,
+      retenue_garantie_pct: 0, user_id: user.id,
     })
     if (error) return { error: error.message }
     await fetchFactures()
@@ -138,7 +117,7 @@ export function useFactures() {
     const { error } = await supabase.from('factures').insert({
       numero, devis_id: params.devis_id, client_id: params.client_id, type: 'acompte',
       montant_ht, montant_ttc, tva_pct: params.tva_pct, statut: 'brouillon',
-      date_emission: new Date().toISOString().split('T')[0], retenue_garantie: 0, user_id: user.id,
+      date_emission: new Date().toISOString().split('T')[0], retenue_garantie_pct: 0, user_id: user.id,
     })
     if (error) return { error: error.message }
     await fetchFactures()
@@ -148,11 +127,9 @@ export function useFactures() {
   // 3. Situation de travaux
   async function createSituation(params: {
     devis_id: string; client_id: string | null; montant_ttc_devis: number; tva_pct: number
-    situation_numero: number; situation_total: number; avancement_pct: number
-    retenue_garantie_pct: number
+    avancement_pct: number; retenue_garantie_pct: number
   }) {
     if (!user) return { error: 'Non connecté' }
-    // Calcul: montant de cette tranche = (avancement cumulé - avancements précédents) × montant total
     const existingSituations = factures.filter((f) => f.devis_id === params.devis_id && f.type === 'situation')
     const previousPct = existingSituations.reduce((s, f) => s + (f.avancement_pct ?? 0), 0)
     const tranchePct = params.avancement_pct - previousPct
@@ -168,8 +145,8 @@ export function useFactures() {
       numero, devis_id: params.devis_id, client_id: params.client_id, type: 'situation',
       montant_ht, montant_ttc, tva_pct: params.tva_pct, statut: 'brouillon',
       date_emission: new Date().toISOString().split('T')[0],
-      situation_numero: params.situation_numero, situation_total: params.situation_total,
-      avancement_pct: tranchePct, retenue_garantie: retenue, user_id: user.id,
+      avancement_pct: tranchePct, retenue_garantie_pct: params.retenue_garantie_pct,
+      user_id: user.id,
     })
     if (error) return { error: error.message }
     await fetchFactures()
@@ -190,7 +167,7 @@ export function useFactures() {
     const { error } = await supabase.from('factures').insert({
       numero, devis_id: params.devis_id, client_id: params.client_id, type: 'solde',
       montant_ht, montant_ttc: resteDu, tva_pct: params.tva_pct, statut: 'brouillon',
-      date_emission: new Date().toISOString().split('T')[0], retenue_garantie: 0, user_id: user.id,
+      date_emission: new Date().toISOString().split('T')[0], retenue_garantie_pct: 0, user_id: user.id,
     })
     if (error) return { error: error.message }
     await fetchFactures()
@@ -208,11 +185,10 @@ export function useFactures() {
     const { error } = await supabase.from('factures').insert({
       numero, devis_id: source.devis_id, client_id: source.client_id, type: 'avoir',
       montant_ht, montant_ttc: montantAvoir, tva_pct: source.tva_pct, statut: 'envoyee',
-      date_emission: new Date().toISOString().split('T')[0], retenue_garantie: 0,
-      avoir_facture_id: factureId, montant_avoir: montantAvoir, user_id: user.id,
+      date_emission: new Date().toISOString().split('T')[0], retenue_garantie_pct: 0,
+      avoir_facture_id: factureId, user_id: user.id,
     })
     if (error) return { error: error.message }
-    // Marquer la facture source comme annulée si avoir total
     if (montantAvoir >= source.montant_ttc) {
       await supabase.from('factures').update({ statut: 'annulee' }).eq('id', factureId)
     }
@@ -227,7 +203,7 @@ export function useFactures() {
     if (!facture) return { error: 'Facture non trouvée' }
     const isTotal = params.montant >= facture.montant_ttc
     const { error } = await supabase.from('factures').update({
-      paiement_date: params.date, paiement_mode: params.mode, paiement_montant: params.montant,
+      date_paiement: params.date, mode_paiement: params.mode, montant_paye: params.montant,
       statut: isTotal ? 'payee' : 'impayee',
     }).eq('id', id)
     if (error) return { error: error.message }

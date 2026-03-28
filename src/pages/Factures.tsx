@@ -65,7 +65,7 @@ export default function Factures() {
 
   const totalPayee = factures.filter((f) => f.statut === 'payee').reduce((s, f) => s + f.montant_ttc, 0)
   const totalImpayee = factures.filter((f) => f.statut === 'impayee' || f.statut === 'envoyee').reduce((s, f) => s + f.montant_ttc, 0)
-  const totalRetenue = factures.reduce((s, f) => s + (f.retenue_garantie ?? 0), 0)
+  const totalRetenue = factures.filter((f) => f.retenue_garantie_pct > 0).reduce((s, f) => s + Math.round(f.montant_ttc * f.retenue_garantie_pct / 100 * 100) / 100, 0)
 
   function getDevis(id: string) { return devisList.find((d) => d.id === id) }
 
@@ -98,7 +98,7 @@ export default function Factures() {
     const d = getDevis(selectedDevis)
     if (!d) return
     setSaving(true); setError('')
-    const res = await createSituation({ devis_id: d.id, client_id: d.client_id, montant_ttc_devis: d.montant_ttc, tva_pct: d.tva_pct, situation_numero: sitNumero, situation_total: sitTotal, avancement_pct: sitAvancement, retenue_garantie_pct: sitRetenue })
+    const res = await createSituation({ devis_id: d.id, client_id: d.client_id, montant_ttc_devis: d.montant_ttc, tva_pct: d.tva_pct, avancement_pct: sitAvancement, retenue_garantie_pct: sitRetenue })
     setSaving(false)
     if (res.error) setError(res.error); else setModal(null)
   }
@@ -148,9 +148,9 @@ export default function Factures() {
     if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Réf. devis : ${f.devis_display}`, 14, y); y += 8 }
 
     // Type-specific info
-    if (f.type === 'situation' && f.situation_numero) {
+    if (f.type === 'situation' && f.avancement_pct) {
       doc.setFontSize(9); doc.setTextColor(26, 158, 82); doc.setFont('helvetica', 'bold')
-      doc.text(`Situation ${f.situation_numero}/${f.situation_total ?? '?'} — Avancement ${f.avancement_pct ?? 0}%`, 14, y); y += 8
+      doc.text(`Situation — Avancement ${f.avancement_pct}%`, 14, y); y += 8
     }
     if (f.type === 'avoir') {
       doc.setFontSize(9); doc.setTextColor(200, 40, 40); doc.setFont('helvetica', 'bold')
@@ -159,7 +159,10 @@ export default function Factures() {
 
     y += 4
     const tableBody: string[][] = [[typeName, fmt(f.montant_ht), `${f.tva_pct}%`, fmt(f.montant_ttc)]]
-    if (f.retenue_garantie > 0) tableBody.push(['Retenue de garantie 5%', '', '', `- ${fmt(f.retenue_garantie)}`])
+    if (f.retenue_garantie_pct > 0) {
+      const retenueAmount = Math.round(f.montant_ttc * f.retenue_garantie_pct / 100 * 100) / 100
+      tableBody.push([`Retenue de garantie ${f.retenue_garantie_pct}%`, '', '', `- ${fmt(retenueAmount)}`])
+    }
 
     autoTable(doc, {
       startY: y, head: [['Description', 'Montant HT', 'TVA', 'Montant TTC']],
@@ -174,9 +177,9 @@ export default function Factures() {
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
     doc.text(`Net à payer : ${fmt(f.montant_ttc)}`, 196, finalY + 12, { align: 'right' })
 
-    if (f.paiement_date) {
+    if (f.date_paiement) {
       doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
-      doc.text(`Payé le ${new Date(f.paiement_date).toLocaleDateString('fr-FR')} par ${f.paiement_mode ?? '—'} — ${fmt(f.paiement_montant ?? 0)}`, 14, finalY + 20)
+      doc.text(`Payé le ${new Date(f.date_paiement!).toLocaleDateString('fr-FR')} par ${f.mode_paiement ?? '—'} — ${fmt(f.montant_paye)}`, 14, finalY + 20)
     }
 
     doc.setFontSize(7); doc.setTextColor(160, 160, 160)
@@ -249,16 +252,16 @@ export default function Factures() {
               <td className="px-5 py-3"><span className="font-mono font-medium text-gray-900">{f.numero}</span></td>
               <td className="px-5 py-3"><div className="text-gray-900 truncate max-w-[180px]">{f.client_display || '—'}</div>
                 {f.devis_display && <div className="text-[11px] text-gray-400 truncate max-w-[180px]">{f.devis_display}</div>}
-                {f.type === 'situation' && f.situation_numero && <div className="text-[11px] text-[#1a9e52] font-medium">Sit. {f.situation_numero}/{f.situation_total} — {f.avancement_pct}%</div>}
+                {f.type === 'situation' && f.avancement_pct > 0 && <div className="text-[11px] text-[#1a9e52] font-medium">Situation — {f.avancement_pct}% avancement</div>}
               </td>
               <td className="px-5 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${f.type === 'avoir' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>{typeLabel[f.type] ?? f.type}</span></td>
               <td className="px-5 py-3 text-right"><span className={`font-semibold tabular-nums ${f.type === 'avoir' ? 'text-red-600' : 'text-gray-900'}`}>{f.type === 'avoir' ? '- ' : ''}{fmt0(f.montant_ttc)}</span></td>
-              <td className="px-5 py-3 text-right">{f.retenue_garantie > 0 ? <span className="text-xs text-amber-600 font-medium">{fmt0(f.retenue_garantie)}</span> : <span className="text-gray-300">—</span>}</td>
+              <td className="px-5 py-3 text-right">{f.retenue_garantie_pct > 0 ? <span className="text-xs text-amber-600 font-medium">{f.retenue_garantie_pct}%</span> : <span className="text-gray-300">—</span>}</td>
               <td className="px-5 py-3"><select value={f.statut} onChange={(e) => updateStatut(f.id, e.target.value)} className={`px-2 py-1 rounded-full text-[11px] font-medium border cursor-pointer appearance-none ${st.cls}`}>
                 <option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option><option value="payee">Payée</option><option value="impayee">Impayée</option><option value="annulee">Annulée</option>
               </select></td>
-              <td className="px-5 py-3">{f.paiement_date
-                ? <div><div className="text-xs text-emerald-600 font-medium">{fmt0(f.paiement_montant ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.paiement_date).toLocaleDateString('fr-FR')} · {f.paiement_mode}</div></div>
+              <td className="px-5 py-3">{f.date_paiement
+                ? <div><div className="text-xs text-emerald-600 font-medium">{fmt0(f.montant_paye ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.date_paiement).toLocaleDateString('fr-FR')} · {f.mode_paiement}</div></div>
                 : <span className="text-gray-300 text-xs">—</span>}</td>
               <td className="px-5 py-3"><div className="flex items-center justify-end gap-0.5">
                 <button onClick={() => generatePDF(f)} title="PDF" className="p-1.5 rounded-lg text-gray-400 hover:text-[#1a9e52] hover:bg-emerald-50 transition-all cursor-pointer">
