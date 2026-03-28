@@ -1,13 +1,20 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { t, languages } from '../lib/i18n'
 import { useLangStore } from '../store/langStore'
+import { useAuthStore } from '../store/authStore'
 import LanguageSelector from '../components/LanguageSelector'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { session, loading: authLoading } = useAuthStore()
+
+  // Already logged in — redirect to dashboard
+  if (!authLoading && session) {
+    return <Navigate to="/dashboard" replace />
+  }
   const { lang } = useLangStore()
   const dir = languages.find((l) => l.code === lang)?.dir ?? 'ltr'
   const isRtl = dir === 'rtl'
