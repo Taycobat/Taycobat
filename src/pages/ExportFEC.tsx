@@ -10,7 +10,7 @@ export default function ExportFEC() {
   const { user } = useAuthStore()
   const [year, setYear] = useState(new Date().getFullYear())
   const [generating, setGenerating] = useState(false)
-  const [stats, setStats] = useState<{ devis: number; factures: number } | null>(null)
+  const [stats, setStats] = useState<{ factures: number } | null>(null)
 
   async function generateFEC() {
     if (!user) return
@@ -19,30 +19,46 @@ export default function ExportFEC() {
     const startDate = `${year}-01-01`
     const endDate = `${year}-12-31`
 
-    const [{ data: devis }, { data: factures }] = await Promise.all([
-      supabase.from('devis').select('numero, titre, montant_ht, montant_ttc, tva_pct, created_at').eq('user_id', user.id).gte('created_at', startDate).lte('created_at', endDate).order('created_at'),
-      supabase.from('factures').select('numero, montant_ht, montant_ttc, tva_pct, created_at, type').eq('user_id', user.id).gte('created_at', startDate).lte('created_at', endDate).order('created_at'),
-    ])
+    // Uniquement les factures avec statut envoyee ou payee
+    const { data: factures } = await supabase
+      .from('factures')
+      .select('id, numero, montant_ht, montant_ttc, tva_pct, statut, created_at')
+      .eq('user_id', user.id)
+      .in('statut', ['envoyee', 'payee'])
+      .gte('created_at', startDate)
+      .lte('created_at', endDate)
+      .order('created_at')
 
     const lines: string[] = [FEC_HEADER]
     let num = 1
 
-    for (const d of devis ?? []) {
-      const ht = toNum(d.montant_ht); const ttc = toNum(d.montant_ttc); const tva = ttc - ht
-      lines.push(generateFECLine({ numero: String(num++), date: d.created_at, compte: '411000', compteLib: 'Clients', pieceRef: d.numero, libelle: `Devis ${d.numero}`, debit: ttc, credit: 0 }))
-      lines.push(generateFECLine({ numero: String(num++), date: d.created_at, compte: '706000', compteLib: 'Prestations de services', pieceRef: d.numero, libelle: `Devis ${d.numero} — HT`, debit: 0, credit: ht }))
-      if (tva > 0) lines.push(generateFECLine({ numero: String(num++), date: d.created_at, compte: '445710', compteLib: `TVA collectée ${d.tva_pct}%`, pieceRef: d.numero, libelle: `TVA ${d.numero}`, debit: 0, credit: tva }))
-    }
-
     for (const f of factures ?? []) {
-      const ht = toNum(f.montant_ht); const ttc = toNum(f.montant_ttc); const tva = ttc - ht
-      const prefix = f.type === 'avoir' ? 'Avoir' : 'Facture'
-      lines.push(generateFECLine({ numero: String(num++), date: f.created_at, compte: '411000', compteLib: 'Clients', pieceRef: f.numero, libelle: `${prefix} ${f.numero}`, debit: f.type === 'avoir' ? 0 : ttc, credit: f.type === 'avoir' ? ttc : 0 }))
-      lines.push(generateFECLine({ numero: String(num++), date: f.created_at, compte: '706000', compteLib: 'Prestations', pieceRef: f.numero, libelle: `${prefix} ${f.numero} — HT`, debit: f.type === 'avoir' ? ht : 0, credit: f.type === 'avoir' ? 0 : ht }))
-      if (tva > 0) lines.push(generateFECLine({ numero: String(num++), date: f.created_at, compte: '445710', compteLib: `TVA collectée`, pieceRef: f.numero, libelle: `TVA ${f.numero}`, debit: f.type === 'avoir' ? tva : 0, credit: f.type === 'avoir' ? 0 : tva }))
+      const ht = toNum(f.montant_ht)
+      const ttc = toNum(f.montant_ttc)
+      const tva = Math.round((ttc - ht) * 100) / 100
+
+      // Écriture client (débit)
+      lines.push(generateFECLine({
+        numero: String(num++), date: f.created_at, compte: '411000', compteLib: 'Clients',
+        pieceRef: f.numero, libelle: `Facture ${f.numero}`, debit: ttc, credit: 0,
+      }))
+
+      // Écriture produit HT (crédit)
+      lines.push(generateFECLine({
+        numero: String(num++), date: f.created_at, compte: '706000', compteLib: 'Prestations de services',
+        pieceRef: f.numero, libelle: `Facture ${f.numero} — HT`, debit: 0, credit: ht,
+      }))
+
+      // Écriture TVA collectée (crédit)
+      if (tva > 0) {
+        lines.push(generateFECLine({
+          numero: String(num++), date: f.created_at, compte: '445710', compteLib: `TVA collectée ${f.tva_pct}%`,
+          pieceRef: f.numero, libelle: `TVA ${f.numero}`, debit: 0, credit: tva,
+        }))
+      }
     }
 
-    setStats({ devis: (devis ?? []).length, factures: (factures ?? []).length })
+    setStats({ factures: (factures ?? []).length })
 
     const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -68,13 +84,17 @@ export default function ExportFEC() {
 
         <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500 space-y-1">
           <p>Le FEC inclut :</p>
-          <ul className="list-disc ml-5 space-y-0.5"><li>Tous les devis de l'année</li><li>Toutes les factures (acomptes, situations, avoirs)</li><li>Ventilation HT / TVA / TTC</li><li>Comptes comptables 411, 706, 44571</li></ul>
+          <ul className="list-disc ml-5 space-y-0.5">
+            <li>Factures avec statut <strong>envoyée</strong> ou <strong>payée</strong> uniquement</li>
+            <li>Ventilation HT / TVA / TTC par facture</li>
+            <li>Comptes comptables : 411 (Clients), 706 (Prestations), 44571 (TVA collectée)</li>
+          </ul>
+          <p className="text-xs text-gray-400 mt-2">Les devis et brouillons ne sont jamais inclus dans le FEC.</p>
         </div>
 
         {stats && (
           <div className="flex gap-4">
-            <div className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-medium">{stats.devis} devis exportés</div>
-            <div className="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 text-sm font-medium">{stats.factures} factures exportées</div>
+            <div className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-medium">{stats.factures} facture{stats.factures !== 1 ? 's' : ''} exportée{stats.factures !== 1 ? 's' : ''}</div>
           </div>
         )}
 
