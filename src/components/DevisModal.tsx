@@ -12,9 +12,9 @@ interface Props {
 }
 
 const TVA_OPTIONS = [
-  { value: 5.5, label: '5,5 %' },
-  { value: 10, label: '10 %' },
-  { value: 20, label: '20 %' },
+  { value: 5.5, label: '5,5 %', tag: 'Isolation' },
+  { value: 10, label: '10 %', tag: 'Rénovation' },
+  { value: 20, label: '20 %', tag: 'Standard' },
 ]
 
 const emptyLigne = (): Omit<DevisLigne, 'id' | 'devis_id'> => ({
@@ -26,41 +26,32 @@ const emptyLigne = (): Omit<DevisLigne, 'id' | 'devis_id'> => ({
 })
 
 function fmt(n: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-  }).format(n)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(n)
 }
 
 export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const { user } = useAuthStore()
   const [clients, setClients] = useState<Client[]>([])
   const [titre, setTitre] = useState('')
+  const [description, setDescription] = useState('')
   const [clientId, setClientId] = useState('')
-  const [tvaPct, setTvaPct] = useState(20)
+  const [tvaPct, setTvaPct] = useState(10)
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([emptyLigne()])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   const fetchClients = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase
-      .from('clients')
-      .select('id, nom, prenom, entreprise')
-      .eq('user_id', user.id)
-      .order('nom')
+    const { data } = await supabase.from('clients').select('id, nom, prenom, entreprise, adresse, ville, code_postal')
+      .eq('user_id', user.id).order('nom')
     setClients((data as Client[]) ?? [])
   }, [user])
 
   useEffect(() => {
     if (open) {
       fetchClients()
-      setTitre('')
-      setClientId('')
-      setTvaPct(20)
-      setLignes([emptyLigne()])
-      setError('')
+      setTitre(''); setDescription(''); setClientId(''); setTvaPct(10)
+      setLignes([emptyLigne()]); setError('')
     }
   }, [open, fetchClients])
 
@@ -74,13 +65,8 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
     })
   }
 
-  function addLigne() {
-    setLignes((p) => [...p, emptyLigne()])
-  }
-
-  function removeLigne(i: number) {
-    setLignes((p) => (p.length <= 1 ? p : p.filter((_, idx) => idx !== i)))
-  }
+  function addLigne() { setLignes((p) => [...p, emptyLigne()]) }
+  function removeLigne(i: number) { setLignes((p) => p.length <= 1 ? p : p.filter((_, idx) => idx !== i)) }
 
   const totalHT = lignes.reduce((s, l) => s + l.montant_ht, 0)
   const totalTVA = Math.round(totalHT * (tvaPct / 100) * 100) / 100
@@ -91,245 +77,212 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
     ? `${selectedClient.prenom ?? ''} ${selectedClient.nom ?? ''}`.trim() +
       (selectedClient.entreprise ? ` — ${selectedClient.entreprise}` : '')
     : ''
+  const entreprise = user?.user_metadata?.entreprise || 'TAYCO BAT'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (lignes.every((l) => !l.designation)) {
-      setError('Ajoutez au moins une ligne de travaux')
-      return
-    }
-    setSaving(true)
-    setError('')
+    if (lignes.every((l) => !l.designation)) { setError('Ajoutez au moins une ligne de travaux'); return }
+    setSaving(true); setError('')
     const res = await onSubmit({
-      titre,
-      client_id: clientId || null,
-      client_nom: clientNom,
-      tva_pct: tvaPct,
-      lignes: lignes.filter((l) => l.designation),
+      titre, description, client_id: clientId || null, client_nom: clientNom,
+      tva_pct: tvaPct, lignes: lignes.filter((l) => l.designation),
     })
     setSaving(false)
-    if (res.error) {
-      setError(res.error)
-    } else {
-      onClose()
-    }
+    if (res.error) setError(res.error); else onClose()
   }
 
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Nouveau devis</h2>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-50 bg-[#f8f9fb]">
+          {/* Top bar */}
+          <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
               </button>
+              <h1 className="text-base font-semibold text-gray-900">Nouveau devis</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">Annuler</button>
+              <motion.button onClick={handleSubmit} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+                className="px-5 py-2 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center gap-2">
+                {saving ? <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                Créer le devis
+              </motion.button>
+            </div>
+          </div>
+
+          <div className="flex h-[calc(100vh-56px)] overflow-hidden">
+            {/* LEFT — Form */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
+                {error && <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">{error}</div>}
+
+                {/* Header fields */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Titre du devis</label>
+                      <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Ex: Rénovation cuisine"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Client</label>
+                      <select value={clientId} onChange={(e) => setClientId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
+                        <option value="">— Client —</option>
+                        {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Description</label>
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Description visible sur le devis (optionnel)"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all resize-none" />
+                  </div>
+                </div>
+
+                {/* TVA selector */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Taux de TVA</label>
+                  <div className="flex gap-2">
+                    {TVA_OPTIONS.map((o) => (
+                      <button key={o.value} type="button" onClick={() => setTvaPct(o.value)}
+                        className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                          tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        }`}>
+                        {o.label}
+                        <span className="block text-[10px] font-normal mt-0.5 opacity-60">{o.tag}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Lignes de travaux */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Lignes de travaux</label>
+                    <button type="button" onClick={addLigne} className="flex items-center gap-1.5 text-sm font-medium text-[#1a9e52] hover:text-emerald-700 transition-colors cursor-pointer">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                      Ajouter
+                    </button>
+                  </div>
+
+                  <div className="hidden sm:grid grid-cols-[1fr_70px_60px_100px_90px_32px] gap-2 mb-2 px-1">
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase">Désignation</span>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase">Qté</span>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase">Unité</span>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase">PU HT</span>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase text-right">Total HT</span>
+                    <span />
+                  </div>
+
+                  <div className="space-y-2">
+                    {lignes.map((l, i) => (
+                      <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-1 sm:grid-cols-[1fr_70px_60px_100px_90px_32px] gap-2 items-center bg-gray-50/50 rounded-xl p-2 border border-gray-100">
+                        <input type="text" value={l.designation} onChange={(e) => updateLigne(i, 'designation', e.target.value)} placeholder="Désignation"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                        <input type="number" value={l.quantite || ''} onChange={(e) => updateLigne(i, 'quantite', e.target.value)} min={0} step="any"
+                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                        <select value={l.unite} onChange={(e) => updateLigne(i, 'unite', e.target.value)}
+                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
+                          {['u', 'm²', 'ml', 'm³', 'h', 'j', 'forfait', 'kg', 'lot'].map((u) => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                        <input type="number" value={l.prix_unitaire || ''} onChange={(e) => updateLigne(i, 'prix_unitaire', e.target.value)} min={0} step="any" placeholder="0,00"
+                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                        <span className="text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.montant_ht)}</span>
+                        <button type="button" onClick={() => removeLigne(i)} disabled={lignes.length <= 1}
+                          className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer disabled:opacity-30">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Totals */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium text-gray-900 tabular-nums">{fmt(totalHT)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">TVA {tvaPct} %</span><span className="font-medium text-gray-900 tabular-nums">{fmt(totalTVA)}</span></div>
+                    <div className="flex justify-between text-lg pt-3 border-t border-gray-200"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(totalTTC)}</span></div>
+                  </div>
+                </div>
+              </form>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {error && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">{error}</div>
-              )}
+            {/* RIGHT — Live preview */}
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
+              className="hidden xl:flex w-[380px] border-l border-gray-200 bg-white flex-col flex-shrink-0">
+              <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Aperçu en direct</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5">
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm text-[11px] leading-relaxed">
+                  {/* Preview header */}
+                  <div className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] p-4 text-white">
+                    <div className="flex justify-between items-start">
+                      <div><div className="font-bold text-sm">{entreprise}</div>{user?.user_metadata?.siret && <div className="text-emerald-200 text-[10px] mt-0.5">SIRET : {user.user_metadata.siret}</div>}</div>
+                      <div className="text-right"><div className="font-mono font-bold text-[10px]">DE-{new Date().getFullYear()}-XXXX</div><div className="text-emerald-200 text-[10px]">{new Date().toLocaleDateString('fr-FR')}</div></div>
+                    </div>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {/* Client */}
+                    {selectedClient && (
+                      <div className="bg-gray-50 rounded-lg p-2.5">
+                        <div className="text-[9px] text-gray-400 uppercase font-semibold mb-1">Destinataire</div>
+                        <div className="font-semibold text-gray-900">{selectedClient.prenom} {selectedClient.nom}</div>
+                        {selectedClient.adresse && <div className="text-gray-500">{selectedClient.adresse}</div>}
+                        {selectedClient.ville && <div className="text-gray-500">{selectedClient.code_postal} {selectedClient.ville}</div>}
+                      </div>
+                    )}
+                    {titre && <div className="font-bold text-gray-900 text-xs">{titre}</div>}
+                    {description && <div className="text-gray-500 text-[10px]">{description}</div>}
 
-              {/* Infos devis */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Titre du devis</label>
-                  <input
-                    type="text"
-                    value={titre}
-                    onChange={(e) => setTitre(e.target.value)}
-                    placeholder="Ex: Rénovation cuisine Mme Dupont"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">TVA</label>
-                  <select
-                    value={tvaPct}
-                    onChange={(e) => setTvaPct(parseFloat(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer"
-                  >
-                    {TVA_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                    {/* Lines table */}
+                    {lignes.some((l) => l.designation) && (
+                      <table className="w-full">
+                        <thead><tr className="border-b border-gray-200">
+                          <th className="text-left py-1 text-[9px] text-gray-400 uppercase">Désig.</th>
+                          <th className="text-center py-1 text-[9px] text-gray-400 uppercase">Qté</th>
+                          <th className="text-right py-1 text-[9px] text-gray-400 uppercase">PU</th>
+                          <th className="text-right py-1 text-[9px] text-gray-400 uppercase">Total</th>
+                        </tr></thead>
+                        <tbody>
+                          {lignes.filter((l) => l.designation).map((l, i) => (
+                            <tr key={i} className="border-b border-gray-50">
+                              <td className="py-1 text-gray-800 max-w-[120px] truncate">{l.designation}</td>
+                              <td className="py-1 text-center text-gray-500">{l.quantite} {l.unite}</td>
+                              <td className="py-1 text-right text-gray-500">{fmt(l.prix_unitaire)}</td>
+                              <td className="py-1 text-right font-medium text-gray-900">{fmt(l.montant_ht)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+
+                    {/* Totals */}
+                    <div className="bg-gray-50 rounded-lg p-2.5 space-y-1">
+                      <div className="flex justify-between"><span className="text-gray-400">Total HT</span><span className="font-medium tabular-nums">{fmt(totalHT)}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-400">TVA {tvaPct}%</span><span className="font-medium tabular-nums">{fmt(totalTVA)}</span></div>
+                      <div className="flex justify-between pt-1 border-t border-gray-200 text-xs"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(totalTTC)}</span></div>
+                    </div>
+
+                    {/* Signature zones */}
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      <div><div className="text-[9px] text-gray-400 mb-1">Signature artisan</div><div className="h-10 border border-dashed border-gray-200 rounded-lg" /></div>
+                      <div><div className="text-[9px] text-gray-400 mb-1">Bon pour accord</div><div className="h-10 border border-dashed border-gray-200 rounded-lg" /></div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Client */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Client</label>
-                <select
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer"
-                >
-                  <option value="">— Sélectionner un client —</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Lignes de travaux */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-gray-700">Lignes de travaux</label>
-                  <button
-                    type="button"
-                    onClick={addLigne}
-                    className="flex items-center gap-1.5 text-sm font-medium text-[#1a9e52] hover:text-emerald-700 transition-colors cursor-pointer"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajouter une ligne
-                  </button>
-                </div>
-
-                {/* Table header */}
-                <div className="hidden sm:grid grid-cols-[1fr_70px_60px_100px_90px_32px] gap-2 mb-2 px-1">
-                  <span className="text-xs font-medium text-gray-400 uppercase">Désignation</span>
-                  <span className="text-xs font-medium text-gray-400 uppercase">Qté</span>
-                  <span className="text-xs font-medium text-gray-400 uppercase">Unité</span>
-                  <span className="text-xs font-medium text-gray-400 uppercase">PU HT</span>
-                  <span className="text-xs font-medium text-gray-400 uppercase text-right">Total HT</span>
-                  <span />
-                </div>
-
-                <div className="space-y-2">
-                  {lignes.map((l, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="grid grid-cols-1 sm:grid-cols-[1fr_70px_60px_100px_90px_32px] gap-2 items-center"
-                    >
-                      <input
-                        type="text"
-                        value={l.designation}
-                        onChange={(e) => updateLigne(i, 'designation', e.target.value)}
-                        placeholder="Désignation"
-                        className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
-                      />
-                      <input
-                        type="number"
-                        value={l.quantite || ''}
-                        onChange={(e) => updateLigne(i, 'quantite', e.target.value)}
-                        min={0}
-                        step="any"
-                        className="px-2 py-2 rounded-lg border border-gray-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
-                      />
-                      <select
-                        value={l.unite}
-                        onChange={(e) => updateLigne(i, 'unite', e.target.value)}
-                        className="px-1 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer"
-                      >
-                        <option value="u">u</option>
-                        <option value="m²">m²</option>
-                        <option value="ml">ml</option>
-                        <option value="m³">m³</option>
-                        <option value="h">h</option>
-                        <option value="j">j</option>
-                        <option value="f">f</option>
-                        <option value="kg">kg</option>
-                        <option value="lot">lot</option>
-                      </select>
-                      <input
-                        type="number"
-                        value={l.prix_unitaire || ''}
-                        onChange={(e) => updateLigne(i, 'prix_unitaire', e.target.value)}
-                        min={0}
-                        step="any"
-                        placeholder="0,00"
-                        className="px-2 py-2 rounded-lg border border-gray-200 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
-                      />
-                      <span className="text-sm font-medium text-gray-900 text-right tabular-nums">
-                        {fmt(l.montant_ht)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeLigne(i)}
-                        className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer disabled:opacity-30"
-                        disabled={lignes.length <= 1}
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Totals */}
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Total HT</span>
-                  <span className="font-medium text-gray-900 tabular-nums">{fmt(totalHT)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">TVA ({tvaPct} %)</span>
-                  <span className="font-medium text-gray-900 tabular-nums">{fmt(totalTVA)}</span>
-                </div>
-                <div className="flex justify-between text-base pt-2 border-t border-gray-200">
-                  <span className="font-semibold text-gray-900">Total TTC</span>
-                  <span className="font-bold text-[#1a9e52] tabular-nums text-lg">{fmt(totalTTC)}</span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-xl transition-all cursor-pointer"
-                >
-                  Annuler
-                </button>
-                <motion.button
-                  type="submit"
-                  disabled={saving}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer"
-                >
-                  {saving ? (
-                    <svg className="animate-spin h-4 w-4 mx-auto text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                  ) : (
-                    'Créer le devis'
-                  )}
-                </motion.button>
-              </div>
-            </form>
-          </motion.div>
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

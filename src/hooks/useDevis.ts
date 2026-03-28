@@ -6,6 +6,7 @@ export interface DevisRow {
   id: string
   numero: string
   titre: string
+  description: string
   client_id: string | null
   client_nom: string
   montant_ht: number
@@ -28,6 +29,7 @@ export interface DevisLigne {
 
 export interface DevisCreatePayload {
   titre: string
+  description: string
   client_id: string | null
   client_nom: string
   tva_pct: number
@@ -50,13 +52,14 @@ export function useDevis() {
     setLoading(true)
     const { data } = await supabase
       .from('devis')
-      .select('id, numero, titre, client_id, client_nom, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at')
+      .select('id, numero, titre, description, client_id, client_nom, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
     setDevisList(
       (data ?? []).map((d) => ({
         ...d,
         titre: d.titre ?? '',
+        description: d.description ?? '',
         client_nom: d.client_nom ?? '',
         montant_ht: toNum(d.montant_ht),
         montant_ttc: toNum(d.montant_ttc),
@@ -88,12 +91,12 @@ export function useDevis() {
     const totalHT = payload.lignes.reduce((s, l) => s + l.montant_ht, 0)
     const totalTTC = Math.round(totalHT * (1 + payload.tva_pct / 100) * 100) / 100
 
-    // Insert devis
     const { data: devisData, error: errDevis } = await supabase
       .from('devis')
       .insert({
         numero,
         titre: payload.titre,
+        description: payload.description,
         client_id: payload.client_id,
         client_nom: payload.client_nom,
         montant_ht: totalHT,
@@ -107,19 +110,17 @@ export function useDevis() {
 
     if (errDevis) return { error: errDevis.message }
 
-    // Insert lignes
     if (payload.lignes.length > 0) {
-      const lignes = payload.lignes.map((l) => ({
+      const lignes = payload.lignes.map((l, i) => ({
         devis_id: devisData.id,
         designation: l.designation,
         quantite: l.quantite,
         unite: l.unite,
         prix_unitaire: l.prix_unitaire,
         montant_ht: l.montant_ht,
+        ordre: i + 1,
       }))
-      const { error: errLignes } = await supabase
-        .from('devis_lignes')
-        .insert(lignes)
+      const { error: errLignes } = await supabase.from('devis_lignes').insert(lignes)
       if (errLignes) return { error: errLignes.message }
     }
 
@@ -128,7 +129,6 @@ export function useDevis() {
   }
 
   async function deleteDevis(id: string) {
-    // Delete lignes first
     await supabase.from('devis_lignes').delete().eq('devis_id', id)
     const { error: err } = await supabase.from('devis').delete().eq('id', id)
     if (err) return { error: err.message }
@@ -137,10 +137,7 @@ export function useDevis() {
   }
 
   async function updateStatut(id: string, statut: string) {
-    const { error: err } = await supabase
-      .from('devis')
-      .update({ statut })
-      .eq('id', id)
+    const { error: err } = await supabase.from('devis').update({ statut }).eq('id', id)
     if (err) return { error: err.message }
     await fetchDevis()
     return { error: null }
