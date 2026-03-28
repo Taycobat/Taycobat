@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useDevis } from '../hooks/useDevis'
 import { useAuthStore } from '../store/authStore'
@@ -41,6 +42,7 @@ function toNum(v: unknown): number {
 }
 
 export default function Devis() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { devisList, loading, createDevis, deleteDevis, updateStatut } = useDevis()
   const [search, setSearch] = useState('')
@@ -232,7 +234,7 @@ export default function Devis() {
                 {filtered.map((devis) => {
                   const st = statutStyle[devis.statut] ?? statutStyle.brouillon
                   return (
-                    <motion.tr key={devis.id} variants={row} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <motion.tr key={devis.id} variants={row} onClick={() => navigate(`/devis/${devis.id}`)} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer">
                       <td className="px-6 py-4"><span className="text-sm font-mono font-medium text-gray-900">{devis.numero}</span></td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900 truncate max-w-[250px]">{devis.titre || '—'}</div>
@@ -242,7 +244,7 @@ export default function Devis() {
                         <span className="text-sm font-semibold text-gray-900 tabular-nums">{fmt(devis.montant_ttc)}</span>
                         <div className="text-xs text-gray-400">HT {fmt(devis.montant_ht)}</div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <select value={devis.statut} onChange={(e) => updateStatut(devis.id, e.target.value)}
                           className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer appearance-none bg-none ${st.cls}`}>
                           <option value="brouillon">Brouillon</option><option value="envoye">Envoyé</option>
@@ -250,7 +252,7 @@ export default function Devis() {
                         </select>
                       </td>
                       <td className="px-6 py-4"><span className="text-sm text-gray-500">{new Date(devis.created_at).toLocaleDateString('fr-FR')}</span></td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           {/* PDF button */}
                           <button onClick={() => handlePDF(devis)} title="Générer PDF" disabled={pdfingId === devis.id}

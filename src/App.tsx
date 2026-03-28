@@ -5,6 +5,7 @@ import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import DevisPage from './pages/Devis'
+import DevisDetail from './pages/DevisDetail'
 import Factures from './pages/Factures'
 import Chantiers from './pages/Chantiers'
 import Planning from './pages/Planning'
@@ -34,6 +35,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/devis" element={<DevisPage />} />
+            <Route path="/devis/:id" element={<DevisDetail />} />
             <Route path="/factures" element={<Factures />} />
             <Route path="/chantiers" element={<Chantiers />} />
             <Route path="/planning" element={<Planning />} />
