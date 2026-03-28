@@ -74,17 +74,23 @@ export default function IAAudio() {
     setLignes([])
 
     try {
-      const formData = new FormData()
-      formData.append('audio', audioBlob, 'recording.webm')
-      formData.append('langue', langue)
+      // Convert audio blob to base64
+      const arrayBuffer = await audioBlob.arrayBuffer()
+      const bytes = new Uint8Array(arrayBuffer)
+      let binary = ''
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+      const audio_base64 = btoa(binary)
 
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch(
         `https://uwdfytuvpujhiniotqyl.supabase.co/functions/v1/whisper-transcription`,
         {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
-          body: formData,
+          headers: {
+            'Authorization': `Bearer ${session?.access_token ?? ''}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ audio_base64, langue }),
         }
       )
 

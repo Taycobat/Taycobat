@@ -2,11 +2,9 @@
 // Deploy: supabase functions deploy whisper-transcription
 // Set secret: supabase secrets set OPENAI_API_KEY=sk-...
 //
-// This function:
-// 1. Receives audio blob from browser
-// 2. Sends to OpenAI Whisper for transcription
-// 3. Sends transcription to GPT-4 to extract structured devis lines
-// 4. Returns JSON with transcription + parsed lines
+// Accepts two modes:
+// A) JSON body: { audio_base64: "...", langue: "fr" }
+// B) FormData:  audio (File) + langue (string)
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 
@@ -15,34 +13,57 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const SYSTEM_PROMPT = `Tu es un assistant BTP français. Transforme cette description de travaux en lignes de devis structurées. Retourne un JSON avec : titre (string), lignes (array de {description, quantite, unite, prix_unitaire}). Les prix doivent être réalistes pour le marché français BTP.
+
+Règles supplémentaires :
+- Traduis TOUJOURS en français, même si la transcription est en arabe, turc, roumain, polonais, etc.
+- Utilise les unités BTP standard : m², ml, u, h, forfait, m³, kg, lot
+- Sépare chaque poste de travail en une ligne distincte
+- Si la quantité n'est pas mentionnée, mets 1
+- Sois précis dans les descriptions (matériaux + pose si applicable)
+- Retourne UNIQUEMENT le JSON, sans texte autour ni blocs markdown`
+
+function ok(body: unknown) {
+  return new Response(JSON.stringify(body), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+}
+function err(message: string, status = 500) {
+  return new Response(JSON.stringify({ error: message }), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+}
+
 serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
-    if (!OPENAI_API_KEY) {
-      return new Response(JSON.stringify({ error: 'OPENAI_API_KEY not configured' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (!OPENAI_API_KEY) return err('OPENAI_API_KEY not configured')
 
-    const formData = await req.formData()
-    const audioFile = formData.get('audio') as File
-    const langue = formData.get('langue') as string || 'fr'
+    // --- Parse input (base64 JSON or FormData) ---
+    let audioBytes: Uint8Array
+    let langue = 'fr'
+    const contentType = req.headers.get('content-type') ?? ''
 
-    if (!audioFile) {
-      return new Response(JSON.stringify({ error: 'No audio file provided' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    if (contentType.includes('application/json')) {
+      // Mode A: JSON with base64 audio
+      const body = await req.json()
+      if (!body.audio_base64) return err('Missing audio_base64 field', 400)
+      langue = body.langue || 'fr'
+
+      // Decode base64 → binary
+      const raw = body.audio_base64.replace(/^data:audio\/[^;]+;base64,/, '')
+      audioBytes = Uint8Array.from(atob(raw), (c) => c.charCodeAt(0))
+    } else {
+      // Mode B: FormData with audio blob
+      const formData = await req.formData()
+      const audioFile = formData.get('audio') as File | null
+      if (!audioFile) return err('No audio file provided', 400)
+      langue = (formData.get('langue') as string) || 'fr'
+      audioBytes = new Uint8Array(await audioFile.arrayBuffer())
     }
 
     // --- Step 1: Whisper transcription ---
     const whisperForm = new FormData()
-    whisperForm.append('file', audioFile, 'audio.webm')
+    const audioBlob = new Blob([audioBytes], { type: 'audio/webm' })
+    whisperForm.append('file', audioBlob, 'audio.webm')
     whisperForm.append('model', 'whisper-1')
     whisperForm.append('language', langToWhisper(langue))
     whisperForm.append('response_format', 'json')
@@ -54,17 +75,17 @@ serve(async (req: Request) => {
     })
 
     if (!whisperRes.ok) {
-      const err = await whisperRes.text()
-      return new Response(JSON.stringify({ error: `Whisper error: ${err}` }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      const e = await whisperRes.text()
+      return err(`Whisper API error: ${e}`)
     }
 
-    const whisperData = await whisperRes.json()
-    const transcription = whisperData.text
+    const { text: transcription } = await whisperRes.json()
 
-    // --- Step 2: GPT-4 to extract devis lines ---
+    if (!transcription || transcription.trim().length === 0) {
+      return ok({ transcription: '', titre: '', lignes: [], warning: 'Aucune parole détectée' })
+    }
+
+    // --- Step 2: GPT-4 structured extraction ---
     const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -75,78 +96,41 @@ serve(async (req: Request) => {
         model: 'gpt-4o-mini',
         temperature: 0.1,
         messages: [
-          {
-            role: 'system',
-            content: `Tu es un assistant spécialisé dans le BTP (bâtiment et travaux publics) en France.
-À partir d'une transcription audio d'un artisan décrivant des travaux, tu dois extraire des lignes de devis structurées.
-
-Retourne UNIQUEMENT un JSON valide, sans texte autour, avec ce format:
-{
-  "titre": "titre du devis suggéré",
-  "lignes": [
-    {
-      "description": "description du poste de travail",
-      "quantite": 1,
-      "unite": "m²",
-      "prix_unitaire": 45
-    }
-  ]
-}
-
-Règles:
-- Traduis TOUJOURS en français, même si la transcription est en arabe, turc, roumain, etc.
-- Utilise les unités BTP standard: m², ml, u, h, forfait, m³, kg, lot
-- Estime des prix unitaires réalistes pour le marché français BTP
-- Sépare chaque poste de travail en une ligne distincte
-- Si la quantité n'est pas mentionnée, mets 1
-- Sois précis dans les descriptions (matériaux + pose si applicable)`
-          },
-          {
-            role: 'user',
-            content: `Transcription audio (langue: ${langue}):\n\n${transcription}`
-          }
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: `Transcription audio (langue: ${langue}):\n\n${transcription}` },
         ],
       }),
     })
 
     if (!gptRes.ok) {
-      const err = await gptRes.text()
-      return new Response(JSON.stringify({ error: `GPT error: ${err}`, transcription }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      const e = await gptRes.text()
+      return ok({ transcription, titre: '', lignes: [], error: `GPT error: ${e}` })
     }
 
     const gptData = await gptRes.json()
-    const content = gptData.choices?.[0]?.message?.content ?? '{}'
+    const raw = gptData.choices?.[0]?.message?.content ?? '{}'
 
-    let parsed
+    // Parse JSON (handle possible markdown code fences)
+    let parsed: { titre?: string; lignes?: Record<string, unknown>[] }
     try {
-      // Extract JSON from potential markdown code blocks
-      const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      parsed = JSON.parse(jsonStr)
+      const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      parsed = JSON.parse(clean)
     } catch {
       parsed = { titre: '', lignes: [] }
     }
 
-    return new Response(JSON.stringify({
+    return ok({
       transcription,
       titre: parsed.titre || '',
-      lignes: (parsed.lignes || []).map((l: Record<string, unknown>) => ({
+      lignes: (parsed.lignes || []).map((l) => ({
         description: String(l.description || ''),
         quantite: Number(l.quantite) || 1,
         unite: String(l.unite || 'u'),
         prix_unitaire: Number(l.prix_unitaire) || 0,
       })),
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-
-  } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+  } catch (e) {
+    return err(String(e))
   }
 })
 
