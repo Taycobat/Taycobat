@@ -33,7 +33,6 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const { user } = useAuthStore()
   const [clients, setClients] = useState<Client[]>([])
   const [titre, setTitre] = useState('')
-  const [description, setDescription] = useState('')
   const [clientId, setClientId] = useState('')
   const [tvaPct, setTvaPct] = useState(10)
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([emptyLigne()])
@@ -50,7 +49,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (open) {
       fetchClients()
-      setTitre(''); setDescription(''); setClientId(''); setTvaPct(10)
+      setTitre(''); setClientId(''); setTvaPct(10)
       setLignes([emptyLigne()]); setError('')
     }
   }, [open, fetchClients])
@@ -73,10 +72,6 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const totalTTC = Math.round((totalHT + totalTVA) * 100) / 100
 
   const selectedClient = clients.find((c) => c.id === clientId)
-  const clientNom = selectedClient
-    ? `${selectedClient.prenom ?? ''} ${selectedClient.nom ?? ''}`.trim() +
-      (selectedClient.entreprise ? ` — ${selectedClient.entreprise}` : '')
-    : ''
   const entreprise = user?.user_metadata?.entreprise || 'TAYCO BAT'
 
   async function handleSubmit(e: React.FormEvent) {
@@ -84,7 +79,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
     if (lignes.every((l) => !l.designation)) { setError('Ajoutez au moins une ligne de travaux'); return }
     setSaving(true); setError('')
     const res = await onSubmit({
-      titre, description, client_id: clientId || null, client_nom: clientNom,
+      titre, client_id: clientId || null,
       tva_pct: tvaPct, lignes: lignes.filter((l) => l.designation),
     })
     setSaving(false)
@@ -137,11 +132,6 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                         {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
                       </select>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Description</label>
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Description visible sur le devis (optionnel)"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all resize-none" />
                   </div>
                 </div>
 
@@ -242,7 +232,6 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                       </div>
                     )}
                     {titre && <div className="font-bold text-gray-900 text-xs">{titre}</div>}
-                    {description && <div className="text-gray-500 text-[10px]">{description}</div>}
 
                     {/* Lines table */}
                     {lignes.some((l) => l.designation) && (

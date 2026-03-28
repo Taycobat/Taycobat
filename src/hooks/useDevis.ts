@@ -2,19 +2,20 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 
+// Colonnes réelles de la table devis dans Supabase
 export interface DevisRow {
   id: string
   numero: string
   titre: string
-  description: string
   client_id: string | null
-  client_nom: string
   montant_ht: number
   montant_ttc: number
   tva_pct: number
   statut: string
   user_id: string
   created_at: string
+  // Résolu côté client depuis la table clients
+  client_display: string
 }
 
 export interface DevisLigne {
@@ -29,9 +30,7 @@ export interface DevisLigne {
 
 export interface DevisCreatePayload {
   titre: string
-  description: string
   client_id: string | null
-  client_nom: string
   tva_pct: number
   lignes: Omit<DevisLigne, 'id' | 'devis_id'>[]
 }
@@ -42,6 +41,9 @@ function toNum(v: unknown): number {
   return isNaN(n) ? 0 : n
 }
 
+// Colonnes exactes de la table devis
+const DEVIS_COLUMNS = 'id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at'
+
 export function useDevis() {
   const { user } = useAuthStore()
   const [devisList, setDevisList] = useState<DevisRow[]>([])
@@ -50,20 +52,45 @@ export function useDevis() {
   const fetchDevis = useCallback(async () => {
     if (!user) return
     setLoading(true)
-    const { data } = await supabase
+
+    // 1. Fetch devis
+    const { data, error } = await supabase
       .from('devis')
-      .select('id, numero, titre, description, client_id, client_nom, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at')
+      .select(DEVIS_COLUMNS)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Erreur fetch devis:', error.message)
+      setDevisList([])
+      setLoading(false)
+      return
+    }
+
+    const rows = data ?? []
+
+    // 2. Fetch client names for devis that have a client_id
+    const clientIds = [...new Set(rows.map((d) => d.client_id).filter(Boolean))]
+    let clientMap: Record<string, string> = {}
+    if (clientIds.length > 0) {
+      const { data: clients } = await supabase
+        .from('clients')
+        .select('id, nom, prenom, entreprise')
+        .in('id', clientIds)
+      for (const c of clients ?? []) {
+        const name = `${c.prenom ?? ''} ${c.nom ?? ''}`.trim()
+        clientMap[c.id] = c.entreprise ? `${name} — ${c.entreprise}` : name
+      }
+    }
+
     setDevisList(
-      (data ?? []).map((d) => ({
+      rows.map((d) => ({
         ...d,
         titre: d.titre ?? '',
-        description: d.description ?? '',
-        client_nom: d.client_nom ?? '',
         montant_ht: toNum(d.montant_ht),
         montant_ttc: toNum(d.montant_ttc),
         tva_pct: toNum(d.tva_pct),
+        client_display: d.client_id ? (clientMap[d.client_id] ?? '') : '',
       })),
     )
     setLoading(false)
@@ -96,9 +123,7 @@ export function useDevis() {
       .insert({
         numero,
         titre: payload.titre,
-        description: payload.description,
         client_id: payload.client_id,
-        client_nom: payload.client_nom,
         montant_ht: totalHT,
         montant_ttc: totalTTC,
         tva_pct: payload.tva_pct,

@@ -56,7 +56,7 @@ export default function Devis() {
       const q = search.toLowerCase()
       return (d.numero ?? '').toLowerCase().includes(q) ||
         (d.titre ?? '').toLowerCase().includes(q) ||
-        (d.client_nom ?? '').toLowerCase().includes(q)
+        (d.client_display ?? '').toLowerCase().includes(q)
     })
   }, [devisList, search, filterStatut])
 
@@ -106,12 +106,12 @@ export default function Devis() {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9)
       if (client.adresse) doc.text(client.adresse, 124, 56)
       doc.text(`${client.code_postal || ''} ${client.ville || ''}`.trim(), 124, 61)
-    } else if (d.client_nom) {
-      doc.setFont('helvetica', 'bold'); doc.text(d.client_nom, 124, 50)
+    } else if (d.client_display) {
+      doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, 50)
     }
 
     if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 46); doc.setTextColor(30, 30, 30) }
-    if (d.description) { doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(d.description, 14, 54); doc.setTextColor(30, 30, 30) }
+    // description column does not exist in the table
 
     // Table
     const tableData = lignes.map((l) => [l.designation, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.montant_ht)])
@@ -236,7 +236,7 @@ export default function Devis() {
                       <td className="px-6 py-4"><span className="text-sm font-mono font-medium text-gray-900">{devis.numero}</span></td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900 truncate max-w-[250px]">{devis.titre || '—'}</div>
-                        {devis.client_nom && <div className="text-xs text-gray-400 truncate max-w-[250px]">{devis.client_nom}</div>}
+                        {devis.client_display && <div className="text-xs text-gray-400 truncate max-w-[250px]">{devis.client_display}</div>}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm font-semibold text-gray-900 tabular-nums">{fmt(devis.montant_ttc)}</span>
