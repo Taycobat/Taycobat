@@ -81,8 +81,8 @@ export default function Devis() {
     // Fetch lignes
     const { data: lignesData } = await supabase.from('devis_lignes').select('*').eq('devis_id', d.id).order('ordre')
     const lignes = (lignesData ?? []).map((l) => ({
-      designation: l.designation, quantite: toNum(l.quantite), unite: l.unite,
-      prix_unitaire: toNum(l.prix_unitaire), montant_ht: toNum(l.montant_ht ?? l.total_ht),
+      description: l.description, quantite: toNum(l.quantite), unite: l.unite,
+      prix_unitaire: toNum(l.prix_unitaire), total_ht: toNum(l.total_ht),
     }))
 
     const doc = new jsPDF()
@@ -114,7 +114,7 @@ export default function Devis() {
     // description column does not exist in the table
 
     // Table
-    const tableData = lignes.map((l) => [l.designation, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.montant_ht)])
+    const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])
     autoTable(doc, {
       startY: 75, head: [['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT']],
       body: tableData.length > 0 ? tableData : [['—', '', '', '', '']],

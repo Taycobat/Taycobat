@@ -14,9 +14,7 @@ interface DevisWithClient {
   tva_pct: number
   statut: string
   created_at: string
-  date_validite?: string
-  description?: string
-  client_nom?: string
+  client_display?: string
   client?: {
     nom: string; prenom: string; email: string; telephone: string
     adresse: string; ville: string; code_postal: string; siret: string
@@ -24,8 +22,8 @@ interface DevisWithClient {
 }
 
 interface Ligne {
-  designation: string; quantite: number; unite: string
-  prix_unitaire: number; montant_ht: number; ordre?: number
+  description: string; quantite: number; unite: string
+  prix_unitaire: number; total_ht: number; ordre?: number
 }
 
 function fmt(n: number) {
@@ -64,7 +62,7 @@ export default function PDFExport() {
     setLoading(true)
     const { data: devis } = await supabase
       .from('devis')
-      .select('id, numero, titre, montant_ht, montant_ttc, tva_pct, statut, created_at, date_validite, description, client_id, client_nom')
+      .select('id, numero, titre, montant_ht, montant_ttc, tva_pct, statut, created_at, client_id')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
@@ -77,7 +75,8 @@ export default function PDFExport() {
         const { data: c } = await supabase.from('clients').select('nom,prenom,email,telephone,adresse,ville,code_postal,siret').eq('id', d.client_id).single()
         client = c ?? undefined
       }
-      list.push({ ...d, montant_ht: toNum(d.montant_ht), montant_ttc: toNum(d.montant_ttc), tva_pct: toNum(d.tva_pct), client })
+      const cName = client ? `${client.prenom ?? ''} ${client.nom ?? ''}`.trim() : ''
+    list.push({ ...d, montant_ht: toNum(d.montant_ht), montant_ttc: toNum(d.montant_ttc), tva_pct: toNum(d.tva_pct), client, client_display: cName })
     }
 
     if (ids.length > 0) {
@@ -86,7 +85,7 @@ export default function PDFExport() {
       for (const l of lignes ?? []) {
         const id = l.devis_id
         if (!map[id]) map[id] = []
-        map[id].push({ designation: l.designation, quantite: toNum(l.quantite), unite: l.unite, prix_unitaire: toNum(l.prix_unitaire), montant_ht: toNum(l.montant_ht ?? l.total_ht), ordre: l.ordre })
+        map[id].push({ description: l.description, quantite: toNum(l.quantite), unite: l.unite, prix_unitaire: toNum(l.prix_unitaire), total_ht: toNum(l.total_ht), ordre: l.ordre })
       }
       setLignesMap(map)
     }
@@ -135,9 +134,9 @@ export default function PDFExport() {
       doc.setFontSize(9)
       if (c.adresse) doc.text(c.adresse, 124, 56)
       doc.text(`${c.code_postal || ''} ${c.ville || ''}`.trim(), 124, 61)
-    } else if (d.client_nom) {
+    } else if (d.client_display) {
       doc.setFont('helvetica', 'bold')
-      doc.text(d.client_nom, 124, 50)
+      doc.text(d.client_display, 124, 50)
     }
 
     // Title
@@ -152,11 +151,11 @@ export default function PDFExport() {
     // Table
     const lignes = lignesMap[d.id] ?? []
     const tableData = lignes.map((l) => [
-      l.designation,
+      l.description,
       String(l.quantite),
       l.unite,
       fmt(l.prix_unitaire),
-      fmt(l.montant_ht),
+      fmt(l.total_ht),
     ])
 
     autoTable(doc, {
@@ -251,7 +250,7 @@ export default function PDFExport() {
                 </div>
                 {d.titre && <p className="text-sm text-gray-700 truncate mb-1">{d.titre}</p>}
                 <p className="text-xs text-gray-400 mb-4">
-                  {d.client?.prenom ? `${d.client.prenom} ${d.client.nom}` : d.client_nom || '—'} &middot; {new Date(d.created_at).toLocaleDateString('fr-FR')}
+                  {d.client?.prenom ? `${d.client.prenom} ${d.client.nom}` : d.client_display || '—'} &middot; {new Date(d.created_at).toLocaleDateString('fr-FR')}
                   {(lignesMap[d.id]?.length ?? 0) > 0 && ` · ${lignesMap[d.id].length} ligne${lignesMap[d.id].length > 1 ? 's' : ''}`}
                 </p>
                 <div className="flex gap-2">
@@ -308,10 +307,10 @@ export default function PDFExport() {
                   </div>
                 </div>
                 {/* Client */}
-                {(preview.client || preview.client_nom) && (
+                {(preview.client || preview.client_display) && (
                   <div className="bg-gray-50 rounded-xl p-4">
                     <div className="text-xs text-gray-400 uppercase font-semibold mb-2">Destinataire</div>
-                    <div className="font-semibold text-gray-900">{preview.client ? `${preview.client.prenom} ${preview.client.nom}` : preview.client_nom}</div>
+                    <div className="font-semibold text-gray-900">{preview.client ? `${preview.client.prenom} ${preview.client.nom}` : preview.client_display}</div>
                     {preview.client?.adresse && <div className="text-sm text-gray-500">{preview.client.adresse}</div>}
                     {preview.client && <div className="text-sm text-gray-500">{preview.client.code_postal} {preview.client.ville}</div>}
                   </div>
@@ -329,11 +328,11 @@ export default function PDFExport() {
                   <tbody>
                     {(lignesMap[preview.id] ?? []).map((l, i) => (
                       <tr key={i} className="border-b border-gray-50">
-                        <td className="py-2 text-gray-900">{l.designation}</td>
+                        <td className="py-2 text-gray-900">{l.description}</td>
                         <td className="py-2 text-center text-gray-600">{l.quantite}</td>
                         <td className="py-2 text-center text-gray-600">{l.unite}</td>
                         <td className="py-2 text-right text-gray-600">{fmt(l.prix_unitaire)}</td>
-                        <td className="py-2 text-right font-medium text-gray-900">{fmt(l.montant_ht)}</td>
+                        <td className="py-2 text-right font-medium text-gray-900">{fmt(l.total_ht)}</td>
                       </tr>
                     ))}
                     {(lignesMap[preview.id] ?? []).length === 0 && (

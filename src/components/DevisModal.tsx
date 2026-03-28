@@ -18,11 +18,11 @@ const TVA_OPTIONS = [
 ]
 
 const emptyLigne = (): Omit<DevisLigne, 'id' | 'devis_id'> => ({
-  designation: '',
+  description: '',
   quantite: 1,
   unite: 'u',
   prix_unitaire: 0,
-  montant_ht: 0,
+  total_ht: 0,
 })
 
 function fmt(n: number) {
@@ -57,8 +57,8 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   function updateLigne(i: number, field: string, raw: string) {
     setLignes((prev) => {
       const next = [...prev]
-      const l = { ...next[i], [field]: field === 'designation' || field === 'unite' ? raw : parseFloat(raw) || 0 }
-      l.montant_ht = Math.round(l.quantite * l.prix_unitaire * 100) / 100
+      const l = { ...next[i], [field]: field === 'description' || field === 'unite' ? raw : parseFloat(raw) || 0 }
+      l.total_ht = Math.round(l.quantite * l.prix_unitaire * 100) / 100
       next[i] = l
       return next
     })
@@ -67,7 +67,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   function addLigne() { setLignes((p) => [...p, emptyLigne()]) }
   function removeLigne(i: number) { setLignes((p) => p.length <= 1 ? p : p.filter((_, idx) => idx !== i)) }
 
-  const totalHT = lignes.reduce((s, l) => s + l.montant_ht, 0)
+  const totalHT = lignes.reduce((s, l) => s + l.total_ht, 0)
   const totalTVA = Math.round(totalHT * (tvaPct / 100) * 100) / 100
   const totalTTC = Math.round((totalHT + totalTVA) * 100) / 100
 
@@ -76,11 +76,11 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (lignes.every((l) => !l.designation)) { setError('Ajoutez au moins une ligne de travaux'); return }
+    if (lignes.every((l) => !l.description)) { setError('Ajoutez au moins une ligne de travaux'); return }
     setSaving(true); setError('')
     const res = await onSubmit({
       titre, client_id: clientId || null,
-      tva_pct: tvaPct, lignes: lignes.filter((l) => l.designation),
+      tva_pct: tvaPct, lignes: lignes.filter((l) => l.description),
     })
     setSaving(false)
     if (res.error) setError(res.error); else onClose()
@@ -174,7 +174,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     {lignes.map((l, i) => (
                       <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                         className="grid grid-cols-1 sm:grid-cols-[1fr_70px_60px_100px_90px_32px] gap-2 items-center bg-gray-50/50 rounded-xl p-2 border border-gray-100">
-                        <input type="text" value={l.designation} onChange={(e) => updateLigne(i, 'designation', e.target.value)} placeholder="Désignation"
+                        <input type="text" value={l.description} onChange={(e) => updateLigne(i, 'description', e.target.value)} placeholder="Désignation"
                           className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
                         <input type="number" value={l.quantite || ''} onChange={(e) => updateLigne(i, 'quantite', e.target.value)} min={0} step="any"
                           className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
@@ -184,7 +184,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                         </select>
                         <input type="number" value={l.prix_unitaire || ''} onChange={(e) => updateLigne(i, 'prix_unitaire', e.target.value)} min={0} step="any" placeholder="0,00"
                           className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
-                        <span className="text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.montant_ht)}</span>
+                        <span className="text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.total_ht)}</span>
                         <button type="button" onClick={() => removeLigne(i)} disabled={lignes.length <= 1}
                           className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer disabled:opacity-30">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -234,7 +234,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     {titre && <div className="font-bold text-gray-900 text-xs">{titre}</div>}
 
                     {/* Lines table */}
-                    {lignes.some((l) => l.designation) && (
+                    {lignes.some((l) => l.description) && (
                       <table className="w-full">
                         <thead><tr className="border-b border-gray-200">
                           <th className="text-left py-1 text-[9px] text-gray-400 uppercase">Désig.</th>
@@ -243,12 +243,12 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                           <th className="text-right py-1 text-[9px] text-gray-400 uppercase">Total</th>
                         </tr></thead>
                         <tbody>
-                          {lignes.filter((l) => l.designation).map((l, i) => (
+                          {lignes.filter((l) => l.description).map((l, i) => (
                             <tr key={i} className="border-b border-gray-50">
-                              <td className="py-1 text-gray-800 max-w-[120px] truncate">{l.designation}</td>
+                              <td className="py-1 text-gray-800 max-w-[120px] truncate">{l.description}</td>
                               <td className="py-1 text-center text-gray-500">{l.quantite} {l.unite}</td>
                               <td className="py-1 text-right text-gray-500">{fmt(l.prix_unitaire)}</td>
-                              <td className="py-1 text-right font-medium text-gray-900">{fmt(l.montant_ht)}</td>
+                              <td className="py-1 text-right font-medium text-gray-900">{fmt(l.total_ht)}</td>
                             </tr>
                           ))}
                         </tbody>

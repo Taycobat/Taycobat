@@ -18,14 +18,16 @@ export interface DevisRow {
   client_display: string
 }
 
+// Colonnes réelles de la table devis_lignes :
+// id, devis_id, description, quantite, unite, prix_unitaire, total_ht, ordre, tva_pct
 export interface DevisLigne {
   id?: string
   devis_id?: string
-  designation: string
+  description: string
   quantite: number
   unite: string
   prix_unitaire: number
-  montant_ht: number
+  total_ht: number
 }
 
 export interface DevisCreatePayload {
@@ -115,7 +117,7 @@ export function useDevis() {
     if (!user) return { error: 'Non connecté' }
 
     const numero = await generateNumero()
-    const totalHT = payload.lignes.reduce((s, l) => s + l.montant_ht, 0)
+    const totalHT = payload.lignes.reduce((s, l) => s + l.total_ht, 0)
     const totalTTC = Math.round(totalHT * (1 + payload.tva_pct / 100) * 100) / 100
 
     const { data: devisData, error: errDevis } = await supabase
@@ -138,11 +140,11 @@ export function useDevis() {
     if (payload.lignes.length > 0) {
       const lignes = payload.lignes.map((l, i) => ({
         devis_id: devisData.id,
-        designation: l.designation,
+        description: l.description,
         quantite: l.quantite,
         unite: l.unite,
         prix_unitaire: l.prix_unitaire,
-        montant_ht: l.montant_ht,
+        total_ht: l.total_ht,
         ordre: i + 1,
       }))
       const { error: errLignes } = await supabase.from('devis_lignes').insert(lignes)
