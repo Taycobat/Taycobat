@@ -98,7 +98,7 @@ export default function DevisDetailPage() {
       numero, devis_id: devis.id, client_id: devis.client_id, type: 'facture',
       montant_ht: devis.montant_ht, montant_ttc: devis.montant_ttc, tva_pct: devis.tva_pct,
       statut: 'brouillon', date_emission: new Date().toISOString().split('T')[0],
-      retenue_garantie: 0, user_id: user.id,
+      retenue_garantie_pct: 0, user_id: user.id,
     })
     setActionLoading('')
     if (!error) navigate('/factures')
@@ -226,7 +226,7 @@ export default function DevisDetailPage() {
           </motion.button>
           {isBrouillon && (
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              onClick={() => {/* TODO: open edit modal */}}
+              onClick={() => navigate(`/devis`)}
               className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">
               Modifier
             </motion.button>

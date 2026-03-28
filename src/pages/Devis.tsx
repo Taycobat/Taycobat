@@ -113,7 +113,6 @@ export default function Devis() {
     }
 
     if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 46); doc.setTextColor(30, 30, 30) }
-    // description column does not exist in the table
 
     // Table
     const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])
