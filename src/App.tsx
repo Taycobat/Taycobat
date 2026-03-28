@@ -11,6 +11,7 @@ import Chantiers from './pages/Chantiers'
 import Planning from './pages/Planning'
 import Bibliotheque from './pages/Bibliotheque'
 import SignaturePage from './pages/Signature'
+import IAAudio from './pages/IAAudio'
 import SousTraitants from './pages/SousTraitants'
 import Notifications from './pages/Notifications'
 import Conformite from './pages/Conformite'
@@ -40,6 +41,7 @@ function App() {
             <Route path="/chantiers" element={<Chantiers />} />
             <Route path="/planning" element={<Planning />} />
             <Route path="/bibliotheque" element={<Bibliotheque />} />
+            <Route path="/ia-audio" element={<IAAudio />} />
             <Route path="/signature" element={<SignaturePage />} />
             <Route path="/sous-traitants" element={<SousTraitants />} />
             <Route path="/notifications" element={<Notifications />} />
