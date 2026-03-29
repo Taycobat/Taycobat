@@ -307,7 +307,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     </button>
                   </div>
 
-                  <div className="hidden sm:grid grid-cols-[2fr_70px_60px_100px_90px_32px] gap-2 mb-2 px-1">
+                  <div className="hidden sm:grid grid-cols-[3fr_80px_80px_100px_100px_40px] gap-2 mb-2 px-1">
                     <span className="text-[10px] font-semibold text-gray-400 uppercase">Désignation</span>
                     <span className="text-[10px] font-semibold text-gray-400 uppercase">Qté</span>
                     <span className="text-[10px] font-semibold text-gray-400 uppercase">Unité</span>
@@ -319,7 +319,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                   <div className="space-y-2">
                     {lignes.map((l, i) => (
                       <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                        className="grid grid-cols-1 sm:grid-cols-[2fr_70px_60px_100px_90px_32px] gap-2 items-start bg-gray-50/50 rounded-xl p-2 border border-gray-100">
+                        className="grid grid-cols-1 sm:grid-cols-[3fr_80px_80px_100px_100px_40px] gap-2 items-start bg-gray-50/50 rounded-xl p-2 border border-gray-100">
                         <textarea value={l.description} onChange={(e) => { updateLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px' }}
                           placeholder="Ex: Pose carrelage 60x60 salle de bain, preparation support, joints epoxy, fourniture comprise..." rows={3}
                           className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all resize-vertical min-h-[72px] max-h-[160px]" />

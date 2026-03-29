@@ -219,7 +219,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
               </div>
 
               {/* En-tete colonnes */}
-              <div className="grid grid-cols-[2fr_70px_80px_100px_90px_32px] gap-2 mb-2 px-1">
+              <div className="grid grid-cols-[3fr_80px_80px_100px_100px_40px] gap-2 mb-2 px-1">
                 <span className="text-[10px] font-semibold text-gray-400 uppercase">Designation</span>
                 <span className="text-[10px] font-semibold text-gray-400 uppercase text-center">Qte</span>
                 <span className="text-[10px] font-semibold text-gray-400 uppercase text-center">Unite</span>
@@ -234,7 +234,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                   const lineTotal = l.quantite * l.prix_unitaire
                   return (
                     <div key={i}>
-                      <div className="grid grid-cols-[2fr_70px_80px_100px_90px_32px] gap-2 items-start">
+                      <div className="grid grid-cols-[3fr_80px_80px_100px_100px_40px] gap-2 items-start">
                         <textarea
                           value={l.description}
                           onChange={(e) => {
