@@ -19,6 +19,9 @@ import AttestationTVA from './pages/AttestationTVA'
 import ExportFEC from './pages/ExportFEC'
 import PDFExport from './pages/PDFExport'
 import Tarifs from './pages/Tarifs'
+import Admin from './pages/Admin'
+import AbonnementSucces from './pages/AbonnementSucces'
+import AbonnementAnnulation from './pages/AbonnementAnnulation'
 import Parametres from './pages/Parametres'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
@@ -50,6 +53,9 @@ function App() {
             <Route path="/export-fec" element={<ExportFEC />} />
             <Route path="/pdf-export" element={<PDFExport />} />
             <Route path="/tarifs" element={<Tarifs />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/abonnement/succes" element={<AbonnementSucces />} />
+            <Route path="/abonnement/annulation" element={<AbonnementAnnulation />} />
             <Route path="/parametres" element={<Parametres />} />
             <Route path="*" element={<NotFound />} />
           </Route>

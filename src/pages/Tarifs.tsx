@@ -1,53 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { PLANS, redirectToCheckout, type PlanKey } from '../lib/stripe'
+import { useAuthStore } from '../store/authStore'
 
-const PLANS = [
-  {
-    name: 'SOLO',
-    desc: 'Artisan indépendant',
-    mensuel: 35,
-    annuel: 30,
-    obat: 39,
-    features: [
-      'Devis & factures illimités',
-      'Bibliothèque BTP',
-      'Export PDF professionnel',
-      'Signature électronique',
-      '1 utilisateur',
-    ],
-  },
-  {
-    name: 'PRO',
-    desc: 'Petite entreprise',
-    mensuel: 53,
-    annuel: 45,
-    obat: 59,
-    popular: true,
-    features: [
-      'Tout SOLO +',
-      'IA Audio multilingue',
-      'Gestion chantiers',
-      'Situations de travaux',
-      'Jusqu\'à 5 utilisateurs',
-      'Tableaux de bord avancés',
-    ],
-  },
-  {
-    name: 'BIZ',
-    desc: 'Entreprise',
-    mensuel: 80,
-    annuel: 68,
-    obat: 89,
-    features: [
-      'Tout PRO +',
-      'Achats & dépenses',
-      'Connexion bancaire',
-      'API & intégrations',
-      'Utilisateurs illimités',
-      'Support prioritaire',
-    ],
-  },
-]
+const planKeys: PlanKey[] = ['solo', 'pro', 'business']
 
 const FAQ = [
   { q: 'Puis-je changer de plan à tout moment ?', a: 'Oui, vous pouvez passer d\'un plan à l\'autre à tout moment. La différence sera calculée au prorata.' },
@@ -59,14 +15,27 @@ const FAQ = [
 
 function fmt(n: number) { return n.toLocaleString('fr-FR') }
 
-const item = {
+const anim = {
   hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.3, ease: 'easeOut' as const } }),
 }
 
 export default function Tarifs() {
   const [billing, setBilling] = useState<'mensuel' | 'annuel'>('mensuel')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [loadingPlan, setLoadingPlan] = useState<PlanKey | null>(null)
+  const { user } = useAuthStore()
+
+  async function handleSubscribe(planKey: PlanKey) {
+    setLoadingPlan(planKey)
+    try {
+      await redirectToCheckout(planKey, billing, user?.email ?? undefined)
+    } finally {
+      setLoadingPlan(null)
+    }
+  }
+
+  const annualSavePct = 17
 
   return (
     <div className="p-8 max-w-[1100px] mx-auto">
@@ -95,27 +64,29 @@ export default function Tarifs() {
             Annuel
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
               billing === 'annuel' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-[#1a9e52]'
-            }`}>-14%</span>
+            }`}>-{annualSavePct}%</span>
           </button>
         </div>
       </div>
 
       {/* Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        {PLANS.map((plan) => {
+        {planKeys.map((key, i) => {
+          const plan = PLANS[key]
           const price = plan[billing]
           const saving = plan.obat - price
+          const isPopular = 'popular' in plan && plan.popular
           return (
-            <motion.div key={plan.name} variants={item} initial="hidden" animate="show"
+            <motion.div key={key} custom={i} variants={anim} initial="hidden" animate="show"
               className={`relative bg-white rounded-2xl border shadow-sm overflow-hidden transition-shadow hover:shadow-md ${
-                plan.popular ? 'border-[#1a9e52] shadow-emerald-500/10' : 'border-gray-100'
+                isPopular ? 'border-[#1a9e52] shadow-emerald-500/10' : 'border-gray-100'
               }`}>
-              {plan.popular && (
+              {isPopular && (
                 <div className="absolute top-0 left-0 right-0 bg-[#1a9e52] text-white text-xs font-bold text-center py-1.5 uppercase tracking-wider">
                   Le plus populaire
                 </div>
               )}
-              <div className={`p-6 ${plan.popular ? 'pt-10' : ''}`}>
+              <div className={`p-6 ${isPopular ? 'pt-10' : ''}`}>
                 <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
                 <p className="text-sm text-gray-500 mb-4">{plan.desc}</p>
 
@@ -123,21 +94,40 @@ export default function Tarifs() {
                   <span className="text-4xl font-bold text-gray-900">{fmt(price)}</span>
                   <span className="text-gray-400 text-sm">€/mois</span>
                 </div>
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm text-gray-400 line-through">{plan.obat} € Obat</span>
                   <span className="text-xs font-bold text-[#1a9e52] bg-emerald-50 px-2 py-0.5 rounded-full">
                     -{fmt(saving)} €/mois
                   </span>
                 </div>
+                {billing === 'annuel' && (
+                  <p className="text-xs text-[#1a9e52] font-medium mb-4">
+                    Soit {fmt(price * 12)} €/an — Économisez {fmt((plan.mensuel - price) * 12)} €/an
+                  </p>
+                )}
+                {billing === 'mensuel' && <div className="mb-4" />}
 
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors cursor-pointer ${
-                    plan.popular
+                  onClick={() => handleSubscribe(key)}
+                  disabled={loadingPlan !== null}
+                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors cursor-pointer disabled:opacity-60 ${
+                    isPopular
                       ? 'bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   }`}>
-                  Essai gratuit 14 jours
+                  {loadingPlan === key ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Redirection…
+                    </span>
+                  ) : (
+                    'Commencer l\'essai gratuit'
+                  )}
                 </motion.button>
+                <p className="text-[11px] text-gray-400 text-center mt-2">14 jours gratuits — sans carte bancaire</p>
 
                 <ul className="mt-6 space-y-3">
                   {plan.features.map((f) => (
@@ -154,6 +144,20 @@ export default function Tarifs() {
           )
         })}
       </div>
+
+      {/* Comparison banner */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+        className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] rounded-2xl p-8 text-white text-center mb-16">
+        <h2 className="text-xl font-bold mb-2">Pourquoi choisir TAYCO BAT ?</h2>
+        <p className="text-emerald-100 mb-4 max-w-xl mx-auto text-sm">
+          Jusqu'à 21 €/mois moins cher qu'Obat, avec plus de fonctionnalités : IA Audio, multilingue, conformité BTP intégrée.
+        </p>
+        <div className="flex justify-center gap-8 text-sm">
+          <div><span className="block text-2xl font-bold">14 jours</span><span className="text-emerald-200">Essai gratuit</span></div>
+          <div><span className="block text-2xl font-bold">0 €</span><span className="text-emerald-200">Sans carte bancaire</span></div>
+          <div><span className="block text-2xl font-bold">-30%</span><span className="text-emerald-200">vs Obat</span></div>
+        </div>
+      </motion.div>
 
       {/* FAQ */}
       <div className="max-w-2xl mx-auto">
