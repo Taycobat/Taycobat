@@ -41,7 +41,7 @@ type TranslationKey =
 
 const translations: Record<string, Record<TranslationKey, string>> = {
   fr: {
-    welcome: 'Bienvenue sur TAYCO BAT',
+    welcome: 'Bienvenue sur TAYCOBAT',
     subtitle: 'Gérez vos chantiers avec efficacité',
     email: 'Adresse e-mail',
     password: 'Mot de passe',
@@ -60,7 +60,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'Retour à la connexion',
   },
   ma: {
-    welcome: 'مرحبا بيك فـ TAYCO BAT',
+    welcome: 'مرحبا بيك فـ TAYCOBAT',
     subtitle: 'دير الشونطييات ديالك بسهولة',
     email: 'الإيميل',
     password: 'كلمة السر',
@@ -79,7 +79,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'رجع للدخول',
   },
   dz: {
-    welcome: 'مرحبا بيك في TAYCO BAT',
+    welcome: 'مرحبا بيك في TAYCOBAT',
     subtitle: 'دير الشونتييات نتاعك بسهولة',
     email: 'الإيمايل',
     password: 'كلمة السر',
@@ -98,7 +98,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'ارجع للدخول',
   },
   tn: {
-    welcome: 'أهلا بيك في TAYCO BAT',
+    welcome: 'أهلا بيك في TAYCOBAT',
     subtitle: 'سيّر الشونتييات متاعك بسهولة',
     email: 'الإيمايل',
     password: 'كلمة السر',
@@ -117,7 +117,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'ارجع للدخول',
   },
   tr: {
-    welcome: "TAYCO BAT'a hoş geldiniz",
+    welcome: "TAYCOBAT'a hoş geldiniz",
     subtitle: 'Şantiyelerinizi verimli yönetin',
     email: 'E-posta adresi',
     password: 'Şifre',
@@ -136,7 +136,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'Girişe dön',
   },
   ro: {
-    welcome: 'Bine ați venit la TAYCO BAT',
+    welcome: 'Bine ați venit la TAYCOBAT',
     subtitle: 'Gestionați-vă șantierele eficient',
     email: 'Adresă de e-mail',
     password: 'Parolă',
@@ -155,7 +155,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'Înapoi la conectare',
   },
   pl: {
-    welcome: 'Witamy w TAYCO BAT',
+    welcome: 'Witamy w TAYCOBAT',
     subtitle: 'Zarządzaj budowami efektywnie',
     email: 'Adres e-mail',
     password: 'Hasło',
@@ -174,7 +174,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'Powrót do logowania',
   },
   pt: {
-    welcome: 'Bem-vindo ao TAYCO BAT',
+    welcome: 'Bem-vindo ao TAYCOBAT',
     subtitle: 'Gerencie suas obras com eficiência',
     email: 'Endereço de e-mail',
     password: 'Senha',
@@ -193,7 +193,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'Voltar ao login',
   },
   in: {
-    welcome: 'TAYCO BAT में आपका स्वागत है',
+    welcome: 'TAYCOBAT में आपका स्वागत है',
     subtitle: 'अपने निर्माण स्थलों को कुशलता से प्रबंधित करें',
     email: 'ईमेल पता',
     password: 'पासवर्ड',
@@ -212,7 +212,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'लॉगिन पर वापस जाएं',
   },
   pk: {
-    welcome: 'TAYCO BAT میں خوش آمدید',
+    welcome: 'TAYCOBAT میں خوش آمدید',
     subtitle: 'اپنے تعمیراتی منصوبوں کا مؤثر انتظام کریں',
     email: 'ای میل پتہ',
     password: 'پاسورڈ',
@@ -231,7 +231,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'لاگ ان پر واپس جائیں',
   },
   al: {
-    welcome: 'Mirë se vini në TAYCO BAT',
+    welcome: 'Mirë se vini në TAYCOBAT',
     subtitle: 'Menaxhoni kantieret tuaja me efikasitet',
     email: 'Adresa e-mail',
     password: 'Fjalëkalimi',
@@ -250,7 +250,7 @@ const translations: Record<string, Record<TranslationKey, string>> = {
     backToLogin: 'Kthehu te hyrja',
   },
   hr: {
-    welcome: 'Dobrodošli u TAYCO BAT',
+    welcome: 'Dobrodošli u TAYCOBAT',
     subtitle: 'Upravljajte gradilištima učinkovito',
     email: 'E-mail adresa',
     password: 'Lozinka',

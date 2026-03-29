@@ -32,7 +32,7 @@ export default function AttestationTVA() {
   function generatePDF() {
     const doc = new jsPDF()
     const green: [number, number, number] = [26, 158, 82]
-    const entreprise = user?.user_metadata?.entreprise || 'TAYCO BAT'
+    const entreprise = user?.user_metadata?.entreprise || 'TAYCOBAT'
 
     doc.setFillColor(...green); doc.rect(0, 0, 210, 24, 'F')
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont('helvetica', 'bold')
@@ -63,7 +63,7 @@ export default function AttestationTVA() {
     doc.roundedRect(14, y, 80, 25, 2, 2)
 
     doc.setFontSize(7); doc.setTextColor(160, 160, 160)
-    doc.text(`${entreprise} — Généré par TAYCO BAT`, 105, 285, { align: 'center' })
+    doc.text(`${entreprise} — Généré par TAYCOBAT`, 105, 285, { align: 'center' })
 
     doc.save(`attestation-tva-${taux}.pdf`)
   }

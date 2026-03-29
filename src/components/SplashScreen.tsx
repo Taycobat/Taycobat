@@ -41,7 +41,7 @@ export default function SplashScreen({ message = 'Chargement...', onDone, durati
         transition={{ delay: 0.2, duration: 0.4 }}
         className="text-2xl font-bold text-gray-900 tracking-tight mb-2"
       >
-        TAYCO BAT
+        TAYCOBAT
       </motion.h1>
 
       {/* Message */}

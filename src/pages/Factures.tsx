@@ -135,7 +135,7 @@ export default function Factures() {
     const doc = new jsPDF()
     const green: [number, number, number] = [26, 158, 82]
     const mu = user?.user_metadata ?? {}
-    const entreprise = mu.entreprise || 'TAYCO BAT'
+    const entreprise = mu.entreprise || 'TAYCOBAT'
     const siret = mu.siret || ''
     const formeJ = mu.forme_juridique || ''
     const adresseE = mu.adresse || ''

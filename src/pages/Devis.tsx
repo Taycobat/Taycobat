@@ -71,7 +71,7 @@ export default function Devis() {
     setPdfingId(d.id)
     const green: [number, number, number] = [26, 158, 82]
     const meta = user?.user_metadata ?? {}
-    const entreprise = meta.entreprise || 'TAYCO BAT'
+    const entreprise = meta.entreprise || 'TAYCOBAT'
     const siretE = meta.siret || ''
 
     // Fetch client

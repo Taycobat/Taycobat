@@ -6,7 +6,7 @@ export default function Layout() {
       <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold text-gray-900">
-            TAYCO BAT
+            TAYCOBAT
           </Link>
           <div className="flex gap-4">
             <Link to="/" className="text-gray-600 hover:text-gray-900">

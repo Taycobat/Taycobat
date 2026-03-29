@@ -8,7 +8,7 @@ export default function CGU() {
           <div className="w-8 h-8 bg-[#1a9e52] rounded-xl flex items-center justify-center">
             <span className="text-white text-xs font-bold">T</span>
           </div>
-          <span className="font-bold text-gray-900">TAYCO BAT</span>
+          <span className="font-bold text-gray-900">TAYCOBAT</span>
         </Link>
       </nav>
       <article className="max-w-3xl mx-auto px-6 py-12">
@@ -18,7 +18,7 @@ export default function CGU() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">1. Objet</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Les presentes CGU regissent l'utilisation du service TAYCO BAT, logiciel SaaS de gestion
+            Les presentes CGU regissent l'utilisation du service TAYCOBAT, logiciel SaaS de gestion
             pour les entreprises du batiment et des travaux publics, edite par TAYCO SAS.
           </p>
         </section>
@@ -50,14 +50,14 @@ export default function CGU() {
             <li>Fournir des informations exactes lors de l'inscription</li>
             <li>Ne pas utiliser le service a des fins illegales ou frauduleuses</li>
             <li>Garder confidentiels ses identifiants de connexion</li>
-            <li>Respecter les droits de propriete intellectuelle de TAYCO BAT</li>
+            <li>Respecter les droits de propriete intellectuelle de TAYCOBAT</li>
           </ul>
         </section>
 
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">5. Donnees et propriete</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Vous restez proprietaire de toutes les donnees que vous saisissez dans TAYCO BAT
+            Vous restez proprietaire de toutes les donnees que vous saisissez dans TAYCOBAT
             (clients, devis, factures). Nous ne les utilisons que pour fournir le service.
             Vous pouvez exporter vos donnees a tout moment (export FEC, PDF).
             En cas de resiliation, vos donnees sont conservees 30 jours puis supprimees.
@@ -69,16 +69,16 @@ export default function CGU() {
           <p className="text-sm text-gray-600 leading-relaxed">
             La fonctionnalite IA Audio utilise des services tiers (OpenAI) pour la transcription vocale.
             Les enregistrements audio sont transmis de maniere securisee, traites, puis supprimes immediatement.
-            Aucun enregistrement n'est conserve par TAYCO BAT ni par ses sous-traitants.
+            Aucun enregistrement n'est conserve par TAYCOBAT ni par ses sous-traitants.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">7. Disponibilite</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            TAYCO BAT s'engage a fournir un service disponible 99,9% du temps.
+            TAYCOBAT s'engage a fournir un service disponible 99,9% du temps.
             Des interruptions pour maintenance peuvent survenir, avec notification prealable
-            lorsque possible. TAYCO BAT ne saurait etre tenu responsable des dommages
+            lorsque possible. TAYCOBAT ne saurait etre tenu responsable des dommages
             resultant d'une indisponibilite temporaire du service.
           </p>
         </section>
@@ -86,8 +86,8 @@ export default function CGU() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">8. Responsabilite</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            TAYCO BAT fournit un outil de gestion. La responsabilite de l'exactitude des devis,
-            factures et documents generes incombe a l'utilisateur. TAYCO BAT ne peut etre tenu
+            TAYCOBAT fournit un outil de gestion. La responsabilite de l'exactitude des devis,
+            factures et documents generes incombe a l'utilisateur. TAYCOBAT ne peut etre tenu
             responsable d'erreurs de saisie ou d'utilisation inappropriee du service.
           </p>
         </section>

@@ -8,7 +8,7 @@ export default function PolitiqueConfidentialite() {
           <div className="w-8 h-8 bg-[#1a9e52] rounded-xl flex items-center justify-center">
             <span className="text-white text-xs font-bold">T</span>
           </div>
-          <span className="font-bold text-gray-900">TAYCO BAT</span>
+          <span className="font-bold text-gray-900">TAYCOBAT</span>
         </Link>
       </nav>
       <article className="max-w-3xl mx-auto px-6 py-12 prose prose-sm prose-gray">
@@ -17,7 +17,7 @@ export default function PolitiqueConfidentialite() {
 
         <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">1. Responsable du traitement</h2>
         <p className="text-sm text-gray-600 leading-relaxed mb-4">
-          TAYCO BAT, edite par TAYCO SAS<br />
+          TAYCOBAT, edite par TAYCO SAS<br />
           Email : contact@taycobat.fr<br />
           Site : taycobat.fr
         </p>

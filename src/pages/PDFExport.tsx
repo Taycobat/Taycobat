@@ -101,7 +101,7 @@ export default function PDFExport() {
     const doc = new jsPDF()
     const green: [number, number, number] = [26, 158, 82]
     const meta = user?.user_metadata ?? {}
-    const entreprise = meta.entreprise || 'TAYCO BAT'
+    const entreprise = meta.entreprise || 'TAYCOBAT'
     const siretEntreprise = meta.siret || ''
 
     // Header
@@ -212,7 +212,7 @@ export default function PDFExport() {
     // Footer
     doc.setFontSize(7)
     doc.setTextColor(160, 160, 160)
-    doc.text(`${entreprise} — Généré par TAYCO BAT`, 105, 285, { align: 'center' })
+    doc.text(`${entreprise} — Généré par TAYCOBAT`, 105, 285, { align: 'center' })
 
     doc.save(`${d.numero}.pdf`)
     setGenerating(null)
@@ -297,7 +297,7 @@ export default function PDFExport() {
                 <div className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] rounded-xl p-5 text-white">
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="text-xl font-bold">{user?.user_metadata?.entreprise || 'TAYCO BAT'}</div>
+                      <div className="text-xl font-bold">{user?.user_metadata?.entreprise || 'TAYCOBAT'}</div>
                       {user?.user_metadata?.siret && <div className="text-sm text-emerald-200 mt-1">SIRET : {user.user_metadata.siret}</div>}
                     </div>
                     <div className="text-right">

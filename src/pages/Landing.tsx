@@ -68,7 +68,7 @@ export default function Landing() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-gray-900 tracking-tight">TAYCO BAT</span>
+            <span className="text-lg font-bold text-gray-900 tracking-tight">TAYCOBAT</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
             <a href="#features" className="hover:text-gray-900 transition-colors">Fonctionnalites</a>
@@ -220,7 +220,7 @@ export default function Landing() {
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Pret a simplifier votre gestion BTP ?</h2>
             <p className="text-gray-500 mb-8 max-w-xl mx-auto">
-              Rejoignez les artisans qui gagnent du temps chaque jour avec TAYCO BAT.
+              Rejoignez les artisans qui gagnent du temps chaque jour avec TAYCOBAT.
             </p>
             <button onClick={cta}
               className="px-8 py-4 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-2xl text-lg shadow-xl shadow-emerald-500/20 transition-colors cursor-pointer">
@@ -238,7 +238,7 @@ export default function Landing() {
               <div className="w-7 h-7 bg-[#1a9e52] rounded-lg flex items-center justify-center">
                 <span className="text-white text-xs font-bold">T</span>
               </div>
-              <span className="text-sm font-semibold text-gray-900">TAYCO BAT</span>
+              <span className="text-sm font-semibold text-gray-900">TAYCOBAT</span>
             </div>
             <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500">
               <Link to="/mentions-legales" className="hover:text-gray-900 transition-colors">Mentions legales</Link>

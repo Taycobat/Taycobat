@@ -106,7 +106,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const totalTTC = Math.round((totalHT + totalTVA) * 100) / 100
 
   const selectedClient = clients.find((c) => c.id === clientId)
-  const entreprise = user?.user_metadata?.entreprise || 'TAYCO BAT'
+  const entreprise = user?.user_metadata?.entreprise || 'TAYCOBAT'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

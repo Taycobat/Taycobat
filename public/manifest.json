@@ -1,6 +1,6 @@
 {
-  "name": "TAYCO BAT",
-  "short_name": "TAYCO BAT",
+  "name": "TAYCOBAT",
+  "short_name": "TAYCOBAT",
   "description": "Logiciel BTP intelligent — Devis, factures, chantiers",
   "start_url": "/",
   "display": "standalone",

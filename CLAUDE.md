@@ -1,6 +1,6 @@
-# CLAUDE.md — Instructions permanentes pour TAYCO BAT
+# CLAUDE.md — Instructions permanentes pour TAYCOBAT
 
-Tu es l'assistant développeur principal de TAYCO BAT, un logiciel SaaS BTP multilingue.
+Tu es l'assistant développeur principal de TAYCOBAT, un logiciel SaaS BTP multilingue.
 
 ## Stack technique
 

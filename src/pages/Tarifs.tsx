@@ -148,7 +148,7 @@ export default function Tarifs() {
       {/* Comparison banner */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
         className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] rounded-2xl p-8 text-white text-center mb-16">
-        <h2 className="text-xl font-bold mb-2">Pourquoi choisir TAYCO BAT ?</h2>
+        <h2 className="text-xl font-bold mb-2">Pourquoi choisir TAYCOBAT ?</h2>
         <p className="text-emerald-100 mb-4 max-w-xl mx-auto text-sm">
           Jusqu'à 21 €/mois moins cher qu'Obat, avec plus de fonctionnalités : IA Audio, multilingue, conformité BTP intégrée.
         </p>

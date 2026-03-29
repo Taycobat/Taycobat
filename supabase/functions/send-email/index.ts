@@ -21,12 +21,12 @@ function layout(content: string) {
 <td style="background:#fff;border-radius:12px;width:40px;height:40px;text-align:center;vertical-align:middle">
 <span style="color:${GREEN};font-size:20px;font-weight:700">T</span>
 </td>
-<td style="padding-left:12px;color:#fff;font-size:20px;font-weight:700;letter-spacing:-.5px">TAYCO BAT</td>
+<td style="padding-left:12px;color:#fff;font-size:20px;font-weight:700;letter-spacing:-.5px">TAYCOBAT</td>
 </tr></table>
 </td></tr>
 <tr><td style="padding:32px 40px">${content}</td></tr>
 <tr><td style="padding:24px 40px;border-top:1px solid #f0f0f0;text-align:center">
-<p style="margin:0;font-size:12px;color:#999">TAYCO BAT — Logiciel de gestion BTP</p>
+<p style="margin:0;font-size:12px;color:#999">TAYCOBAT — Logiciel de gestion BTP</p>
 <p style="margin:4px 0 0;font-size:12px;color:#bbb">taycobat.vercel.app</p>
 </td></tr>
 </table>
@@ -36,7 +36,7 @@ function layout(content: string) {
 function welcomeHtml(name: string) {
   return layout(`
     <h1 style="margin:0 0 8px;font-size:24px;color:#111">Bienvenue ${name} !</h1>
-    <p style="color:#666;line-height:1.6;margin:0 0 24px">Votre compte TAYCO BAT est actif. Votre essai gratuit de <strong>14 jours</strong> commence maintenant.</p>
+    <p style="color:#666;line-height:1.6;margin:0 0 24px">Votre compte TAYCOBAT est actif. Votre essai gratuit de <strong>14 jours</strong> commence maintenant.</p>
     <p style="color:#666;line-height:1.6;margin:0 0 24px">Voici comment bien démarrer :</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
       <tr><td style="padding:12px 16px;background:#f0fdf4;border-radius:8px;margin-bottom:8px">
@@ -69,7 +69,7 @@ function devisHtml(clientName: string, devisNumero: string, montantTTC: string, 
       </td></tr>
     </table>
     <p style="color:#666;line-height:1.6;margin:0 0 4px">Merci de votre confiance.</p>
-    <p style="color:#999;font-size:13px;margin:0">— ${artisanName} via TAYCO BAT</p>
+    <p style="color:#999;font-size:13px;margin:0">— ${artisanName} via TAYCOBAT</p>
   `)
 }
 
@@ -89,7 +89,7 @@ function relanceHtml(clientName: string, factureNumero: string, montantTTC: stri
       </td></tr>
     </table>
     <p style="color:#666;line-height:1.6;margin:0 0 24px">Merci de procéder au règlement dans les meilleurs délais.</p>
-    <p style="color:#999;font-size:13px;margin:0">— ${artisanName} via TAYCO BAT</p>
+    <p style="color:#999;font-size:13px;margin:0">— ${artisanName} via TAYCOBAT</p>
   `)
 }
 
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
 
     switch (type) {
       case 'welcome':
-        subject = `Bienvenue sur TAYCO BAT, ${data.name} !`
+        subject = `Bienvenue sur TAYCOBAT, ${data.name} !`
         html = welcomeHtml(data.name)
         break
       case 'devis':
@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'TAYCO BAT <noreply@taycobat.fr>',
+        from: 'TAYCOBAT <noreply@taycobat.fr>',
         to: Array.isArray(to) ? to : [to],
         subject,
         html,

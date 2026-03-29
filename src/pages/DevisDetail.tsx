@@ -125,7 +125,7 @@ export default function DevisDetailPage() {
     const doc = new jsPDF()
     const green: [number, number, number] = [26, 158, 82]
     const meta = user?.user_metadata ?? {}
-    const entreprise = meta.entreprise || 'TAYCO BAT'
+    const entreprise = meta.entreprise || 'TAYCOBAT'
     const siret = meta.siret || ''
 
     doc.setFillColor(...green); doc.rect(0, 0, 210, 32, 'F')
@@ -178,7 +178,7 @@ export default function DevisDetailPage() {
     doc.text("Signature de l'artisan", 14, sigY); doc.text('Signature du client (bon pour accord)', 120, sigY)
     doc.setDrawColor(200, 200, 200); doc.roundedRect(14, sigY + 4, 76, 25, 2, 2); doc.roundedRect(120, sigY + 4, 76, 25, 2, 2)
     doc.setFontSize(7); doc.setTextColor(160, 160, 160)
-    doc.text(`${entreprise} — Généré par TAYCO BAT`, 105, 285, { align: 'center' })
+    doc.text(`${entreprise} — Généré par TAYCOBAT`, 105, 285, { align: 'center' })
     doc.save(`${devis.numero}.pdf`)
   }
 

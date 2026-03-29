@@ -107,7 +107,7 @@ export default function Login() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <span className="text-white text-2xl font-bold tracking-tight">TAYCO BAT</span>
+              <span className="text-white text-2xl font-bold tracking-tight">TAYCOBAT</span>
             </div>
           </motion.div>
 
@@ -119,9 +119,9 @@ export default function Login() {
             className="space-y-6"
           >
             <h1 className="text-5xl xl:text-6xl font-bold text-white leading-[1.1] tracking-tight">
-              {t(lang, 'welcome').split('TAYCO BAT')[0]}
-              <span className="text-emerald-200">TAYCO BAT</span>
-              {t(lang, 'welcome').split('TAYCO BAT')[1]}
+              {t(lang, 'welcome').split('TAYCOBAT')[0]}
+              <span className="text-emerald-200">TAYCOBAT</span>
+              {t(lang, 'welcome').split('TAYCOBAT')[1]}
             </h1>
             <p className="text-xl text-emerald-100/80 max-w-md leading-relaxed">
               {t(lang, 'subtitle')}
@@ -160,7 +160,7 @@ export default function Login() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <span className="font-bold text-gray-900">TAYCO BAT</span>
+            <span className="font-bold text-gray-900">TAYCOBAT</span>
           </div>
           <div className="lg:block hidden" />
           <LanguageSelector />
