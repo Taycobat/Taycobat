@@ -219,7 +219,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
               </div>
 
               {/* En-tete colonnes */}
-              <div className="grid grid-cols-[1fr_70px_80px_100px_90px_32px] gap-2 mb-2 px-1">
+              <div className="grid grid-cols-[2fr_70px_80px_100px_90px_32px] gap-2 mb-2 px-1">
                 <span className="text-[10px] font-semibold text-gray-400 uppercase">Designation</span>
                 <span className="text-[10px] font-semibold text-gray-400 uppercase text-center">Qte</span>
                 <span className="text-[10px] font-semibold text-gray-400 uppercase text-center">Unite</span>
@@ -234,17 +234,17 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                   const lineTotal = l.quantite * l.prix_unitaire
                   return (
                     <div key={i}>
-                      <div className="grid grid-cols-[1fr_70px_80px_100px_90px_32px] gap-2 items-start">
+                      <div className="grid grid-cols-[2fr_70px_80px_100px_90px_32px] gap-2 items-start">
                         <textarea
                           value={l.description}
                           onChange={(e) => {
                             setLigne(i, 'description', e.target.value)
                             if (hasError && e.target.value.trim()) setLigneErrors((prev) => { const n = { ...prev }; delete n[i]; return n })
-                            e.target.style.height = 'auto'; e.target.style.height = Math.max(38, e.target.scrollHeight) + 'px'
+                            e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px'
                           }}
-                          placeholder="Description..."
-                          rows={1}
-                          className={`px-3 py-2 rounded-lg border bg-white text-sm focus:outline-none focus:ring-2 transition-all resize-none overflow-hidden min-h-[38px] ${
+                          placeholder="Ex: Pose carrelage 60x60 salle de bain, preparation support, joints epoxy, fourniture comprise..."
+                          rows={3}
+                          className={`px-3 py-2 rounded-lg border bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 transition-all resize-vertical min-h-[72px] max-h-[160px] ${
                             hasError ? 'border-red-300 focus:ring-red-200 focus:border-red-400' : 'border-gray-200 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]'
                           }`}
                         />
