@@ -216,6 +216,25 @@ export function useFactures() {
     return { error: null }
   }
 
+  // 8. Facture directe (sans devis)
+  async function createDirecte(params: {
+    client_id: string; montant_ht: number; montant_ttc: number; tva_pct: number
+    date_emission: string; date_echeance: string; retenue_garantie_pct: number
+  }) {
+    if (!user) return { error: 'Non connecte', id: null }
+    const numero = await generateNumero('FA')
+    const { data, error } = await supabase.from('factures').insert({
+      numero, client_id: params.client_id, devis_id: null, type: 'directe',
+      montant_ht: params.montant_ht, montant_ttc: params.montant_ttc, tva_pct: params.tva_pct,
+      statut: 'brouillon', date_emission: params.date_emission, date_echeance: params.date_echeance,
+      retenue_garantie_pct: params.retenue_garantie_pct, user_id: user.id,
+    }).select('id').single()
+    if (error) return { error: error.message, id: null }
+    await logAudit({ user_id: user.id, action: 'create', table_name: 'factures', record_id: data.id, details: `Facture directe ${numero} creee` })
+    await fetchFactures()
+    return { error: null, id: data.id }
+  }
+
   async function updateStatut(id: string, statut: string) {
     const { error } = await supabase.from('factures').update({ statut }).eq('id', id)
     if (error) return { error: error.message }
@@ -228,6 +247,6 @@ export function useFactures() {
   return {
     factures, loading, fetchFactures,
     factureFromDevis, createAcompte, createSituation, createSolde,
-    createAvoir, enregistrerPaiement, updateStatut,
+    createAvoir, createDirecte, enregistrerPaiement, updateStatut,
   }
 }

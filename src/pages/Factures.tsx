@@ -5,6 +5,7 @@ import { useDevis } from '../hooks/useDevis'
 import { useAuthStore } from '../store/authStore'
 import type { Facture } from '../hooks/useFactures'
 import { loadImageAsBase64 } from '../lib/storage'
+import FactureDirecteModal from '../components/FactureDirecteModal'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -12,8 +13,8 @@ const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { st
 const row = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' as const } } }
 
 const TYPES = [
-  { key: 'all', label: 'Toutes' }, { key: 'facture', label: 'Factures' }, { key: 'acompte', label: 'Acomptes' },
-  { key: 'situation', label: 'Situations' }, { key: 'solde', label: 'Solde' }, { key: 'avoir', label: 'Avoirs' },
+  { key: 'all', label: 'Toutes' }, { key: 'facture', label: 'Factures' }, { key: 'directe', label: 'Directes' },
+  { key: 'acompte', label: 'Acomptes' }, { key: 'situation', label: 'Situations' }, { key: 'solde', label: 'Solde' }, { key: 'avoir', label: 'Avoirs' },
 ]
 const statutStyle: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-gray-50 text-gray-600 border-gray-200' },
@@ -22,14 +23,15 @@ const statutStyle: Record<string, { label: string; cls: string }> = {
   impayee: { label: 'Impayée', cls: 'bg-red-50 text-red-600 border-red-200' },
   annulee: { label: 'Annulée', cls: 'bg-gray-50 text-gray-400 border-gray-200' },
 }
-const typeLabel: Record<string, string> = { facture: 'Facture', acompte: 'Acompte', situation: 'Situation', solde: 'Solde', avoir: 'Avoir' }
+const typeLabel: Record<string, string> = { facture: 'Facture', directe: 'Facture', acompte: 'Acompte', situation: 'Situation', solde: 'Solde', avoir: 'Avoir' }
 
 function fmt(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(n) }
 function fmt0(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n) }
 
 export default function Factures() {
   const { user } = useAuthStore()
-  const { factures, loading, factureFromDevis, createAcompte, createSituation, createSolde, createAvoir, enregistrerPaiement, updateStatut } = useFactures()
+  const { factures, loading, factureFromDevis, createAcompte, createSituation, createSolde, createAvoir, createDirecte, enregistrerPaiement, updateStatut } = useFactures()
+  const [directeOpen, setDirecteOpen] = useState(false)
   const { devisList } = useDevis()
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('all')
@@ -265,8 +267,12 @@ export default function Factures() {
           <p className="text-gray-500 text-sm mt-0.5">{factures.length} documents &middot; Encaissé : {fmt0(totalPayee)} &middot; Reste dû : {fmt0(totalImpayee)}{totalRetenue > 0 ? ` · Retenue : ${fmt0(totalRetenue)}` : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <motion.button onClick={() => setDirecteOpen(true)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+            className="px-4 py-2 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20">
+            Nouvelle facture directe
+          </motion.button>
           {[
-            { label: 'Facturer un devis', modal: 'facturer' as const, cls: 'bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20' },
+            { label: 'Facturer un devis', modal: 'facturer' as const, cls: 'bg-white border border-[#1a9e52] text-[#1a9e52] hover:bg-emerald-50' },
             { label: 'Acompte', modal: 'acompte' as const, cls: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
             { label: 'Situation', modal: 'situation' as const, cls: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
             { label: 'Solde', modal: 'solde' as const, cls: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
@@ -463,6 +469,8 @@ export default function Factures() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <FactureDirecteModal open={directeOpen} onClose={() => setDirecteOpen(false)} onSubmit={createDirecte} />
     </div>
   )
 }
