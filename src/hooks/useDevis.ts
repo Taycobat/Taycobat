@@ -198,7 +198,8 @@ export function useDevis() {
 
   async function deleteDevis(id: string) {
     const target = devisList.find((d) => d.id === id)
-    await supabase.from('devis_lignes').delete().eq('devis_id', id)
+    const { error: errLignes } = await supabase.from('devis_lignes').delete().eq('devis_id', id)
+    if (errLignes) return { error: errLignes.message }
     const { error: err } = await supabase.from('devis').delete().eq('id', id)
     if (err) return { error: err.message }
     if (user && target) await logAudit({ user_id: user.id, action: 'delete', table_name: 'devis', record_id: id, details: `Devis ${target.numero} supprimé` })

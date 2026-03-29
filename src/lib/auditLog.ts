@@ -10,12 +10,16 @@ export async function logAudit(params: {
   record_id: string
   details: string
 }) {
-  await supabase.from('audit_log').insert({
-    user_id: params.user_id,
-    action: params.action,
-    table_name: params.table_name,
-    record_id: params.record_id,
-    details: params.details,
-    created_at: new Date().toISOString(),
-  })
+  try {
+    await supabase.from('audit_log').insert({
+      user_id: params.user_id,
+      action: params.action,
+      table_name: params.table_name,
+      record_id: params.record_id,
+      details: params.details,
+      created_at: new Date().toISOString(),
+    })
+  } catch {
+    // Audit log failure should never block the main operation
+  }
 }

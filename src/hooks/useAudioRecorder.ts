@@ -57,7 +57,7 @@ export function useAudioRecorder() {
       analyserRef.current = analyser
 
       const mimeType = getSupportedMimeType()
-      console.log('[AudioRecorder] mimeType:', mimeType || 'default')
+
 
       const options: MediaRecorderOptions = mimeType ? { mimeType } : {}
       const mediaRecorder = new MediaRecorder(stream, options)
@@ -70,7 +70,7 @@ export function useAudioRecorder() {
       mediaRecorder.onstop = () => {
         const type = mimeType || 'audio/webm'
         const blob = new Blob(chunksRef.current, { type })
-        console.log('[AudioRecorder] blob ready:', blob.size, 'bytes, type:', blob.type)
+
         setAudioBlob(blob)
       }
 
@@ -85,9 +85,8 @@ export function useAudioRecorder() {
         setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000))
       }, 200)
 
-      console.log('[AudioRecorder] recording started')
     } catch (err) {
-      console.error('[AudioRecorder] start error:', err)
+
       setError('Accès au micro refusé. Autorisez le micro dans les paramètres du navigateur.')
     }
   }
@@ -103,7 +102,6 @@ export function useAudioRecorder() {
     streamRef.current?.getTracks().forEach((t) => t.stop())
     audioCtxRef.current?.close()
     analyserRef.current = null
-    console.log('[AudioRecorder] recording stopped')
   }
 
   function reset() {

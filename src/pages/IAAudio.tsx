@@ -81,11 +81,9 @@ export default function IAAudio() {
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [debugLog, setDebugLog] = useState<string[]>([])
 
-  function addLog(msg: string) {
-    console.log(`[IA Audio] ${msg}`)
-    setDebugLog((prev) => [...prev.slice(-9), `${new Date().toLocaleTimeString('fr-FR')} — ${msg}`])
+  function addLog(_msg: string) {
+    // Production: silent. Enable console.log for debugging if needed.
   }
 
   function handleSelectLangue(code: string) {
@@ -300,7 +298,7 @@ export default function IAAudio() {
                       <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>Générer le devis</>
                     )}
                   </motion.button>
-                  <button type="button" onClick={() => { reset(); setTranscription(''); setLignes([]); setTitre(''); setDebugLog([]) }}
+                  <button type="button" onClick={() => { reset(); setTranscription(''); setLignes([]); setTitre('') }}
                     className="px-4 py-3 text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 rounded-xl cursor-pointer">
                     Recommencer
                   </button>
@@ -324,14 +322,6 @@ export default function IAAudio() {
           </AnimatePresence>
 
           {error && <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>}
-
-          {/* Debug log */}
-          {debugLog.length > 0 && (
-            <div className="bg-gray-900 rounded-xl p-4 text-[11px] font-mono text-emerald-400 space-y-0.5 overflow-x-auto">
-              <div className="text-gray-500 mb-1">Debug log :</div>
-              {debugLog.map((l, i) => <div key={i}>{l}</div>)}
-            </div>
-          )}
         </div>
 
         {/* Right — Generated devis */}

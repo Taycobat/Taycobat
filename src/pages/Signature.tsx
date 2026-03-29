@@ -4,8 +4,8 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 
 interface DevisItem {
-  id: string; numero: string; titre: string; client_nom: string
-  montant_ttc: number; statut: string
+  id: string; numero: string; titre: string; client_id: string | null
+  montant_ttc: number; statut: string; client_display: string
 }
 
 function toNum(v: unknown): number {
@@ -50,9 +50,16 @@ export default function SignaturePage() {
 
   const fetchDevis = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase.from('devis').select('id,numero,titre,client_nom,montant_ttc,statut')
+    const { data } = await supabase.from('devis').select('id,numero,titre,client_id,montant_ttc,statut')
       .eq('user_id', user.id).order('created_at', { ascending: false })
-    setDevisList((data ?? []).map((d) => ({ ...d, montant_ttc: toNum(d.montant_ttc) })))
+    const rows = data ?? []
+    const clientIds = [...new Set(rows.map((d) => d.client_id).filter(Boolean))] as string[]
+    let clientMap: Record<string, string> = {}
+    if (clientIds.length > 0) {
+      const { data: clients } = await supabase.from('clients').select('id, nom, prenom, raison_sociale, type_client').in('id', clientIds)
+      for (const c of clients ?? []) clientMap[c.id] = c.type_client === 'societe' ? (c.raison_sociale || '') : `${c.prenom ?? ''} ${c.nom ?? ''}`.trim()
+    }
+    setDevisList(rows.map((d) => ({ ...d, montant_ttc: toNum(d.montant_ttc), client_display: d.client_id ? clientMap[d.client_id] ?? '' : '' })))
   }, [user])
 
   useEffect(() => { fetchDevis() }, [fetchDevis])
@@ -61,7 +68,7 @@ export default function SignaturePage() {
 
   useEffect(() => {
     if (selected) {
-      setMessage(TEMPLATES[msgLang]?.(selected.client_nom || 'Client', selected.numero) ?? '')
+      setMessage(TEMPLATES[msgLang]?.(selected.client_display || 'Client', selected.numero) ?? '')
     }
   }, [selected, msgLang])
 
@@ -149,7 +156,7 @@ export default function SignaturePage() {
                 className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
                 <option value="">— Sélectionner un devis —</option>
                 {devisList.map((d) => (
-                  <option key={d.id} value={d.id}>{d.numero} — {d.titre || d.client_nom || '—'} — {fmt(d.montant_ttc)}</option>
+                  <option key={d.id} value={d.id}>{d.numero} — {d.titre || d.client_display || '—'} — {fmt(d.montant_ttc)}</option>
                 ))}
               </select>
             </div>
