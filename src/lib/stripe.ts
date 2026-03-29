@@ -1,8 +1,16 @@
 import { loadStripe } from '@stripe/stripe-js'
 
+// DEBUG — log toutes les variables VITE_ au chargement du module
+const allEnv = import.meta.env
+console.log('[STRIPE DEBUG] Toutes les variables VITE_:', Object.fromEntries(
+  Object.entries(allEnv).filter(([k]) => k.startsWith('VITE_'))
+))
+
 const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY as string | undefined
+console.log('[STRIPE DEBUG] VITE_STRIPE_PUBLIC_KEY =', JSON.stringify(stripePublicKey), '| type:', typeof stripePublicKey)
 
 export const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null
+console.log('[STRIPE DEBUG] stripePromise est', stripePromise ? 'initialisé' : 'NULL (clé manquante)')
 
 export const PLANS = {
   solo: {
