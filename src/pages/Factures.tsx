@@ -142,6 +142,7 @@ export default function Factures() {
     if (siret) doc.text(`SIRET : ${siret}`, 14, 20)
     doc.setFontSize(10); doc.text(`${typeName} N° ${f.numero}`, 196, 12, { align: 'right' })
     doc.setFontSize(8); doc.text(`Date : ${new Date(f.date_emission || f.created_at).toLocaleDateString('fr-FR')}`, 196, 19, { align: 'right' })
+    if (f.date_echeance) doc.text(`Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 24, { align: 'right' })
 
     let y = 40
     if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, 14, y); y += 8 }
@@ -257,9 +258,15 @@ export default function Factures() {
               <td className="px-5 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${f.type === 'avoir' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>{typeLabel[f.type] ?? f.type}</span></td>
               <td className="px-5 py-3 text-right"><span className={`font-semibold tabular-nums ${f.type === 'avoir' ? 'text-red-600' : 'text-gray-900'}`}>{f.type === 'avoir' ? '- ' : ''}{fmt0(f.montant_ttc)}</span></td>
               <td className="px-5 py-3 text-right">{f.retenue_garantie_pct > 0 ? <span className="text-xs text-amber-600 font-medium">{f.retenue_garantie_pct}%</span> : <span className="text-gray-300">—</span>}</td>
-              <td className="px-5 py-3"><select value={f.statut} onChange={(e) => updateStatut(f.id, e.target.value)} className={`px-2 py-1 rounded-full text-[11px] font-medium border cursor-pointer appearance-none ${st.cls}`}>
-                <option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option><option value="payee">Payée</option><option value="impayee">Impayée</option><option value="annulee">Annulée</option>
-              </select></td>
+              <td className="px-5 py-3">
+                <select value={f.statut} onChange={(e) => updateStatut(f.id, e.target.value)} className={`px-2 py-1 rounded-full text-[11px] font-medium border cursor-pointer appearance-none ${st.cls}`}>
+                  <option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option><option value="payee">Payée</option><option value="impayee">Impayée</option><option value="annulee">Annulée</option>
+                </select>
+                {f.date_echeance && f.statut !== 'payee' && f.statut !== 'annulee' && new Date(f.date_echeance) < new Date() && (
+                  <span className="block mt-1 text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded w-fit">En retard</span>
+                )}
+                {f.date_echeance && <div className="text-[10px] text-gray-400 mt-0.5">Éch. {new Date(f.date_echeance).toLocaleDateString('fr-FR')}</div>}
+              </td>
               <td className="px-5 py-3">{f.date_paiement
                 ? <div><div className="text-xs text-emerald-600 font-medium">{fmt0(f.montant_paye ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.date_paiement).toLocaleDateString('fr-FR')} · {f.mode_paiement}</div></div>
                 : <span className="text-gray-300 text-xs">—</span>}</td>

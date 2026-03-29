@@ -15,7 +15,7 @@ Tu es l'assistant développeur principal de TAYCO BAT, un logiciel SaaS BTP mult
 - URL : https://uwdfytuvpujhiniotqyl.supabase.co
 - Tables principales : devis, devis_lignes, clients, factures, chantiers, sous_traitants, audit_log
 - Toujours filtrer par `user_id` de l'utilisateur connecté
-- Colonnes devis : id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at
+- Colonnes devis : id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, date_devis, date_validite, user_id, created_at
 - Colonnes devis_lignes : id, devis_id, description, quantite, unite, prix_unitaire, total_ht, ordre, tva_pct
 - Colonnes clients : id, user_id, nom, prenom, email, telephone, adresse, ville, code_postal, siret, entreprise, type_client, raison_sociale, nom_contact, tva_intracom, adresse_chantier, ville_chantier, code_postal_chantier, notes, created_at
 - Colonnes factures : id, user_id, numero, client_id, devis_id, type, montant_ht, montant_ttc, tva_pct, statut, date_emission, date_echeance, avancement_pct, retenue_garantie_pct, avoir_facture_id, date_paiement, mode_paiement, montant_paye, created_at

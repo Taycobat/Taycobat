@@ -10,6 +10,7 @@ import autoTable from 'jspdf-autotable'
 interface DevisDetail {
   id: string; numero: string; titre: string; client_id: string | null
   montant_ht: number; montant_ttc: number; tva_pct: number; statut: string
+  date_devis: string | null; date_validite: string | null
   user_id: string; created_at: string
 }
 
@@ -52,7 +53,7 @@ export default function DevisDetailPage() {
     setLoading(true)
 
     const { data: d } = await supabase.from('devis')
-      .select('id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at')
+      .select('id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, date_devis, date_validite, user_id, created_at')
       .eq('id', id).eq('user_id', user.id).single()
 
     if (!d) { setLoading(false); return }
@@ -350,8 +351,9 @@ export default function DevisDetailPage() {
             <div className="space-y-3">
               {[
                 { label: 'Numéro', value: devis.numero },
-                { label: 'Date', value: new Date(devis.created_at).toLocaleDateString('fr-FR') },
-                { label: 'TVA', value: `${devis.tva_pct}%` },
+                { label: 'Date du devis', value: new Date(devis.date_devis || devis.created_at).toLocaleDateString('fr-FR') },
+                { label: 'Valable jusqu\'au', value: devis.date_validite ? new Date(devis.date_validite).toLocaleDateString('fr-FR') : '—' },
+                { label: 'TVA', value: devis.tva_pct === 0 ? 'Autoliquidation' : `${devis.tva_pct}%` },
                 { label: 'Statut', value: st.label },
               ].map((r) => (
                 <div key={r.label} className="flex justify-between text-sm">

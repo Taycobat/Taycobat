@@ -96,7 +96,8 @@ export default function Devis() {
     doc.setFontSize(9); doc.setFont('helvetica', 'normal')
     doc.text(`SIRET : ${siretE}`, 14, 22)
     doc.text(`DEVIS N° ${d.numero}`, 196, 15, { align: 'right' })
-    doc.text(`Date : ${new Date(d.created_at).toLocaleDateString('fr-FR')}`, 196, 22, { align: 'right' })
+    doc.text(`Date : ${new Date(d.date_devis || d.created_at).toLocaleDateString('fr-FR')}`, 196, 22, { align: 'right' })
+    if (d.date_validite) doc.text(`Valable jusqu'au : ${new Date(d.date_validite).toLocaleDateString('fr-FR')}`, 196, 27, { align: 'right' })
 
     // Client box
     doc.setTextColor(50, 50, 50); doc.setDrawColor(200, 200, 200)

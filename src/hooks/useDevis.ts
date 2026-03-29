@@ -13,9 +13,10 @@ export interface DevisRow {
   montant_ttc: number
   tva_pct: number
   statut: string
+  date_devis: string | null
+  date_validite: string | null
   user_id: string
   created_at: string
-  // Résolu côté client depuis la table clients
   client_display: string
 }
 
@@ -36,8 +37,8 @@ export interface DevisCreatePayload {
   client_id: string | null
   tva_pct: number
   autoliquidation?: boolean
-  validite_jours?: number
-  conditions_generales?: string
+  date_devis?: string
+  date_validite?: string
   lignes: Omit<DevisLigne, 'id' | 'devis_id'>[]
 }
 
@@ -48,7 +49,7 @@ function toNum(v: unknown): number {
 }
 
 // Colonnes exactes de la table devis
-const DEVIS_COLUMNS = 'id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, user_id, created_at'
+const DEVIS_COLUMNS = 'id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, date_devis, date_validite, user_id, created_at'
 
 export function useDevis() {
   const { user } = useAuthStore()
@@ -96,6 +97,8 @@ export function useDevis() {
         montant_ht: toNum(d.montant_ht),
         montant_ttc: toNum(d.montant_ttc),
         tva_pct: toNum(d.tva_pct),
+        date_devis: d.date_devis ?? null,
+        date_validite: d.date_validite ?? null,
         client_display: d.client_id ? (clientMap[d.client_id] ?? '') : '',
       })),
     )
@@ -125,6 +128,9 @@ export function useDevis() {
     const effectiveTva = payload.autoliquidation ? 0 : payload.tva_pct
     const totalTTC = payload.autoliquidation ? totalHT : Math.round(totalHT * (1 + payload.tva_pct / 100) * 100) / 100
 
+    const today = new Date().toISOString().split('T')[0]
+    const validite = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
+
     const { data: devisData, error: errDevis } = await supabase
       .from('devis')
       .insert({
@@ -135,6 +141,8 @@ export function useDevis() {
         montant_ttc: totalTTC,
         tva_pct: effectiveTva,
         statut: 'brouillon',
+        date_devis: payload.date_devis || today,
+        date_validite: payload.date_validite || validite,
         user_id: user.id,
       })
       .select('id')
