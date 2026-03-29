@@ -165,16 +165,29 @@ export default function IAAudio() {
             className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Langue de l'enregistrement</label>
             <div className="grid grid-cols-4 gap-2">
-              {LANGS.map((l) => (
-                <button key={l.code} onClick={() => setLangue(l.code)}
-                  className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
-                    langue === l.code ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}>
-                  <span className="text-lg">{l.flag}</span>
-                  <span className="truncate px-1">{l.label}</span>
-                </button>
-              ))}
+              {LANGS.map((l) => {
+                const isActive = langue === l.code
+                return (
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLangue(l.code) }}
+                    className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none ${
+                      isActive
+                        ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52] ring-2 ring-[#1a9e52]/20 font-semibold'
+                        : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-lg leading-none">{l.flag}</span>
+                    <span className="truncate px-1 leading-tight">{l.label}</span>
+                    {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#1a9e52]" />}
+                  </button>
+                )
+              })}
             </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Sélectionné : <span className="font-semibold text-[#1a9e52]">{LANGS.find((l) => l.code === langue)?.flag} {LANGS.find((l) => l.code === langue)?.label}</span>
+            </p>
           </motion.div>
 
           {/* Microphone */}
