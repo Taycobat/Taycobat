@@ -27,6 +27,7 @@ export interface Client {
   ville_chantier: string
   code_postal_chantier: string
   notes: string
+  logo_url: string
   created_at: string
 }
 

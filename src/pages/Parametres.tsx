@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
+import { uploadFile } from '../lib/storage'
 import { useNavigate } from 'react-router-dom'
 
 export default function Parametres() {
@@ -13,12 +14,25 @@ export default function Parametres() {
   const [entreprise, setEntreprise] = useState(meta.entreprise || '')
   const [siret, setSiret] = useState(meta.siret || '')
   const [telephone, setTelephone] = useState(meta.telephone || '')
+  const [photoUrl, setPhotoUrl] = useState(meta.photo_url || '')
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const photoRef = useRef<HTMLInputElement>(null)
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setUploading(true)
+    const path = `photos/artisan_${user.id}_${Date.now()}.${file.name.split('.').pop()}`
+    const url = await uploadFile(path, file)
+    if (url) setPhotoUrl(url)
+    setUploading(false)
+  }
 
   async function handleSave() {
     setSaving(true)
-    await supabase.auth.updateUser({ data: { prenom, nom, entreprise, siret, telephone } })
+    await supabase.auth.updateUser({ data: { prenom, nom, entreprise, siret, telephone, photo_url: photoUrl } })
     setSaving(false); setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -38,6 +52,26 @@ export default function Parametres() {
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 mb-6">
         <h2 className="text-base font-semibold text-gray-900">Informations personnelles</h2>
+
+        {/* Photo profil */}
+        <div className="flex items-center gap-5">
+          {photoUrl ? (
+            <img src={photoUrl} alt="Photo" className="w-16 h-16 rounded-full object-cover border-2 border-gray-200" />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1a9e52] to-emerald-400 flex items-center justify-center text-white font-bold text-xl">
+              {(prenom || nom || '?').charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <input ref={photoRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+            <button type="button" onClick={() => photoRef.current?.click()} disabled={uploading}
+              className="text-sm font-medium text-[#1a9e52] hover:text-emerald-700 cursor-pointer disabled:opacity-50">
+              {uploading ? 'Upload...' : photoUrl ? 'Changer la photo' : 'Ajouter une photo'}
+            </button>
+            <p className="text-[11px] text-gray-400 mt-0.5">Visible sur vos devis et factures PDF</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Prénom</label>
             <input type="text" value={prenom} onChange={(e) => setPrenom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>

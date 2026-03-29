@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Client, ClientForm } from '../hooks/useClients'
+import { uploadFile } from '../lib/storage'
 
 interface Props {
   open: boolean
@@ -12,7 +13,7 @@ interface Props {
 const empty: ClientForm = {
   nom: '', prenom: '', email: '', telephone: '', adresse: '', ville: '', code_postal: '',
   siret: '', entreprise: '', type_client: 'particulier', raison_sociale: '', nom_contact: '',
-  tva_intracom: '', adresse_chantier: '', ville_chantier: '', code_postal_chantier: '', notes: '',
+  tva_intracom: '', adresse_chantier: '', ville_chantier: '', code_postal_chantier: '', notes: '', logo_url: '',
 }
 
 const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all'
@@ -21,6 +22,8 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
   const [form, setForm] = useState<ClientForm>(empty)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
   const isEdit = !!client
 
   useEffect(() => {
@@ -34,6 +37,16 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
 
   function set(key: keyof ClientForm, value: string) { setForm((f) => ({ ...f, [key]: value })) }
   const isSociete = form.type_client === 'societe'
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const path = `logos/client_${Date.now()}_${file.name}`
+    const url = await uploadFile(path, file)
+    if (url) set('logo_url', url)
+    setUploading(false)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
@@ -130,6 +143,28 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
                 <div className="grid grid-cols-2 gap-3">
                   <input type="text" value={form.ville_chantier} onChange={(e) => set('ville_chantier', e.target.value)} placeholder="Ville chantier" className={ic} />
                   <input type="text" value={form.code_postal_chantier} onChange={(e) => set('code_postal_chantier', e.target.value)} placeholder="Code postal" className={ic} />
+                </div>
+              </div>
+
+              {/* Logo client */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Logo client</label>
+                <div className="flex items-center gap-4">
+                  {form.logo_url ? (
+                    <img src={form.logo_url} alt="Logo" className="w-14 h-14 rounded-xl object-cover border border-gray-200" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                    </div>
+                  )}
+                  <div>
+                    <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                    <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+                      className="text-sm font-medium text-[#1a9e52] hover:text-emerald-700 cursor-pointer disabled:opacity-50">
+                      {uploading ? 'Upload...' : form.logo_url ? 'Changer le logo' : 'Ajouter un logo'}
+                    </button>
+                    <p className="text-[11px] text-gray-400 mt-0.5">JPG, PNG. Visible sur les devis et factures PDF.</p>
+                  </div>
                 </div>
               </div>
 

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import type { DevisLigne } from '../hooks/useDevis'
+import { useEmail } from '../hooks/useEmail'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -47,6 +48,7 @@ export default function DevisDetailPage() {
   const [lignes, setLignes] = useState<DevisLigne[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState('')
+  const { sendDevis } = useEmail()
 
   const fetchData = useCallback(async () => {
     if (!id || !user) return
@@ -84,6 +86,19 @@ export default function DevisDetailPage() {
     if (!devis) return
     setActionLoading('envoyer')
     await supabase.from('devis').update({ statut: 'envoye' }).eq('id', devis.id)
+    // Envoyer l'email au client si email disponible
+    if (client?.email) {
+      const meta = user?.user_metadata ?? {}
+      const artisanName = meta.entreprise || `${meta.prenom || ''} ${meta.nom || ''}`.trim() || 'Votre artisan'
+      const clientName = client.entreprise || `${client.prenom || ''} ${client.nom || ''}`.trim()
+      const montantTTC = devis.montant_ttc.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
+      await sendDevis(client.email, {
+        clientName,
+        devisNumero: devis.numero,
+        montantTTC,
+        artisanName,
+      })
+    }
     setDevis({ ...devis, statut: 'envoye' })
     setActionLoading('')
   }
