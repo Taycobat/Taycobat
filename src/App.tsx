@@ -25,6 +25,10 @@ import Admin from './pages/Admin'
 import AbonnementSucces from './pages/AbonnementSucces'
 import AbonnementAnnulation from './pages/AbonnementAnnulation'
 import Parametres from './pages/Parametres'
+import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite'
+import MentionsLegales from './pages/MentionsLegales'
+import CGU from './pages/CGU'
+import CookieBanner from './components/CookieBanner'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 
@@ -39,9 +43,13 @@ function App() {
 
   return (
     <BrowserRouter>
+      <CookieBanner />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<HomeRedirect />} />
+        <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+        <Route path="/mentions-legales" element={<MentionsLegales />} />
+        <Route path="/cgu" element={<CGU />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />

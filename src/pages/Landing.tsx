@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 const FEATURES = [
   {
@@ -231,15 +231,23 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-[#1a9e52] rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">T</span>
+      <footer className="border-t border-gray-100 py-10 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-[#1a9e52] rounded-lg flex items-center justify-center">
+                <span className="text-white text-xs font-bold">T</span>
+              </div>
+              <span className="text-sm font-semibold text-gray-900">TAYCO BAT</span>
             </div>
-            <span className="text-sm font-semibold text-gray-900">TAYCO BAT</span>
+            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500">
+              <Link to="/mentions-legales" className="hover:text-gray-900 transition-colors">Mentions legales</Link>
+              <Link to="/politique-confidentialite" className="hover:text-gray-900 transition-colors">Politique de confidentialite</Link>
+              <Link to="/cgu" className="hover:text-gray-900 transition-colors">CGU</Link>
+              <a href="mailto:contact@taycobat.fr" className="hover:text-gray-900 transition-colors">Contact</a>
+            </div>
           </div>
-          <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} TAYCO BAT. Tous droits reserves.</p>
+          <p className="text-xs text-gray-400">&copy; {new Date().getFullYear()} TAYCO SAS. Tous droits reserves.</p>
         </div>
       </footer>
     </div>
