@@ -25,16 +25,22 @@ export default function Parametres() {
   const [conditionsPaiement, setConditionsPaiement] = useState(meta.conditions_paiement || '30 jours')
   const [tauxPenalites, setTauxPenalites] = useState(meta.taux_penalites || '3 fois le taux legal')
   const [searching, setSearching] = useState(false)
+  const [siretFound, setSiretFound] = useState(false)
 
   async function handleSiretSearch() {
     if (!siret || siret.replace(/\s/g, '').length < 9) return
-    setSearching(true)
-    const result = await searchSiret(siret)
-    if (result) {
-      if (result.raisonSociale) setEntreprise(result.raisonSociale)
-      if (result.formeJuridique) setFormeJuridique(result.formeJuridique)
-      if (result.adresse) setAdresse(result.adresse)
-      if (result.siret) setSiret(result.siret)
+    setSearching(true); setSiretFound(false)
+    const r = await searchSiret(siret)
+    if (r) {
+      if (r.raisonSociale) setEntreprise(r.raisonSociale)
+      if (r.formeJuridique) setFormeJuridique(r.formeJuridique)
+      if (r.adresse) setAdresse(r.adresse)
+      if (r.siret) setSiret(r.siret)
+      if (r.tvaIntracom) setTvaIntracom(r.tvaIntracom)
+      if (r.rcs) setRcs(r.rcs)
+      if (r.capitalSocial) setCapitalSocial(r.capitalSocial)
+      setSiretFound(true)
+      setTimeout(() => setSiretFound(false), 4000)
     }
     setSearching(false)
   }
@@ -179,7 +185,11 @@ export default function Parametres() {
                 Rechercher
               </button>
             </div>
-            <p className="text-[11px] text-gray-400 mt-1">Entrez votre SIRET et cliquez Rechercher pour pre-remplir automatiquement</p>
+            {siretFound ? (
+              <p className="text-[11px] text-[#1a9e52] font-semibold mt-1">Informations trouvees — champs pre-remplis</p>
+            ) : (
+              <p className="text-[11px] text-gray-400 mt-1">Entrez votre SIRET et cliquez Rechercher pour pre-remplir automatiquement</p>
+            )}
           </div>
           <div><label className={lb}>N° TVA intracommunautaire</label>
             <input type="text" value={tvaIntracom} onChange={(e) => setTvaIntracom(e.target.value)} placeholder="FR12345678901" className={ic + ' font-mono'} /></div>

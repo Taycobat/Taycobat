@@ -25,6 +25,7 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [searchingSiret, setSearchingSiret] = useState(false)
+  const [siretFound, setSiretFound] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const isEdit = !!client
 
@@ -43,17 +44,20 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
   async function handleSiretSearch() {
     const val = form.siret.replace(/\s/g, '')
     if (val.length < 9) return
-    setSearchingSiret(true)
-    const result = await searchSiret(val)
-    if (result) {
+    setSearchingSiret(true); setSiretFound(false)
+    const r = await searchSiret(val)
+    if (r) {
       setForm((f) => ({
         ...f,
-        raison_sociale: result.raisonSociale || f.raison_sociale,
-        adresse: result.adresse || f.adresse,
-        ville: result.ville || f.ville,
-        code_postal: result.codePostal || f.code_postal,
-        siret: result.siret || f.siret,
+        raison_sociale: r.raisonSociale || f.raison_sociale,
+        adresse: r.adresse || f.adresse,
+        ville: r.ville || f.ville,
+        code_postal: r.codePostal || f.code_postal,
+        siret: r.siret || f.siret,
+        tva_intracom: r.tvaIntracom || f.tva_intracom,
       }))
+      setSiretFound(true)
+      setTimeout(() => setSiretFound(false), 4000)
     }
     setSearchingSiret(false)
   }
@@ -136,7 +140,11 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
                         Rechercher
                       </button>
                     </div>
-                    <p className="text-[11px] text-gray-400 mt-1">Pre-remplit raison sociale et adresse automatiquement</p>
+                    {siretFound ? (
+                      <p className="text-[11px] text-[#1a9e52] font-semibold mt-1">Informations trouvees — champs pre-remplis</p>
+                    ) : (
+                      <p className="text-[11px] text-gray-400 mt-1">Pre-remplit raison sociale et adresse automatiquement</p>
+                    )}
                   </div>
                   <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">TVA intracommunautaire</label>
                     <input type="text" value={form.tva_intracom} onChange={(e) => set('tva_intracom', e.target.value)} placeholder="FR12345678901" className={ic} /></div>
