@@ -1,8 +1,4 @@
-import { loadStripe } from '@stripe/stripe-js'
-
-const stripePublicKey = (import.meta.env.VITE_STRIPE_PUBLIC_KEY as string) || 'pk_test_51TGGfdJtM4sMqIiXUD0azzcFyzwTXIvjfxVtWAVWf3BTDjGHm8dWhRIJAwcmb3cZQpMGON3sqvve0B3NwwlEajXj00jgbLWYv3'
-
-export const stripePromise = loadStripe(stripePublicKey)
+import { supabase } from './supabase'
 
 export const PLANS = {
   solo: {
@@ -18,8 +14,8 @@ export const PLANS = {
       'Signature électronique',
       '1 utilisateur',
     ],
-    stripePriceMonthly: (import.meta.env.VITE_STRIPE_SOLO_MONTHLY as string) || 'price_1TGH7zJtM4sMqIiXKeYT4gSo',
-    stripePriceYearly: (import.meta.env.VITE_STRIPE_SOLO_YEARLY as string) || 'price_1TGH7zJtM4sMqIiX68InoNZG',
+    stripePriceMonthly: 'price_1TGH7zJtM4sMqIiXKeYT4gSo',
+    stripePriceYearly: 'price_1TGH7zJtM4sMqIiX68InoNZG',
   },
   pro: {
     name: 'Pro',
@@ -36,8 +32,8 @@ export const PLANS = {
       "Jusqu'à 5 utilisateurs",
       'Tableaux de bord avancés',
     ],
-    stripePriceMonthly: (import.meta.env.VITE_STRIPE_PRO_MONTHLY as string) || 'price_1TGHA2JtM4sMqIiXzwhKJBm8',
-    stripePriceYearly: (import.meta.env.VITE_STRIPE_PRO_YEARLY as string) || 'price_1TGHApJtM4sMqIiXzU7Fr55k',
+    stripePriceMonthly: 'price_1TGHA2JtM4sMqIiXzwhKJBm8',
+    stripePriceYearly: 'price_1TGHApJtM4sMqIiXzU7Fr55k',
   },
   business: {
     name: 'Business',
@@ -53,8 +49,8 @@ export const PLANS = {
       'Utilisateurs illimités',
       'Support prioritaire',
     ],
-    stripePriceMonthly: (import.meta.env.VITE_STRIPE_BIZ_MONTHLY as string) || 'price_1TGHCFJtM4sMqIiXI5WYeeUP',
-    stripePriceYearly: (import.meta.env.VITE_STRIPE_BIZ_YEARLY as string) || 'price_1TGHD8JtM4sMqIiXL26Rt00w',
+    stripePriceMonthly: 'price_1TGHCFJtM4sMqIiXI5WYeeUP',
+    stripePriceYearly: 'price_1TGHD8JtM4sMqIiXL26Rt00w',
   },
 } as const
 
@@ -64,27 +60,24 @@ export async function redirectToCheckout(planKey: PlanKey, billing: 'mensuel' | 
   const plan = PLANS[planKey]
   const priceId = billing === 'mensuel' ? plan.stripePriceMonthly : plan.stripePriceYearly
 
-  if (!priceId) {
-    alert('Price ID Stripe non configuré pour ce plan.')
-    return
-  }
-
-  const stripe = await stripePromise
-  if (!stripe) {
-    alert('Stripe non configuré. Ajoutez VITE_STRIPE_PUBLIC_KEY dans les variables d\'environnement Vercel.')
-    return
-  }
-
-  const { error } = await stripe.redirectToCheckout({
-    lineItems: [{ price: priceId, quantity: 1 }],
-    mode: 'subscription',
-    successUrl: `${window.location.origin}/abonnement/succes?session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${window.location.origin}/abonnement/annulation`,
-    customerEmail: userEmail,
+  const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+    body: {
+      priceId,
+      customerEmail: userEmail,
+      successUrl: `${window.location.origin}/abonnement/succes?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${window.location.origin}/abonnement/annulation`,
+    },
   })
 
   if (error) {
-    console.error('Stripe checkout error:', error)
-    alert(error.message)
+    console.error('Edge function error:', error)
+    alert('Erreur lors de la création de la session de paiement.')
+    return
+  }
+
+  if (data?.url) {
+    window.location.href = data.url
+  } else {
+    alert(data?.error || 'Erreur Stripe inconnue.')
   }
 }
