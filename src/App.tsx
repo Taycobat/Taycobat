@@ -1,6 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { useAuthStore } from './store/authStore'
 import ProtectedRoute from './components/ProtectedRoute'
+import Landing from './pages/Landing'
 import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
@@ -26,6 +28,12 @@ import Parametres from './pages/Parametres'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 
+function HomeRedirect() {
+  const { session, loading } = useAuthStore()
+  if (loading) return null
+  return session ? <Dashboard /> : <Landing />
+}
+
 function App() {
   useAuth()
 
@@ -33,7 +41,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomeRedirect />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />

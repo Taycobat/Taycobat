@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import Onboarding from './Onboarding'
 
 export default function DashboardLayout() {
   return (
@@ -8,6 +9,7 @@ export default function DashboardLayout() {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
+      <Onboarding />
     </div>
   )
 }
