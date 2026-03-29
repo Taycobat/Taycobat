@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import DevisPage from './pages/Devis'
 import DevisDetail from './pages/DevisDetail'
+import NouveauDevis from './pages/NouveauDevis'
 import Factures from './pages/Factures'
 import FactureDetail from './pages/FactureDetail'
 import NouvelleFacture from './pages/NouvelleFacture'
@@ -60,6 +61,7 @@ function App() {
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientDetail />} />
             <Route path="/devis" element={<DevisPage />} />
+            <Route path="/devis/nouveau" element={<NouveauDevis />} />
             <Route path="/devis/:id" element={<DevisDetail />} />
             <Route path="/factures" element={<Factures />} />
             <Route path="/factures/nouvelle" element={<NouvelleFacture />} />

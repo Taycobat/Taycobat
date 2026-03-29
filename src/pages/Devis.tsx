@@ -245,7 +245,7 @@ export default function Devis() {
             {devisList.length} devis &middot; CA signé : {fmt(totalCA)}
           </p>
         </div>
-        <motion.button onClick={() => setModalOpen(true)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+        <motion.button onClick={() => navigate('/devis/nouveau')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
           className="flex items-center gap-2 px-5 py-2.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           Nouveau devis
