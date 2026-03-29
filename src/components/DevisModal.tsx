@@ -193,36 +193,31 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                   )}
                 </div>
 
-                {/* TVA selector + Autoliquidation */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Taux de TVA</label>
-                    <div className="flex gap-2">
-                      {TVA_OPTIONS.map((o) => (
-                        <button key={o.value} type="button" onClick={() => { setTvaPct(o.value); setAutoliquidation(false) }}
-                          className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                            !autoliquidation && tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                          }`}>
-                          {o.label}
-                          <span className="block text-[10px] font-normal mt-0.5 opacity-60">{o.tag}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {/* Autoliquidation toggle */}
-                  <div className={`flex items-center justify-between p-3 rounded-xl border transition-all ${autoliquidation ? 'border-amber-300 bg-amber-50' : 'border-gray-200'}`}>
-                    <div>
-                      <span className="text-sm font-medium text-gray-900">Autoliquidation TVA</span>
-                      <span className="block text-[11px] text-gray-500">Sous-traitance - Art. 283-2 nonies du CGI</span>
-                    </div>
-                    <button type="button" onClick={() => setAutoliquidation(!autoliquidation)}
-                      className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${autoliquidation ? 'bg-amber-500' : 'bg-gray-300'}`}>
-                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoliquidation ? 'translate-x-5' : ''}`} />
+                {/* TVA selector — 4 boutons incluant Autoliquidation */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Taux de TVA</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {TVA_OPTIONS.map((o) => (
+                      <button key={o.value} type="button" onClick={() => { setTvaPct(o.value); setAutoliquidation(false) }}
+                        className={`py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                          !autoliquidation && tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        }`}>
+                        {o.label}
+                        <span className="block text-[10px] font-normal mt-0.5 opacity-60">{o.tag}</span>
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => setAutoliquidation(true)}
+                      className={`py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                        autoliquidation ? 'border-amber-400 bg-amber-50 text-amber-700 ring-2 ring-amber-200' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                      }`}>
+                      0%
+                      <span className="block text-[10px] font-normal mt-0.5 opacity-60">Autoliquid.</span>
                     </button>
                   </div>
                   {autoliquidation && (
-                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
-                      TVA = 0% — Mention légale ajoutée automatiquement : « Autoliquidation de la TVA - Article 283-2 nonies du CGI. TVA due par le preneur assujetti »
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                      <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <span><strong>Autoliquidation TVA</strong> — Article 283-2 nonies du CGI. TVA due par le preneur assujetti. La mention légale sera ajoutée automatiquement sur le devis et le PDF.</span>
                     </div>
                   )}
                 </div>
