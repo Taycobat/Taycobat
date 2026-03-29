@@ -61,6 +61,16 @@ export default function IAAudio() {
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
   const [tvaPct, setTvaPct] = useState(10)
+  const [autoliquidation, setAutoliquidation] = useState(false)
+
+  // Quick client creation
+  const [showNewClient, setShowNewClient] = useState(false)
+  const [newNom, setNewNom] = useState('')
+  const [newPrenom, setNewPrenom] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newTel, setNewTel] = useState('')
+  const [newVille, setNewVille] = useState('')
+  const [creatingClient, setCreatingClient] = useState(false)
 
   const [transcribing, setTranscribing] = useState(false)
   const [transcription, setTranscription] = useState('')
@@ -88,6 +98,20 @@ export default function IAAudio() {
   }, [user])
 
   useEffect(() => { fetchClients() }, [fetchClients])
+
+  async function handleCreateClient() {
+    if (!user || !newNom) return
+    setCreatingClient(true)
+    const { data, error: err } = await supabase.from('clients')
+      .insert({ nom: newNom, prenom: newPrenom, email: newEmail, telephone: newTel, ville: newVille, user_id: user.id })
+      .select('id').single()
+    setCreatingClient(false)
+    if (err) { setError(err.message); return }
+    await fetchClients()
+    setClientId(data.id)
+    setShowNewClient(false)
+    setNewNom(''); setNewPrenom(''); setNewEmail(''); setNewTel(''); setNewVille('')
+  }
 
   async function handleTranscribe() {
     if (!audioBlob) { addLog('Erreur : pas de blob audio'); return }
@@ -165,13 +189,13 @@ export default function IAAudio() {
   }
 
   const totalHT = lignes.reduce((s, l) => s + l.total_ht, 0)
-  const totalTVA = Math.round(totalHT * tvaPct / 100 * 100) / 100
+  const totalTVA = autoliquidation ? 0 : Math.round(totalHT * tvaPct / 100 * 100) / 100
   const totalTTC = Math.round((totalHT + totalTVA) * 100) / 100
 
   async function handleCreateDevis() {
     if (lignes.length === 0) { setError('Aucune ligne à enregistrer'); return }
     setSaving(true); setError('')
-    const res = await createDevis({ titre, client_id: clientId || null, tva_pct: tvaPct, lignes: lignes.filter((l) => l.description) })
+    const res = await createDevis({ titre, client_id: clientId || null, tva_pct: autoliquidation ? 0 : tvaPct, autoliquidation, lignes: lignes.filter((l) => l.description) })
     setSaving(false)
     if (res.error) setError(res.error)
     else { addLog('Devis créé avec succès'); navigate('/devis') }
@@ -319,19 +343,62 @@ export default function IAAudio() {
                       <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
                     <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Client</label>
-                      <select value={clientId} onChange={(e) => setClientId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
-                        <option value="">— Client —</option>
-                        {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
-                      </select></div>
+                      <div className="flex gap-2">
+                        <select value={clientId} onChange={(e) => setClientId(e.target.value)}
+                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
+                          <option value="">— Client —</option>
+                          {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
+                        </select>
+                        <button type="button" onClick={() => setShowNewClient(!showNewClient)} title="Nouveau client"
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52] hover:border-[#1a9e52]'}`}>
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                  {showNewClient && (
+                    <div className="border border-[#1a9e52]/20 bg-emerald-50/30 rounded-xl p-4 space-y-3">
+                      <div className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider">Nouveau client rapide</div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input type="text" value={newPrenom} onChange={(e) => setNewPrenom(e.target.value)} placeholder="Prénom"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom *"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                      </div>
+                      <input type="text" value={newVille} onChange={(e) => setNewVille(e.target.value)} placeholder="Ville"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setShowNewClient(false)} className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                        <button type="button" onClick={handleCreateClient} disabled={creatingClient || !newNom}
+                          className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-lg disabled:opacity-50 cursor-pointer">
+                          {creatingClient ? 'Création...' : 'Créer et sélectionner'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-2">TVA</label>
-                    <div className="flex gap-2">{TVA_OPTIONS.map((o) => (
-                      <button key={o.value} type="button" onClick={() => setTvaPct(o.value)}
-                        className={`flex-1 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                          tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                        }`}>{o.label}<span className="block text-[10px] font-normal opacity-60">{o.tag}</span></button>
-                    ))}</div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {TVA_OPTIONS.map((o) => (
+                        <button key={o.value} type="button" onClick={() => { setTvaPct(o.value); setAutoliquidation(false) }}
+                          className={`py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                            !autoliquidation && tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                          }`}>{o.label}<span className="block text-[10px] font-normal opacity-60">{o.tag}</span></button>
+                      ))}
+                      <button type="button" onClick={() => setAutoliquidation(true)}
+                        className={`py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                          autoliquidation ? 'border-amber-400 bg-amber-50 text-amber-700 ring-2 ring-amber-200' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        }`}>0%<span className="block text-[10px] font-normal opacity-60">Autoliquid.</span></button>
+                    </div>
+                    {autoliquidation && (
+                      <div className="mt-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                        <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span><strong>Autoliquidation TVA</strong> — Art. 283-2 nonies du CGI. TVA due par le preneur assujetti.</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
