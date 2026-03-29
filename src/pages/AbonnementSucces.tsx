@@ -6,7 +6,7 @@ export default function AbonnementSucces() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const sessionId = searchParams.get('session_id')
-  const [countdown, setCountdown] = useState(5)
+  const [countdown, setCountdown] = useState(3)
 
   useEffect(() => {
     const timer = setInterval(() => {
