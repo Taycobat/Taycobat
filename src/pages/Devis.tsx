@@ -143,6 +143,15 @@ export default function Devis() {
     doc.setDrawColor(200, 200, 200)
     doc.roundedRect(14, sigY + 4, 76, 25, 2, 2); doc.roundedRect(120, sigY + 4, 76, 25, 2, 2)
 
+    // Autoliquidation mention if TVA = 0
+    if (d.tva_pct === 0) {
+      const alY = sigY + 35
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 120, 0)
+      doc.text('AUTOLIQUIDATION DE LA TVA', 14, alY)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 90, 0)
+      doc.text('Article 283-2 nonies du CGI. TVA due par le preneur assujetti.', 14, alY + 5)
+    }
+
     doc.setFontSize(7); doc.setTextColor(160, 160, 160)
     doc.text(`${entreprise} — Généré par TAYCO BAT`, 105, 285, { align: 'center' })
 
@@ -242,6 +251,7 @@ export default function Devis() {
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm font-semibold text-gray-900 tabular-nums">{fmt(devis.montant_ttc)}</span>
                         <div className="text-xs text-gray-400">HT {fmt(devis.montant_ht)}</div>
+                        {devis.tva_pct === 0 && <span className="inline-block mt-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">Autoliquidation</span>}
                       </td>
                       <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <select value={devis.statut} onChange={(e) => updateStatut(devis.id, e.target.value)}

@@ -35,6 +35,7 @@ export interface DevisCreatePayload {
   titre: string
   client_id: string | null
   tva_pct: number
+  autoliquidation?: boolean
   lignes: Omit<DevisLigne, 'id' | 'devis_id'>[]
 }
 
@@ -119,7 +120,8 @@ export function useDevis() {
 
     const numero = await generateNumero()
     const totalHT = payload.lignes.reduce((s, l) => s + l.total_ht, 0)
-    const totalTTC = Math.round(totalHT * (1 + payload.tva_pct / 100) * 100) / 100
+    const effectiveTva = payload.autoliquidation ? 0 : payload.tva_pct
+    const totalTTC = payload.autoliquidation ? totalHT : Math.round(totalHT * (1 + payload.tva_pct / 100) * 100) / 100
 
     const { data: devisData, error: errDevis } = await supabase
       .from('devis')
@@ -129,7 +131,7 @@ export function useDevis() {
         client_id: payload.client_id,
         montant_ht: totalHT,
         montant_ttc: totalTTC,
-        tva_pct: payload.tva_pct,
+        tva_pct: effectiveTva,
         statut: 'brouillon',
         user_id: user.id,
       })

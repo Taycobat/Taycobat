@@ -35,9 +35,19 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const [titre, setTitre] = useState('')
   const [clientId, setClientId] = useState('')
   const [tvaPct, setTvaPct] = useState(10)
+  const [autoliquidation, setAutoliquidation] = useState(false)
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([emptyLigne()])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Quick client creation
+  const [showNewClient, setShowNewClient] = useState(false)
+  const [newNom, setNewNom] = useState('')
+  const [newPrenom, setNewPrenom] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newTel, setNewTel] = useState('')
+  const [newVille, setNewVille] = useState('')
+  const [creatingClient, setCreatingClient] = useState(false)
 
   const fetchClients = useCallback(async () => {
     if (!user) return
@@ -49,10 +59,24 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (open) {
       fetchClients()
-      setTitre(''); setClientId(''); setTvaPct(10)
-      setLignes([emptyLigne()]); setError('')
+      setTitre(''); setClientId(''); setTvaPct(10); setAutoliquidation(false)
+      setLignes([emptyLigne()]); setError(''); setShowNewClient(false)
     }
   }, [open, fetchClients])
+
+  async function handleCreateClient() {
+    if (!user || !newNom) return
+    setCreatingClient(true)
+    const { data, error: err } = await supabase.from('clients')
+      .insert({ nom: newNom, prenom: newPrenom, email: newEmail, telephone: newTel, ville: newVille, user_id: user.id })
+      .select('id').single()
+    setCreatingClient(false)
+    if (err) { setError(err.message); return }
+    await fetchClients()
+    setClientId(data.id)
+    setShowNewClient(false)
+    setNewNom(''); setNewPrenom(''); setNewEmail(''); setNewTel(''); setNewVille('')
+  }
 
   function updateLigne(i: number, field: string, raw: string) {
     setLignes((prev) => {
@@ -68,7 +92,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   function removeLigne(i: number) { setLignes((p) => p.length <= 1 ? p : p.filter((_, idx) => idx !== i)) }
 
   const totalHT = lignes.reduce((s, l) => s + l.total_ht, 0)
-  const totalTVA = Math.round(totalHT * (tvaPct / 100) * 100) / 100
+  const totalTVA = autoliquidation ? 0 : Math.round(totalHT * (tvaPct / 100) * 100) / 100
   const totalTTC = Math.round((totalHT + totalTVA) * 100) / 100
 
   const selectedClient = clients.find((c) => c.id === clientId)
@@ -80,7 +104,8 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
     setSaving(true); setError('')
     const res = await onSubmit({
       titre, client_id: clientId || null,
-      tva_pct: tvaPct, lignes: lignes.filter((l) => l.description),
+      tva_pct: autoliquidation ? 0 : tvaPct, autoliquidation,
+      lignes: lignes.filter((l) => l.description),
     })
     setSaving(false)
     if (res.error) setError(res.error); else onClose()
@@ -126,29 +151,80 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Client</label>
-                      <select value={clientId} onChange={(e) => setClientId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
-                        <option value="">— Client —</option>
-                        {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
-                      </select>
+                      <div className="flex gap-2">
+                        <select value={clientId} onChange={(e) => setClientId(e.target.value)}
+                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
+                          <option value="">— Client —</option>
+                          {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
+                        </select>
+                        <button type="button" onClick={() => setShowNewClient(!showNewClient)} title="Nouveau client"
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52] hover:border-[#1a9e52]'}`}>
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Quick client creation */}
+                  {showNewClient && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                      className="border border-[#1a9e52]/20 bg-emerald-50/30 rounded-xl p-4 space-y-3">
+                      <div className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider">Nouveau client rapide</div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input type="text" value={newPrenom} onChange={(e) => setNewPrenom(e.target.value)} placeholder="Prénom"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom *"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                      </div>
+                      <input type="text" value={newVille} onChange={(e) => setNewVille(e.target.value)} placeholder="Ville"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setShowNewClient(false)} className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                        <button type="button" onClick={handleCreateClient} disabled={creatingClient || !newNom}
+                          className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-lg disabled:opacity-50 cursor-pointer">
+                          {creatingClient ? 'Création...' : 'Créer et sélectionner'}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
-                {/* TVA selector */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Taux de TVA</label>
-                  <div className="flex gap-2">
-                    {TVA_OPTIONS.map((o) => (
-                      <button key={o.value} type="button" onClick={() => setTvaPct(o.value)}
-                        className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                          tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                        }`}>
-                        {o.label}
-                        <span className="block text-[10px] font-normal mt-0.5 opacity-60">{o.tag}</span>
-                      </button>
-                    ))}
+                {/* TVA selector + Autoliquidation */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Taux de TVA</label>
+                    <div className="flex gap-2">
+                      {TVA_OPTIONS.map((o) => (
+                        <button key={o.value} type="button" onClick={() => { setTvaPct(o.value); setAutoliquidation(false) }}
+                          className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                            !autoliquidation && tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                          }`}>
+                          {o.label}
+                          <span className="block text-[10px] font-normal mt-0.5 opacity-60">{o.tag}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
+                  {/* Autoliquidation toggle */}
+                  <div className={`flex items-center justify-between p-3 rounded-xl border transition-all ${autoliquidation ? 'border-amber-300 bg-amber-50' : 'border-gray-200'}`}>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">Autoliquidation TVA</span>
+                      <span className="block text-[11px] text-gray-500">Sous-traitance - Art. 283-2 nonies du CGI</span>
+                    </div>
+                    <button type="button" onClick={() => setAutoliquidation(!autoliquidation)}
+                      className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${autoliquidation ? 'bg-amber-500' : 'bg-gray-300'}`}>
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoliquidation ? 'translate-x-5' : ''}`} />
+                    </button>
+                  </div>
+                  {autoliquidation && (
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                      TVA = 0% — Mention légale ajoutée automatiquement : « Autoliquidation de la TVA - Article 283-2 nonies du CGI. TVA due par le preneur assujetti »
+                    </div>
+                  )}
                 </div>
 
                 {/* Lignes de travaux */}
@@ -200,6 +276,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium text-gray-900 tabular-nums">{fmt(totalHT)}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-gray-500">TVA {tvaPct} %</span><span className="font-medium text-gray-900 tabular-nums">{fmt(totalTVA)}</span></div>
                     <div className="flex justify-between text-lg pt-3 border-t border-gray-200"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(totalTTC)}</span></div>
+                    {autoliquidation && <div className="text-[11px] text-amber-700 bg-amber-50 rounded-lg p-2 mt-2">Autoliquidation TVA - Art. 283-2 nonies du CGI. TVA due par le preneur assujetti.</div>}
                   </div>
                 </div>
               </form>
