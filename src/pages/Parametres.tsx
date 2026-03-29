@@ -15,10 +15,12 @@ export default function Parametres() {
   const [siret, setSiret] = useState(meta.siret || '')
   const [telephone, setTelephone] = useState(meta.telephone || '')
   const [photoUrl, setPhotoUrl] = useState(meta.photo_url || '')
+  const [logoUrl, setLogoUrl] = useState(meta.logo_url || '')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const photoRef = useRef<HTMLInputElement>(null)
+  const logoRef = useRef<HTMLInputElement>(null)
 
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -30,9 +32,19 @@ export default function Parametres() {
     setUploading(false)
   }
 
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setUploading(true)
+    const path = `logos/artisan_${user.id}_${Date.now()}.${file.name.split('.').pop()}`
+    const url = await uploadFile(path, file)
+    if (url) setLogoUrl(url)
+    setUploading(false)
+  }
+
   async function handleSave() {
     setSaving(true)
-    await supabase.auth.updateUser({ data: { prenom, nom, entreprise, siret, telephone, photo_url: photoUrl } })
+    await supabase.auth.updateUser({ data: { prenom, nom, entreprise, siret, telephone, photo_url: photoUrl, logo_url: logoUrl } })
     setSaving(false); setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -87,6 +99,29 @@ export default function Parametres() {
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
         className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 mb-6">
         <h2 className="text-base font-semibold text-gray-900">Entreprise</h2>
+
+        {/* Logo entreprise */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Logo de mon entreprise</label>
+          <div className="flex items-center gap-4">
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-contain border border-gray-200 bg-white p-1" />
+            ) : (
+              <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+              </div>
+            )}
+            <div>
+              <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+              <button type="button" onClick={() => logoRef.current?.click()} disabled={uploading}
+                className="text-sm font-medium text-[#1a9e52] hover:text-emerald-700 cursor-pointer disabled:opacity-50">
+                {uploading ? 'Upload...' : logoUrl ? 'Changer le logo' : 'Ajouter un logo'}
+              </button>
+              <p className="text-[11px] text-gray-400 mt-0.5">Affiche sur vos devis et factures PDF</p>
+            </div>
+          </div>
+        </div>
+
         <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Nom de l'entreprise</label>
           <input type="text" value={entreprise} onChange={(e) => setEntreprise(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
         <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">SIRET</label>

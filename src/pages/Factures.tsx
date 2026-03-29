@@ -4,7 +4,6 @@ import { useFactures } from '../hooks/useFactures'
 import { useDevis } from '../hooks/useDevis'
 import { useAuthStore } from '../store/authStore'
 import type { Facture } from '../hooks/useFactures'
-import { supabase } from '../lib/supabase'
 import { loadImageAsBase64 } from '../lib/storage'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -137,28 +136,28 @@ export default function Factures() {
     const siret = user?.user_metadata?.siret || ''
     const typeName = typeLabel[f.type] ?? 'Facture'
 
-    // Fetch client logo
-    let logoB64: string | null = null
-    if (f.client_id) {
-      const { data: cl } = await supabase.from('clients').select('logo_url').eq('id', f.client_id).single()
-      if (cl?.logo_url) logoB64 = await loadImageAsBase64(cl.logo_url)
-    }
+    // Load artisan logo
+    const artisanLogoUrl = user?.user_metadata?.logo_url as string | undefined
+    let artisanLogoB64: string | null = null
+    if (artisanLogoUrl) artisanLogoB64 = await loadImageAsBase64(artisanLogoUrl)
 
     doc.setFillColor(...green); doc.rect(0, 0, 210, 30, 'F')
+    // Artisan logo in header
+    let textX = 14
+    if (artisanLogoB64) {
+      try { doc.addImage(artisanLogoB64, 'PNG', 10, 3, 22, 22) } catch { /* ignore */ }
+      textX = 36
+    }
     doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
-    doc.text(entreprise, 14, 13)
+    doc.text(entreprise, textX, 13)
     doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-    if (siret) doc.text(`SIRET : ${siret}`, 14, 20)
+    if (siret) doc.text(`SIRET : ${siret}`, textX, 20)
     doc.setFontSize(10); doc.text(`${typeName} N° ${f.numero}`, 196, 12, { align: 'right' })
     doc.setFontSize(8); doc.text(`Date : ${new Date(f.date_emission || f.created_at).toLocaleDateString('fr-FR')}`, 196, 19, { align: 'right' })
     if (f.date_echeance) doc.text(`Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 24, { align: 'right' })
 
-    // Client logo
-    if (logoB64) { try { doc.addImage(logoB64, 'PNG', 14, 33, 16, 16) } catch { /* ignore */ } }
-
     let y = 40
-    const clientX = logoB64 ? 34 : 14
-    if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, clientX, y); y += 8 }
+    if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, 14, y); y += 8 }
     if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Réf. devis : ${f.devis_display}`, 14, y); y += 8 }
 
     // Type-specific info

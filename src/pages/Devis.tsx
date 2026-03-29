@@ -75,11 +75,16 @@ export default function Devis() {
     const siretE = meta.siret || ''
 
     // Fetch client
-    let client: { nom: string; prenom: string; adresse?: string; ville?: string; code_postal?: string; logo_url?: string } | undefined
+    let client: { nom: string; prenom: string; adresse?: string; ville?: string; code_postal?: string } | undefined
     if (d.client_id) {
-      const { data: c } = await supabase.from('clients').select('nom,prenom,adresse,ville,code_postal,logo_url').eq('id', d.client_id).single()
+      const { data: c } = await supabase.from('clients').select('nom,prenom,adresse,ville,code_postal').eq('id', d.client_id).single()
       if (c) client = c
     }
+
+    // Load artisan logo
+    const artisanLogoUrl = meta.logo_url as string | undefined
+    let artisanLogoB64: string | null = null
+    if (artisanLogoUrl) artisanLogoB64 = await loadImageAsBase64(artisanLogoUrl)
 
     // Fetch lignes
     const { data: lignesData } = await supabase.from('devis_lignes').select('*').eq('devis_id', d.id).order('ordre')
@@ -92,10 +97,16 @@ export default function Devis() {
 
     // Header
     doc.setFillColor(...green); doc.rect(0, 0, 210, 32, 'F')
+    // Artisan logo in header
+    let textX = 14
+    if (artisanLogoB64) {
+      try { doc.addImage(artisanLogoB64, 'PNG', 10, 4, 24, 24) } catch { /* ignore */ }
+      textX = 38
+    }
     doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
-    doc.text(entreprise, 14, 15)
+    doc.text(entreprise, textX, 15)
     doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-    doc.text(`SIRET : ${siretE}`, 14, 22)
+    doc.text(`SIRET : ${siretE}`, textX, 22)
     doc.text(`DEVIS N° ${d.numero}`, 196, 15, { align: 'right' })
     doc.text(`Date : ${new Date(d.date_devis || d.created_at).toLocaleDateString('fr-FR')}`, 196, 22, { align: 'right' })
     if (d.date_validite) doc.text(`Valable jusqu'au : ${new Date(d.date_validite).toLocaleDateString('fr-FR')}`, 196, 27, { align: 'right' })
@@ -114,15 +125,7 @@ export default function Devis() {
       doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, 50)
     }
 
-    // Client logo
-    if (client?.logo_url) {
-      const logoB64 = await loadImageAsBase64(client.logo_url)
-      if (logoB64) {
-        try { doc.addImage(logoB64, 'PNG', 14, 38, 18, 18) } catch { /* ignore format errors */ }
-      }
-    }
-
-    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, client?.logo_url ? 36 : 14, 46); doc.setTextColor(30, 30, 30) }
+    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 46); doc.setTextColor(30, 30, 30) }
 
     // Table
     const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])
