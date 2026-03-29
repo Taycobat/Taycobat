@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   AreaChart,
@@ -101,6 +102,7 @@ const kpiConfig = [
 ]
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { kpis, recentDevis, caData, loading } = useDashboardData()
   const displayName = getDisplayName(user)
@@ -124,6 +126,7 @@ export default function Dashboard() {
         </div>
 
         <motion.button
+          onClick={() => navigate('/ia-audio')}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           className="flex items-center gap-2.5 px-5 py-2.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer"
