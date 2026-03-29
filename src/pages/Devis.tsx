@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import type { DevisCreatePayload, DevisRow } from '../hooks/useDevis'
 import DevisModal from '../components/DevisModal'
+import { loadImageAsBase64 } from '../lib/storage'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -74,9 +75,9 @@ export default function Devis() {
     const siretE = meta.siret || ''
 
     // Fetch client
-    let client: { nom: string; prenom: string; adresse?: string; ville?: string; code_postal?: string } | undefined
+    let client: { nom: string; prenom: string; adresse?: string; ville?: string; code_postal?: string; logo_url?: string } | undefined
     if (d.client_id) {
-      const { data: c } = await supabase.from('clients').select('nom,prenom,adresse,ville,code_postal').eq('id', d.client_id).single()
+      const { data: c } = await supabase.from('clients').select('nom,prenom,adresse,ville,code_postal,logo_url').eq('id', d.client_id).single()
       if (c) client = c
     }
 
@@ -113,7 +114,15 @@ export default function Devis() {
       doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, 50)
     }
 
-    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 46); doc.setTextColor(30, 30, 30) }
+    // Client logo
+    if (client?.logo_url) {
+      const logoB64 = await loadImageAsBase64(client.logo_url)
+      if (logoB64) {
+        try { doc.addImage(logoB64, 'PNG', 14, 38, 18, 18) } catch { /* ignore format errors */ }
+      }
+    }
+
+    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, client?.logo_url ? 36 : 14, 46); doc.setTextColor(30, 30, 30) }
 
     // Table
     const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])

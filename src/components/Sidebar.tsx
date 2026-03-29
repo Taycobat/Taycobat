@@ -42,6 +42,7 @@ export default function Sidebar() {
   const { user } = useAuthStore()
   const displayName = getDisplayName(user)
   const email = user?.email || ''
+  const photoUrl = user?.user_metadata?.photo_url || ''
 
   async function handleLogout() { await supabase.auth.signOut(); navigate('/login') }
 
@@ -80,7 +81,11 @@ export default function Sidebar() {
 
       <div className="px-3 pb-3 border-t border-gray-100 pt-3">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a9e52] to-emerald-400 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">{displayName.charAt(0).toUpperCase()}</div>
+          {photoUrl ? (
+            <img src={photoUrl} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a9e52] to-emerald-400 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">{displayName.charAt(0).toUpperCase()}</div>
+          )}
           <div className="flex-1 min-w-0"><div className="text-sm font-medium text-gray-900 truncate">{displayName}</div><div className="text-[11px] text-gray-400 truncate">{email}</div></div>
           <button onClick={handleLogout} title="Déconnexion" className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>

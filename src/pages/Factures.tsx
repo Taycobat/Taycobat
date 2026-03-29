@@ -4,6 +4,8 @@ import { useFactures } from '../hooks/useFactures'
 import { useDevis } from '../hooks/useDevis'
 import { useAuthStore } from '../store/authStore'
 import type { Facture } from '../hooks/useFactures'
+import { supabase } from '../lib/supabase'
+import { loadImageAsBase64 } from '../lib/storage'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -128,12 +130,19 @@ export default function Factures() {
     if (res.error) setError(res.error); else setModal(null)
   }
 
-  function generatePDF(f: Facture) {
+  async function generatePDF(f: Facture) {
     const doc = new jsPDF()
     const green: [number, number, number] = [26, 158, 82]
     const entreprise = user?.user_metadata?.entreprise || 'TAYCO BAT'
     const siret = user?.user_metadata?.siret || ''
     const typeName = typeLabel[f.type] ?? 'Facture'
+
+    // Fetch client logo
+    let logoB64: string | null = null
+    if (f.client_id) {
+      const { data: cl } = await supabase.from('clients').select('logo_url').eq('id', f.client_id).single()
+      if (cl?.logo_url) logoB64 = await loadImageAsBase64(cl.logo_url)
+    }
 
     doc.setFillColor(...green); doc.rect(0, 0, 210, 30, 'F')
     doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
@@ -144,8 +153,12 @@ export default function Factures() {
     doc.setFontSize(8); doc.text(`Date : ${new Date(f.date_emission || f.created_at).toLocaleDateString('fr-FR')}`, 196, 19, { align: 'right' })
     if (f.date_echeance) doc.text(`Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 24, { align: 'right' })
 
+    // Client logo
+    if (logoB64) { try { doc.addImage(logoB64, 'PNG', 14, 33, 16, 16) } catch { /* ignore */ } }
+
     let y = 40
-    if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, 14, y); y += 8 }
+    const clientX = logoB64 ? 34 : 14
+    if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, clientX, y); y += 8 }
     if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Réf. devis : ${f.devis_display}`, 14, y); y += 8 }
 
     // Type-specific info
