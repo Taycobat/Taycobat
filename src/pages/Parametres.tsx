@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import { uploadFile } from '../lib/storage'
+import { searchSiret } from '../lib/siret'
 import { useNavigate } from 'react-router-dom'
 
 export default function Parametres() {
@@ -23,6 +24,20 @@ export default function Parametres() {
   const [iban, setIban] = useState(meta.iban || '')
   const [conditionsPaiement, setConditionsPaiement] = useState(meta.conditions_paiement || '30 jours')
   const [tauxPenalites, setTauxPenalites] = useState(meta.taux_penalites || '3 fois le taux legal')
+  const [searching, setSearching] = useState(false)
+
+  async function handleSiretSearch() {
+    if (!siret || siret.replace(/\s/g, '').length < 9) return
+    setSearching(true)
+    const result = await searchSiret(siret)
+    if (result) {
+      if (result.raisonSociale) setEntreprise(result.raisonSociale)
+      if (result.formeJuridique) setFormeJuridique(result.formeJuridique)
+      if (result.adresse) setAdresse(result.adresse)
+      if (result.siret) setSiret(result.siret)
+    }
+    setSearching(false)
+  }
   const [photoUrl, setPhotoUrl] = useState(meta.photo_url || '')
   const [logoUrl, setLogoUrl] = useState(meta.logo_url || '')
   const [uploading, setUploading] = useState(false)
@@ -151,8 +166,21 @@ export default function Parametres() {
         <div><label className={lb}>Adresse complete</label>
           <input type="text" value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 rue des Artisans, 75001 Paris" className={ic} /></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label className={lb}>SIRET</label>
-            <input type="text" value={siret} onChange={(e) => setSiret(e.target.value)} maxLength={17} className={ic + ' font-mono'} /></div>
+          <div><label className={lb}>SIRET / SIREN</label>
+            <div className="flex gap-2">
+              <input type="text" value={siret} onChange={(e) => setSiret(e.target.value)} maxLength={17} placeholder="123 456 789 00012" className={ic + ' font-mono flex-1'} />
+              <button type="button" onClick={handleSiretSearch} disabled={searching || siret.replace(/\s/g, '').length < 9}
+                className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0 flex items-center gap-2">
+                {searching ? (
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                )}
+                Rechercher
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1">Entrez votre SIRET et cliquez Rechercher pour pre-remplir automatiquement</p>
+          </div>
           <div><label className={lb}>N° TVA intracommunautaire</label>
             <input type="text" value={tvaIntracom} onChange={(e) => setTvaIntracom(e.target.value)} placeholder="FR12345678901" className={ic + ' font-mono'} /></div>
         </div>

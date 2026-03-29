@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Client, ClientForm } from '../hooks/useClients'
 import { uploadFile } from '../lib/storage'
+import { searchSiret } from '../lib/siret'
 
 interface Props {
   open: boolean
@@ -23,6 +24,7 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [searchingSiret, setSearchingSiret] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const isEdit = !!client
 
@@ -37,6 +39,24 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
 
   function set(key: keyof ClientForm, value: string) { setForm((f) => ({ ...f, [key]: value })) }
   const isSociete = form.type_client === 'societe'
+
+  async function handleSiretSearch() {
+    const val = form.siret.replace(/\s/g, '')
+    if (val.length < 9) return
+    setSearchingSiret(true)
+    const result = await searchSiret(val)
+    if (result) {
+      setForm((f) => ({
+        ...f,
+        raison_sociale: result.raisonSociale || f.raison_sociale,
+        adresse: result.adresse || f.adresse,
+        ville: result.ville || f.ville,
+        code_postal: result.codePostal || f.code_postal,
+        siret: result.siret || f.siret,
+      }))
+    }
+    setSearchingSiret(false)
+  }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -102,12 +122,24 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
                     <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Code postal</label>
                       <input type="text" value={form.code_postal} onChange={(e) => set('code_postal', e.target.value)} className={ic} /></div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">SIRET</label>
-                      <input type="text" value={form.siret} onChange={(e) => set('siret', e.target.value)} maxLength={17} className={ic} /></div>
-                    <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">TVA intracommunautaire</label>
-                      <input type="text" value={form.tva_intracom} onChange={(e) => set('tva_intracom', e.target.value)} placeholder="FR12345678901" className={ic} /></div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">SIRET</label>
+                    <div className="flex gap-2">
+                      <input type="text" value={form.siret} onChange={(e) => set('siret', e.target.value)} maxLength={17} placeholder="123 456 789 00012" className={ic + ' font-mono flex-1'} />
+                      <button type="button" onClick={handleSiretSearch} disabled={searchingSiret || form.siret.replace(/\s/g, '').length < 9}
+                        className="px-3 py-2.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0 flex items-center gap-1.5">
+                        {searchingSiret ? (
+                          <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                        ) : (
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        )}
+                        Rechercher
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-1">Pre-remplit raison sociale et adresse automatiquement</p>
                   </div>
+                  <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">TVA intracommunautaire</label>
+                    <input type="text" value={form.tva_intracom} onChange={(e) => set('tva_intracom', e.target.value)} placeholder="FR12345678901" className={ic} /></div>
                 </div>
               ) : (
                 /* Particulier fields */
