@@ -287,7 +287,7 @@ export default function Dashboard() {
                 const st = factureStatut[f.statut] ?? factureStatut.brouillon
                 return (
                   <motion.div key={f.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.05 }}
-                    onClick={() => navigate('/factures')}
+                    onClick={() => navigate(`/factures/${f.id}`)}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.type === 'directe' ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-emerald-50 group-hover:bg-emerald-100'}`}>
                       <svg className={`w-4 h-4 ${f.type === 'directe' ? 'text-blue-600' : 'text-[#1a9e52]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

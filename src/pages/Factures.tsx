@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFactures } from '../hooks/useFactures'
 import { useDevis } from '../hooks/useDevis'
@@ -29,6 +30,7 @@ function fmt(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'curren
 function fmt0(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n) }
 
 export default function Factures() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { factures, loading, factureFromDevis, createAcompte, createSituation, createSolde, createAvoir, createDirecte, enregistrerPaiement, updateStatut } = useFactures()
   const [directeOpen, setDirecteOpen] = useState(false)
@@ -320,7 +322,7 @@ export default function Factures() {
           <th className="text-right text-xs font-medium text-gray-400 uppercase px-5 py-3">Actions</th>
         </tr></thead><motion.tbody variants={container} initial="hidden" animate="show">
           {filtered.map((f) => { const st = statutStyle[f.statut] ?? statutStyle.brouillon; return (
-            <motion.tr key={f.id} variants={row} onClick={() => generatePDF(f)} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer">
+            <motion.tr key={f.id} variants={row} onClick={() => navigate(`/factures/${f.id}`)} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer">
               <td className="px-5 py-3"><span className="font-mono font-medium text-gray-900">{f.numero}</span></td>
               <td className="px-5 py-3"><div className="text-gray-900 truncate max-w-[180px]">{f.client_display || '—'}</div>
                 {f.devis_display && <div className="text-[11px] text-gray-400 truncate max-w-[180px]">{f.devis_display}</div>}

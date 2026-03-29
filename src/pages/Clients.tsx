@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useClients } from '../hooks/useClients'
 import type { Client, ClientForm } from '../hooks/useClients'
@@ -15,6 +16,7 @@ const row = {
 }
 
 export default function Clients() {
+  const navigate = useNavigate()
   const { clients, loading, createClient, updateClient, deleteClient } = useClients()
 
   const [search, setSearch] = useState('')
@@ -153,7 +155,7 @@ export default function Clients() {
                   <motion.tr
                     key={client.id}
                     variants={row}
-                    onClick={() => openEdit(client)}
+                    onClick={() => navigate(`/clients/${client.id}`)}
                     className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer"
                   >
                     {/* Client */}

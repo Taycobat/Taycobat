@@ -9,6 +9,8 @@ import Clients from './pages/Clients'
 import DevisPage from './pages/Devis'
 import DevisDetail from './pages/DevisDetail'
 import Factures from './pages/Factures'
+import FactureDetail from './pages/FactureDetail'
+import ClientDetail from './pages/ClientDetail'
 import Chantiers from './pages/Chantiers'
 import Planning from './pages/Planning'
 import Bibliotheque from './pages/Bibliotheque'
@@ -54,9 +56,11 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:id" element={<ClientDetail />} />
             <Route path="/devis" element={<DevisPage />} />
             <Route path="/devis/:id" element={<DevisDetail />} />
             <Route path="/factures" element={<Factures />} />
+            <Route path="/factures/:id" element={<FactureDetail />} />
             <Route path="/chantiers" element={<Chantiers />} />
             <Route path="/planning" element={<Planning />} />
             <Route path="/bibliotheque" element={<Bibliotheque />} />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
@@ -9,6 +10,7 @@ function fmt(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'curren
 interface Relance { id: string; numero: string; montant_ttc: number; statut: string; created_at: string; client_display: string; jours: number }
 
 export default function Notifications() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const [relances, setRelances] = useState<Relance[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,7 +75,7 @@ export default function Notifications() {
           <th className="text-right text-xs font-medium text-gray-400 uppercase px-6 py-3">Action</th>
         </tr></thead><tbody>
           {relances.map((r) => (
-            <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+            <tr key={r.id} onClick={() => navigate(`/factures/${r.id}`)} className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer">
               <td className="px-6 py-4"><span className="text-sm font-mono font-medium text-gray-900">{r.numero}</span></td>
               <td className="px-6 py-4 text-sm text-gray-700">{r.client_display || '—'}</td>
               <td className="px-6 py-4 text-right"><span className="text-sm font-semibold text-gray-900 tabular-nums">{fmt(r.montant_ttc)}</span></td>
