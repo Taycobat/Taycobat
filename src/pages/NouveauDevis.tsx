@@ -8,6 +8,7 @@ import { useEmail } from '../hooks/useEmail'
 import { searchSiret } from '../lib/siret'
 import { logAudit } from '../lib/auditLog'
 import { emptyLigne, UNITES, TVA_RATES, type LigneType } from '../hooks/useFactureLignes'
+import LigneActions from '../components/LigneActions'
 import { loadImageAsBase64 } from '../lib/storage'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -350,8 +351,11 @@ export default function NouveauDevis() {
                   return (
                     <div key={i} className="grid grid-cols-[40px_3fr_80px_80px_110px_90px_110px_40px] gap-1 px-4 py-2 items-start hover:bg-gray-50/50">
                       <span className="text-xs text-gray-400 pt-2.5">{i + 1}</span>
-                      <textarea value={l.description} onChange={(e) => { setLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px' }}
-                        placeholder="Designation de la prestation..." rows={3} className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 resize-vertical min-h-[72px] max-h-[160px] w-full" />
+                      <div className="flex gap-1">
+                        <textarea value={l.description} onChange={(e) => { setLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px' }}
+                          placeholder="Designation de la prestation..." rows={3} className="flex-1 px-2 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 resize-vertical min-h-[72px] max-h-[160px]" />
+                        <LigneActions value={l.description} onChange={(t) => setLigne(i, 'description', t)} />
+                      </div>
                       <input type="number" value={l.quantite || ''} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)} min={0} step="any" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20" />
                       <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)} className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20">
                         {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
