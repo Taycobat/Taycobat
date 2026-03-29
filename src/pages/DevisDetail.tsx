@@ -224,6 +224,31 @@ export default function DevisDetailPage() {
             className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">
             Générer PDF
           </motion.button>
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+            onClick={async () => {
+              if (!devis || !user) return
+              setActionLoading('dupliquer')
+              const year = new Date().getFullYear()
+              const { count } = await supabase.from('devis').select('id', { count: 'exact', head: true }).eq('user_id', user.id).like('numero', `DE-${year}-%`)
+              const numero = `DE-${year}-${String((count ?? 0) + 1).padStart(4, '0')}`
+              const { data: nd } = await supabase.from('devis').insert({
+                numero, titre: `${devis.titre} (copie)`, client_id: devis.client_id,
+                montant_ht: devis.montant_ht, montant_ttc: devis.montant_ttc, tva_pct: devis.tva_pct,
+                statut: 'brouillon', user_id: user.id,
+              }).select('id').single()
+              if (nd && lignes.length > 0) {
+                await supabase.from('devis_lignes').insert(lignes.map((l, i) => ({
+                  devis_id: nd.id, description: l.description, quantite: l.quantite,
+                  unite: l.unite, prix_unitaire: l.prix_unitaire, total_ht: l.total_ht, ordre: i + 1,
+                })))
+              }
+              setActionLoading('')
+              if (nd) navigate(`/devis/${nd.id}`)
+            }}
+            disabled={actionLoading === 'dupliquer'}
+            className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-all cursor-pointer disabled:opacity-50">
+            {actionLoading === 'dupliquer' ? 'Duplication...' : 'Dupliquer'}
+          </motion.button>
           {isBrouillon && (
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
               onClick={() => navigate(`/devis`)}

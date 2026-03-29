@@ -44,7 +44,7 @@ function toNum(v: unknown): number {
 export default function Devis() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { devisList, loading, createDevis, deleteDevis, updateStatut } = useDevis()
+  const { devisList, loading, createDevis, duplicateDevis, deleteDevis, updateStatut } = useDevis()
   const [search, setSearch] = useState('')
   const [filterStatut, setFilterStatut] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
@@ -263,6 +263,11 @@ export default function Devis() {
                       <td className="px-6 py-4"><span className="text-sm text-gray-500">{new Date(devis.created_at).toLocaleDateString('fr-FR')}</span></td>
                       <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
+                          {/* Duplicate button */}
+                          <button onClick={() => duplicateDevis(devis.id)} title="Dupliquer"
+                            className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                          </button>
                           {/* PDF button */}
                           <button onClick={() => handlePDF(devis)} title="Générer PDF" disabled={pdfingId === devis.id}
                             className="p-2 rounded-lg text-gray-400 hover:text-[#1a9e52] hover:bg-emerald-50 transition-all cursor-pointer disabled:opacity-40">

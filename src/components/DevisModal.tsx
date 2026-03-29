@@ -17,6 +17,14 @@ const TVA_OPTIONS = [
   { value: 20, label: '20 %', tag: 'Standard' },
 ]
 
+const MENTIONS_LEGALES = [
+  'Devis valable {validite} jours à compter de sa date d\'émission.',
+  'Paiement à réception de facture, sauf accord contraire.',
+  'Pénalités de retard : 3 fois le taux d\'intérêt légal. Indemnité forfaitaire de recouvrement : 40 €.',
+  'Le client dispose d\'un délai de rétractation de 14 jours pour les contrats conclus hors établissement.',
+  'Assurance décennale : [à compléter]. Assurance RC professionnelle : [à compléter].',
+]
+
 const emptyLigne = (): Omit<DevisLigne, 'id' | 'devis_id'> => ({
   description: '',
   quantite: 1,
@@ -36,6 +44,9 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const [clientId, setClientId] = useState('')
   const [tvaPct, setTvaPct] = useState(10)
   const [autoliquidation, setAutoliquidation] = useState(false)
+  const [validiteJours, setValiditeJours] = useState(30)
+  const [cgv, setCgv] = useState('')
+  const [showCgv, setShowCgv] = useState(false)
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([emptyLigne()])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -59,7 +70,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (open) {
       fetchClients()
-      setTitre(''); setClientId(''); setTvaPct(10); setAutoliquidation(false)
+      setTitre(''); setClientId(''); setTvaPct(10); setAutoliquidation(false); setValiditeJours(30); setCgv(''); setShowCgv(false)
       setLignes([emptyLigne()]); setError(''); setShowNewClient(false)
     }
   }, [open, fetchClients])
@@ -105,6 +116,8 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
     const res = await onSubmit({
       titre, client_id: clientId || null,
       tva_pct: autoliquidation ? 0 : tvaPct, autoliquidation,
+      validite_jours: validiteJours,
+      conditions_generales: cgv || undefined,
       lignes: lignes.filter((l) => l.description),
     })
     setSaving(false)
@@ -220,6 +233,48 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                       <span><strong>Autoliquidation TVA</strong> — Article 283-2 nonies du CGI. TVA due par le preneur assujetti. La mention légale sera ajoutée automatiquement sur le devis et le PDF.</span>
                     </div>
                   )}
+                </div>
+
+                {/* Validité + CGV */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Validité du devis</label>
+                      <div className="flex items-center gap-2">
+                        <input type="number" value={validiteJours} onChange={(e) => setValiditeJours(parseInt(e.target.value) || 30)} min={1}
+                          className="w-20 px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <span className="text-sm text-gray-500">jours</span>
+                      </div>
+                    </div>
+                    <div className="flex items-end">
+                      <button type="button" onClick={() => setShowCgv(!showCgv)}
+                        className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${showCgv ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                        {showCgv ? 'Masquer CGV' : 'Ajouter CGV'}
+                      </button>
+                    </div>
+                  </div>
+                  {showCgv && (
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Conditions générales de vente</label>
+                      <textarea value={cgv} onChange={(e) => setCgv(e.target.value)} rows={3} placeholder="Saisissez vos CGV ou utilisez le modèle ci-dessous..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] resize-none" />
+                      <button type="button" onClick={() => setCgv(MENTIONS_LEGALES.map((m) => m.replace('{validite}', String(validiteJours))).join('\n'))}
+                        className="text-xs text-[#1a9e52] hover:text-emerald-700 font-medium cursor-pointer">
+                        Insérer les mentions légales standard
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mentions légales automatiques */}
+                <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4">
+                  <div className="text-[10px] text-gray-400 uppercase font-semibold mb-2">Mentions légales automatiques</div>
+                  <ul className="text-[11px] text-gray-500 space-y-1">
+                    <li>Devis valable {validiteJours} jours.</li>
+                    <li>Pénalités de retard : 3x le taux d'intérêt légal. Indemnité forfaitaire : 40 €.</li>
+                    {autoliquidation && <li className="text-amber-700 font-medium">Autoliquidation de la TVA - Article 283-2 nonies du CGI.</li>}
+                    <li>Délai de rétractation : 14 jours (contrats hors établissement).</li>
+                  </ul>
                 </div>
 
                 {/* Lignes de travaux */}

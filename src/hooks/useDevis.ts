@@ -36,6 +36,8 @@ export interface DevisCreatePayload {
   client_id: string | null
   tva_pct: number
   autoliquidation?: boolean
+  validite_jours?: number
+  conditions_generales?: string
   lignes: Omit<DevisLigne, 'id' | 'devis_id'>[]
 }
 
@@ -160,6 +162,32 @@ export function useDevis() {
     return { error: null }
   }
 
+  async function duplicateDevis(id: string) {
+    if (!user) return { error: 'Non connecté' }
+    const source = devisList.find((d) => d.id === id)
+    if (!source) return { error: 'Devis non trouvé' }
+
+    const numero = await generateNumero()
+    const { data: newDevis, error: errD } = await supabase.from('devis').insert({
+      numero, titre: `${source.titre} (copie)`, client_id: source.client_id,
+      montant_ht: source.montant_ht, montant_ttc: source.montant_ttc, tva_pct: source.tva_pct,
+      statut: 'brouillon', user_id: user.id,
+    }).select('id').single()
+    if (errD) return { error: errD.message }
+
+    // Copy lignes
+    const { data: lignes } = await supabase.from('devis_lignes')
+      .select('description, quantite, unite, prix_unitaire, total_ht, ordre, tva_pct')
+      .eq('devis_id', id).order('ordre')
+    if (lignes && lignes.length > 0) {
+      await supabase.from('devis_lignes').insert(lignes.map((l) => ({ ...l, devis_id: newDevis.id })))
+    }
+
+    await logAudit({ user_id: user.id, action: 'create', table_name: 'devis', record_id: newDevis.id, details: `Devis ${numero} dupliqué depuis ${source.numero}` })
+    await fetchDevis()
+    return { error: null }
+  }
+
   async function deleteDevis(id: string) {
     const target = devisList.find((d) => d.id === id)
     await supabase.from('devis_lignes').delete().eq('devis_id', id)
@@ -179,5 +207,5 @@ export function useDevis() {
     return { error: null }
   }
 
-  return { devisList, loading, createDevis, deleteDevis, updateStatut, fetchDevis }
+  return { devisList, loading, createDevis, duplicateDevis, deleteDevis, updateStatut, fetchDevis }
 }
