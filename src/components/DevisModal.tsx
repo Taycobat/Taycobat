@@ -151,7 +151,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
           <div className="flex h-[calc(100vh-56px)] overflow-hidden">
             {/* LEFT — Form */}
             <div className="flex-1 overflow-y-auto p-6">
-              <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
+              <form onSubmit={handleSubmit} className="max-w-[1200px] mx-auto space-y-6">
                 {error && <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">{error}</div>}
 
                 {/* Header fields */}
