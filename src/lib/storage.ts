@@ -1,20 +1,25 @@
 import { supabase } from './supabase'
 
-const BUCKET = 'uploads'
-
 export async function uploadFile(path: string, file: File): Promise<string | null> {
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true })
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('path', path)
+
+  const { data, error } = await supabase.functions.invoke('upload-file', {
+    body: formData,
+  })
+
   if (error) {
     console.error('Upload error:', error)
     return null
   }
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
-}
 
-export function getPublicUrl(path: string): string {
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
+  if (data?.error) {
+    console.error('Upload server error:', data.error)
+    return null
+  }
+
+  return data?.url ?? null
 }
 
 export async function loadImageAsBase64(url: string): Promise<string | null> {
