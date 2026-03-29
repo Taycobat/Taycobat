@@ -22,6 +22,7 @@ import Conformite from './pages/Conformite'
 import AttestationTVA from './pages/AttestationTVA'
 import ExportFEC from './pages/ExportFEC'
 import PDFExport from './pages/PDFExport'
+import Rapports from './pages/Rapports'
 import Tarifs from './pages/Tarifs'
 import Admin from './pages/Admin'
 import AbonnementSucces from './pages/AbonnementSucces'
@@ -72,6 +73,7 @@ function App() {
             <Route path="/attestation-tva" element={<AttestationTVA />} />
             <Route path="/export-fec" element={<ExportFEC />} />
             <Route path="/pdf-export" element={<PDFExport />} />
+            <Route path="/rapports" element={<Rapports />} />
             <Route path="/tarifs" element={<Tarifs />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/abonnement/succes" element={<AbonnementSucces />} />
