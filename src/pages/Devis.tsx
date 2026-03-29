@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useDevis } from '../hooks/useDevis'
 import { useAuthStore } from '../store/authStore'
@@ -48,8 +48,11 @@ export default function Devis() {
   const { devisList, loading, createDevis, duplicateDevis, deleteDevis, updateStatut } = useDevis()
   const [search, setSearch] = useState('')
   const [filterStatut, setFilterStatut] = useState('all')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [modalOpen, setModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  useEffect(() => { if (searchParams.get('new') === '1') { setModalOpen(true); setSearchParams({}, { replace: true }) } }, [searchParams, setSearchParams])
   const [pdfingId, setPdfingId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {

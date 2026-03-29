@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFactures } from '../hooks/useFactures'
 import { useDevis } from '../hooks/useDevis'
@@ -31,9 +31,12 @@ function fmt0(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'curre
 
 export default function Factures() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuthStore()
   const { factures, loading, factureFromDevis, createAcompte, createSituation, createSolde, createAvoir, createDirecte, enregistrerPaiement, updateStatut } = useFactures()
   const [directeOpen, setDirecteOpen] = useState(false)
+
+  useEffect(() => { if (searchParams.get('new') === '1') { setDirecteOpen(true); setSearchParams({}, { replace: true }) } }, [searchParams, setSearchParams])
   const { devisList } = useDevis()
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('all')
