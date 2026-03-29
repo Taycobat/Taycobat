@@ -195,7 +195,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
               <input type="number" value={retenue} onChange={(e) => setRetenue(parseFloat(e.target.value) || 0)} min={0} max={10} className={ic + ' max-w-[120px]'} />
             </div>
 
-            {/* Lignes de travaux — layout 2 niveaux */}
+            {/* Lignes de travaux — tableau 1 ligne par prestation */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className={lb + ' mb-0'}>Lignes de travaux</label>
@@ -204,62 +204,54 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                   Ajouter une ligne
                 </button>
               </div>
-              <div className="space-y-4">
+
+              {/* En-tete colonnes */}
+              <div className="grid grid-cols-[1fr_70px_80px_100px_90px_32px] gap-2 mb-2 px-1">
+                <span className="text-[10px] font-semibold text-gray-400 uppercase">Designation</span>
+                <span className="text-[10px] font-semibold text-gray-400 uppercase text-center">Qte</span>
+                <span className="text-[10px] font-semibold text-gray-400 uppercase text-center">Unite</span>
+                <span className="text-[10px] font-semibold text-gray-400 uppercase text-right">P.U. HT</span>
+                <span className="text-[10px] font-semibold text-gray-400 uppercase text-right">Total HT</span>
+                <span />
+              </div>
+
+              <div className="space-y-2">
                 {lignes.map((l, i) => {
                   const hasError = ligneErrors[i]
                   const lineTotal = l.quantite * l.prix_unitaire
                   return (
-                    <div key={i} className="bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-3">
-                      {/* Niveau 1 : Libelle pleine largeur */}
-                      <div className="relative">
+                    <div key={i}>
+                      <div className="grid grid-cols-[1fr_70px_80px_100px_90px_32px] gap-2 items-start">
                         <textarea
                           value={l.description}
                           onChange={(e) => {
                             setLigne(i, 'description', e.target.value)
                             if (hasError && e.target.value.trim()) setLigneErrors((prev) => { const n = { ...prev }; delete n[i]; return n })
+                            e.target.style.height = 'auto'; e.target.style.height = Math.max(38, e.target.scrollHeight) + 'px'
                           }}
-                          placeholder="Description de la prestation ou des travaux..."
-                          rows={2}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 transition-all resize-y min-h-[60px] ${
+                          placeholder="Description..."
+                          rows={1}
+                          className={`px-3 py-2 rounded-lg border bg-white text-sm focus:outline-none focus:ring-2 transition-all resize-none overflow-hidden min-h-[38px] ${
                             hasError ? 'border-red-300 focus:ring-red-200 focus:border-red-400' : 'border-gray-200 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]'
                           }`}
                         />
-                        {hasError && <p className="text-[11px] text-red-500 mt-1">La designation est obligatoire</p>}
+                        <input type="number" value={l.quantite} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)}
+                          min={0} step="any" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)}
+                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
+                          {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                        <input type="number" value={l.prix_unitaire} onChange={(e) => setLigne(i, 'prix_unitaire', parseFloat(e.target.value) || 0)}
+                          min={0} step={0.01} placeholder="0,00" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        <div className="py-2 text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{lineTotal.toFixed(2)}</div>
+                        {lignes.length > 1 ? (
+                          <button type="button" onClick={() => { removeLigne(i); setLigneErrors((prev) => { const n = { ...prev }; delete n[i]; return n }) }}
+                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        ) : <span />}
                       </div>
-
-                      {/* Niveau 2 : Qte, Unite, PU, Total, Supprimer */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex-shrink-0">
-                          <label className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Qte</label>
-                          <input type="number" value={l.quantite} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)}
-                            min={0} step="any" className={ic + ' w-[80px] text-center'} />
-                        </div>
-                        <div className="flex-shrink-0">
-                          <label className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Unite</label>
-                          <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)} className={ic + ' w-[100px] cursor-pointer'}>
-                            {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
-                          </select>
-                        </div>
-                        <div className="flex-shrink-0">
-                          <label className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Prix unit. HT</label>
-                          <input type="number" value={l.prix_unitaire} onChange={(e) => setLigne(i, 'prix_unitaire', parseFloat(e.target.value) || 0)}
-                            min={0} step={0.01} placeholder="0,00" className={ic + ' w-[150px]'} />
-                        </div>
-                        <div className="flex-shrink-0">
-                          <label className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Total HT</label>
-                          <div className="w-[120px] px-3.5 py-2.5 rounded-xl border border-gray-100 bg-gray-100 text-sm font-semibold text-gray-700 tabular-nums">
-                            {lineTotal.toFixed(2)} &euro;
-                          </div>
-                        </div>
-                        <div className="flex-shrink-0 pt-5">
-                          {lignes.length > 1 && (
-                            <button type="button" onClick={() => { removeLigne(i); setLigneErrors((prev) => { const n = { ...prev }; delete n[i]; return n }) }}
-                              className="p-2 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer" title="Supprimer cette ligne">
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                      {hasError && <p className="text-[11px] text-red-500 mt-0.5 ml-1">La designation est obligatoire</p>}
                     </div>
                   )
                 })}
