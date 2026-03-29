@@ -18,8 +18,8 @@ export const PLANS = {
       'Signature électronique',
       '1 utilisateur',
     ],
-    stripePriceMonthly: import.meta.env.VITE_STRIPE_SOLO_MONTHLY as string | undefined,
-    stripePriceYearly: import.meta.env.VITE_STRIPE_SOLO_YEARLY as string | undefined,
+    stripePriceMonthly: (import.meta.env.VITE_STRIPE_SOLO_MONTHLY as string) || 'price_1TGH7zJtM4sMqIiXKeYT4gSo',
+    stripePriceYearly: (import.meta.env.VITE_STRIPE_SOLO_YEARLY as string) || 'price_1TGH7zJtM4sMqIiX68InoNZG',
   },
   pro: {
     name: 'Pro',
@@ -36,8 +36,8 @@ export const PLANS = {
       "Jusqu'à 5 utilisateurs",
       'Tableaux de bord avancés',
     ],
-    stripePriceMonthly: import.meta.env.VITE_STRIPE_PRO_MONTHLY as string | undefined,
-    stripePriceYearly: import.meta.env.VITE_STRIPE_PRO_YEARLY as string | undefined,
+    stripePriceMonthly: (import.meta.env.VITE_STRIPE_PRO_MONTHLY as string) || 'price_1TGHA2JtM4sMqIiXzwhKJBm8',
+    stripePriceYearly: (import.meta.env.VITE_STRIPE_PRO_YEARLY as string) || 'price_1TGHApJtM4sMqIiXzU7Fr55k',
   },
   business: {
     name: 'Business',
@@ -53,8 +53,8 @@ export const PLANS = {
       'Utilisateurs illimités',
       'Support prioritaire',
     ],
-    stripePriceMonthly: import.meta.env.VITE_STRIPE_BIZ_MONTHLY as string | undefined,
-    stripePriceYearly: import.meta.env.VITE_STRIPE_BIZ_YEARLY as string | undefined,
+    stripePriceMonthly: (import.meta.env.VITE_STRIPE_BIZ_MONTHLY as string) || 'price_1TGHCFJtM4sMqIiXI5WYeeUP',
+    stripePriceYearly: (import.meta.env.VITE_STRIPE_BIZ_YEARLY as string) || 'price_1TGHD8JtM4sMqIiXL26Rt00w',
   },
 } as const
 
