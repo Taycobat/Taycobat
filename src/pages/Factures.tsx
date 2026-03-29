@@ -132,53 +132,64 @@ export default function Factures() {
   async function generatePDF(f: Facture) {
     const doc = new jsPDF()
     const green: [number, number, number] = [26, 158, 82]
-    const entreprise = user?.user_metadata?.entreprise || 'TAYCO BAT'
-    const siret = user?.user_metadata?.siret || ''
+    const mu = user?.user_metadata ?? {}
+    const entreprise = mu.entreprise || 'TAYCO BAT'
+    const siret = mu.siret || ''
+    const formeJ = mu.forme_juridique || ''
+    const adresseE = mu.adresse || ''
+    const telephoneE = mu.telephone || ''
+    const emailPro = mu.email_pro || ''
+    const tvaIntraE = mu.tva_intracom || ''
+    const ibanE = mu.iban || ''
+    const condPaiement = mu.conditions_paiement || '30 jours'
+    const tauxPen = mu.taux_penalites || '3 fois le taux legal'
+    const nomComplet = formeJ ? `${entreprise} ${formeJ}` : entreprise
     const typeName = typeLabel[f.type] ?? 'Facture'
 
     // Load artisan logo
-    const artisanLogoUrl = user?.user_metadata?.logo_url as string | undefined
+    const artisanLogoUrl = mu.logo_url as string | undefined
     let artisanLogoB64: string | null = null
     if (artisanLogoUrl) artisanLogoB64 = await loadImageAsBase64(artisanLogoUrl)
 
-    const adresseE = user?.user_metadata?.adresse || ''
-    const telephoneE = user?.user_metadata?.telephone || ''
-
-    // --- Header blanc professionnel ---
-    let infoX = 14
+    // --- Header blanc professionnel (Art. 289 CGI) ---
+    let infoX = 14; const infoY = 12
     if (artisanLogoB64) {
-      try { doc.addImage(artisanLogoB64, 'PNG', 14, 10, 22, 22) } catch { /* ignore */ }
-      infoX = 40
+      try { doc.addImage(artisanLogoB64, 'PNG', 14, 10, 20, 20) } catch { /* ignore */ }
+      infoX = 38
     }
-    doc.setTextColor(30, 30, 30); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
-    doc.text(entreprise, infoX, 17)
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
-    if (siret) doc.text(`SIRET : ${siret}`, infoX, 23)
-    if (adresseE) doc.text(adresseE, infoX, 28)
-    if (telephoneE) doc.text(telephoneE, infoX, 33)
+    doc.setTextColor(30, 30, 30); doc.setFontSize(14); doc.setFont('helvetica', 'bold')
+    doc.text(nomComplet, infoX, infoY + 5)
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
+    const hLines: string[] = []
+    if (adresseE) hLines.push(adresseE)
+    if (telephoneE) hLines.push(`Tel : ${telephoneE}`)
+    if (emailPro) hLines.push(emailPro)
+    if (siret) hLines.push(`SIRET : ${siret}`)
+    if (tvaIntraE) hLines.push(`TVA : ${tvaIntraE}`)
+    hLines.forEach((l, i) => doc.text(l, infoX, infoY + 11 + i * 4))
 
-    // Document type + number (top right)
+    // Document type + number
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
     doc.text(typeName.toUpperCase(), 196, 16, { align: 'right' })
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
-    doc.text(`N° ${f.numero}`, 196, 23, { align: 'right' })
+    doc.text(`N\u00b0 ${f.numero}`, 196, 23, { align: 'right' })
     doc.setFontSize(8); doc.setTextColor(120, 120, 120)
     doc.text(`Date : ${new Date(f.date_emission || f.created_at).toLocaleDateString('fr-FR')}`, 196, 29, { align: 'right' })
-    if (f.date_echeance) doc.text(`Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 34, { align: 'right' })
+    if (f.date_echeance) doc.text(`Echeance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 34, { align: 'right' })
 
-    // Green separator line
+    // Green separator
+    const sepY = Math.max(38, infoY + 11 + hLines.length * 4 + 2)
     doc.setDrawColor(...green); doc.setLineWidth(0.8)
-    doc.line(14, 38, 196, 38)
+    doc.line(14, sepY, 196, sepY)
 
     // --- Client + metadata ---
-    let y = 44
+    let y = sepY + 6
     if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, 14, y); y += 7 }
-    if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Réf. devis : ${f.devis_display}`, 14, y); y += 7 }
+    if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Ref. devis : ${f.devis_display}`, 14, y); y += 7 }
 
-    // Type-specific info
     if (f.type === 'situation' && f.avancement_pct) {
       doc.setFontSize(9); doc.setTextColor(...green); doc.setFont('helvetica', 'bold')
-      doc.text(`Situation — Avancement ${f.avancement_pct}%`, 14, y); y += 7
+      doc.text(`Situation - Avancement ${f.avancement_pct}%`, 14, y); y += 7
     }
     if (f.type === 'avoir') {
       doc.setFontSize(9); doc.setTextColor(200, 40, 40); doc.setFont('helvetica', 'bold')
@@ -203,15 +214,42 @@ export default function Factures() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
-    doc.text(`Net à payer : ${fmt(f.montant_ttc)}`, 196, finalY + 12, { align: 'right' })
+    doc.text(`Net a payer : ${fmt(f.montant_ttc)}`, 196, finalY + 12, { align: 'right' })
 
     if (f.date_paiement) {
       doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
-      doc.text(`Payé le ${new Date(f.date_paiement!).toLocaleDateString('fr-FR')} par ${f.mode_paiement ?? '—'} — ${fmt(f.montant_paye)}`, 14, finalY + 20)
+      doc.text(`Paye le ${new Date(f.date_paiement!).toLocaleDateString('fr-FR')} par ${f.mode_paiement ?? '-'} - ${fmt(f.montant_paye)}`, 14, finalY + 20)
     }
 
-    doc.setFontSize(7); doc.setTextColor(160, 160, 160)
-    doc.text(`${entreprise} — Généré par TAYCO BAT`, 105, 285, { align: 'center' })
+    // --- Conditions de paiement & mentions legales (Art. 289 CGI) ---
+    let condY = finalY + 28
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.text('CONDITIONS DE REGLEMENT', 14, condY)
+    condY += 5
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
+    doc.text(`Delai de paiement : ${condPaiement} a compter de la date de reception de la facture.`, 14, condY); condY += 4
+    doc.text(`Modes de reglement acceptes : virement bancaire, cheque, carte bancaire.`, 14, condY); condY += 4
+    if (ibanE) { doc.text(`Coordonnees bancaires (IBAN) : ${ibanE}`, 14, condY); condY += 4 }
+    condY += 2
+    doc.setFontSize(6.5); doc.setTextColor(120, 120, 120)
+    doc.text(`Penalites de retard : ${tauxPen}. Exigibles sans rappel prealable (Art. L441-10 Code de commerce).`, 14, condY); condY += 3.5
+    doc.text('Indemnite forfaitaire pour frais de recouvrement : 40 EUR (Art. D441-5 Code de commerce).', 14, condY); condY += 3.5
+    doc.text('Pas d\'escompte pour paiement anticipe.', 14, condY)
+
+    // --- Pied de page legal ---
+    doc.setFontSize(6); doc.setFont('helvetica', 'normal'); doc.setTextColor(150, 150, 150)
+    doc.setDrawColor(200, 200, 200); doc.line(14, 278, 196, 278)
+    const footParts: string[] = [nomComplet]
+    if (mu.capital_social) footParts.push(`Capital : ${mu.capital_social}`)
+    if (mu.rcs) footParts.push(`RCS ${mu.rcs}`)
+    if (siret) footParts.push(`SIRET : ${siret}`)
+    if (tvaIntraE) footParts.push(`TVA : ${tvaIntraE}`)
+    doc.text(footParts.join(' | '), 105, 282, { align: 'center' })
+    if (adresseE || telephoneE || emailPro) {
+      const footLine2 = [adresseE, telephoneE, emailPro].filter(Boolean).join(' | ')
+      doc.text(footLine2, 105, 286, { align: 'center' })
+    }
+
     doc.save(`${f.numero}.pdf`)
   }
 

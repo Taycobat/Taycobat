@@ -12,8 +12,17 @@ export default function Parametres() {
   const [prenom, setPrenom] = useState(meta.prenom || '')
   const [nom, setNom] = useState(meta.nom || '')
   const [entreprise, setEntreprise] = useState(meta.entreprise || '')
+  const [formeJuridique, setFormeJuridique] = useState(meta.forme_juridique || '')
   const [siret, setSiret] = useState(meta.siret || '')
+  const [tvaIntracom, setTvaIntracom] = useState(meta.tva_intracom || '')
+  const [rcs, setRcs] = useState(meta.rcs || '')
+  const [capitalSocial, setCapitalSocial] = useState(meta.capital_social || '')
+  const [adresse, setAdresse] = useState(meta.adresse || '')
   const [telephone, setTelephone] = useState(meta.telephone || '')
+  const [emailPro, setEmailPro] = useState(meta.email_pro || '')
+  const [iban, setIban] = useState(meta.iban || '')
+  const [conditionsPaiement, setConditionsPaiement] = useState(meta.conditions_paiement || '30 jours')
+  const [tauxPenalites, setTauxPenalites] = useState(meta.taux_penalites || '3 fois le taux legal')
   const [photoUrl, setPhotoUrl] = useState(meta.photo_url || '')
   const [logoUrl, setLogoUrl] = useState(meta.logo_url || '')
   const [uploading, setUploading] = useState(false)
@@ -44,7 +53,12 @@ export default function Parametres() {
 
   async function handleSave() {
     setSaving(true)
-    await supabase.auth.updateUser({ data: { prenom, nom, entreprise, siret, telephone, photo_url: photoUrl, logo_url: logoUrl } })
+    await supabase.auth.updateUser({ data: {
+      prenom, nom, entreprise, forme_juridique: formeJuridique, siret, tva_intracom: tvaIntracom,
+      rcs, capital_social: capitalSocial, adresse, telephone, email_pro: emailPro,
+      iban, conditions_paiement: conditionsPaiement, taux_penalites: tauxPenalites,
+      photo_url: photoUrl, logo_url: logoUrl,
+    } })
     setSaving(false); setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -53,6 +67,9 @@ export default function Parametres() {
     await supabase.auth.signOut()
     navigate('/login')
   }
+
+  const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]'
+  const lb = 'block text-xs font-semibold text-gray-400 uppercase mb-1.5'
 
   return (
     <div className="p-8 max-w-[800px] mx-auto">
@@ -122,12 +139,51 @@ export default function Parametres() {
           </div>
         </div>
 
-        <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Nom de l'entreprise</label>
-          <input type="text" value={entreprise} onChange={(e) => setEntreprise(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
-        <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">SIRET</label>
-          <input type="text" value={siret} onChange={(e) => setSiret(e.target.value)} maxLength={17} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label className={lb}>Nom de l'entreprise</label>
+            <input type="text" value={entreprise} onChange={(e) => setEntreprise(e.target.value)} className={ic} /></div>
+          <div><label className={lb}>Forme juridique</label>
+            <select value={formeJuridique} onChange={(e) => setFormeJuridique(e.target.value)} className={ic}>
+              <option value="">-- Choisir --</option>
+              {['Auto-entrepreneur', 'EI', 'EIRL', 'EURL', 'SARL', 'SAS', 'SASU', 'SCI', 'SA'].map((f) => <option key={f} value={f}>{f}</option>)}
+            </select></div>
+        </div>
+        <div><label className={lb}>Adresse complete</label>
+          <input type="text" value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 rue des Artisans, 75001 Paris" className={ic} /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label className={lb}>SIRET</label>
+            <input type="text" value={siret} onChange={(e) => setSiret(e.target.value)} maxLength={17} className={ic + ' font-mono'} /></div>
+          <div><label className={lb}>N° TVA intracommunautaire</label>
+            <input type="text" value={tvaIntracom} onChange={(e) => setTvaIntracom(e.target.value)} placeholder="FR12345678901" className={ic + ' font-mono'} /></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label className={lb}>RCS (ville d'immatriculation)</label>
+            <input type="text" value={rcs} onChange={(e) => setRcs(e.target.value)} placeholder="Paris B 123 456 789" className={ic} /></div>
+          <div><label className={lb}>Capital social</label>
+            <input type="text" value={capitalSocial} onChange={(e) => setCapitalSocial(e.target.value)} placeholder="10 000 EUR" className={ic} /></div>
+        </div>
+        <div><label className={lb}>Email professionnel (affiche sur PDF)</label>
+          <input type="email" value={emailPro} onChange={(e) => setEmailPro(e.target.value)} placeholder="contact@monentreprise.fr" className={ic} /></div>
+      </motion.div>
 
-        {saved && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">Paramètres sauvegardés ✓</div>}
+      {/* Facturation */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 mb-6">
+        <h2 className="text-base font-semibold text-gray-900">Facturation & paiement</h2>
+        <div><label className={lb}>IBAN / RIB</label>
+          <input type="text" value={iban} onChange={(e) => setIban(e.target.value)} placeholder="FR76 1234 5678 9012 3456 7890 123" className={ic + ' font-mono'} /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label className={lb}>Delai de paiement</label>
+            <select value={conditionsPaiement} onChange={(e) => setConditionsPaiement(e.target.value)} className={ic}>
+              {['A reception', '15 jours', '30 jours', '45 jours', '60 jours'].map((c) => <option key={c} value={c}>{c}</option>)}
+            </select></div>
+          <div><label className={lb}>Penalites de retard</label>
+            <select value={tauxPenalites} onChange={(e) => setTauxPenalites(e.target.value)} className={ic}>
+              {['3 fois le taux legal', '10%', '12%', '15%', 'Taux BCE + 10 points'].map((t) => <option key={t} value={t}>{t}</option>)}
+            </select></div>
+        </div>
+
+        {saved && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">Parametres sauvegardes</div>}
 
         <motion.button onClick={handleSave} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
           className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">

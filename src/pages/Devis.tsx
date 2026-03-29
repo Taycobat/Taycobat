@@ -94,57 +94,69 @@ export default function Devis() {
     }))
 
     const doc = new jsPDF()
-    const adresseE = meta.adresse || ''
-    const telephoneE = meta.telephone || ''
+    const m = meta
+    const formeJ = m.forme_juridique || ''
+    const adresseE = m.adresse || ''
+    const telephoneE = m.telephone || ''
+    const emailPro = m.email_pro || ''
+    const tvaIntraE = m.tva_intracom || ''
+    const nomComplet = formeJ ? `${entreprise} ${formeJ}` : entreprise
 
-    // --- Header blanc professionnel ---
-    let infoX = 14
+    // --- Header blanc professionnel (Art. 289 CGI) ---
+    let infoX = 14; let infoY = 12
     if (artisanLogoB64) {
-      try { doc.addImage(artisanLogoB64, 'PNG', 14, 10, 22, 22) } catch { /* ignore */ }
-      infoX = 40
+      try { doc.addImage(artisanLogoB64, 'PNG', 14, 10, 20, 20) } catch { /* ignore */ }
+      infoX = 38
     }
-    doc.setTextColor(30, 30, 30); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
-    doc.text(entreprise, infoX, 17)
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
-    if (siretE) doc.text(`SIRET : ${siretE}`, infoX, 23)
-    if (adresseE) doc.text(adresseE, infoX, 28)
-    if (telephoneE) doc.text(telephoneE, infoX, 33)
+    doc.setTextColor(30, 30, 30); doc.setFontSize(14); doc.setFont('helvetica', 'bold')
+    doc.text(nomComplet, infoX, infoY + 5)
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
+    const lines: string[] = []
+    if (adresseE) lines.push(adresseE)
+    if (telephoneE) lines.push(`Tel : ${telephoneE}`)
+    if (emailPro) lines.push(emailPro)
+    if (siretE) lines.push(`SIRET : ${siretE}`)
+    if (tvaIntraE) lines.push(`TVA : ${tvaIntraE}`)
+    lines.forEach((l, i) => doc.text(l, infoX, infoY + 11 + i * 4))
 
     // Document type + number (top right)
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
-    doc.text(`DEVIS`, 196, 16, { align: 'right' })
+    doc.text('DEVIS', 196, 16, { align: 'right' })
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
-    doc.text(`N° ${d.numero}`, 196, 23, { align: 'right' })
+    doc.text(`N\u00b0 ${d.numero}`, 196, 23, { align: 'right' })
     doc.setFontSize(8); doc.setTextColor(120, 120, 120)
     doc.text(`Date : ${new Date(d.date_devis || d.created_at).toLocaleDateString('fr-FR')}`, 196, 29, { align: 'right' })
     if (d.date_validite) doc.text(`Valable jusqu'au : ${new Date(d.date_validite).toLocaleDateString('fr-FR')}`, 196, 34, { align: 'right' })
 
-    // Green separator line
+    // Green separator
+    const sepY = Math.max(38, infoY + 11 + lines.length * 4 + 2)
     doc.setDrawColor(...green); doc.setLineWidth(0.8)
-    doc.line(14, 38, 196, 38)
+    doc.line(14, sepY, 196, sepY)
 
     // --- Client box ---
+    const clientY = sepY + 4
     doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.3)
-    doc.roundedRect(120, 42, 76, 28, 2, 2)
+    doc.roundedRect(120, clientY, 76, 28, 2, 2)
     doc.setFontSize(7); doc.setTextColor(160, 160, 160); doc.setFont('helvetica', 'bold')
-    doc.text('DESTINATAIRE', 124, 47)
+    doc.text('DESTINATAIRE', 124, clientY + 5)
     doc.setTextColor(30, 30, 30); doc.setFontSize(10)
     if (client) {
-      doc.setFont('helvetica', 'bold'); doc.text(`${client.prenom} ${client.nom}`, 124, 54)
+      doc.setFont('helvetica', 'bold'); doc.text(`${client.prenom} ${client.nom}`, 124, clientY + 12)
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9)
-      if (client.adresse) doc.text(client.adresse, 124, 60)
-      doc.text(`${client.code_postal || ''} ${client.ville || ''}`.trim(), 124, 65)
+      if (client.adresse) doc.text(client.adresse, 124, clientY + 18)
+      doc.text(`${client.code_postal || ''} ${client.ville || ''}`.trim(), 124, clientY + 23)
     } else if (d.client_display) {
-      doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, 54)
+      doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, clientY + 12)
     }
 
     // Devis title
-    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 50); doc.setTextColor(30, 30, 30) }
+    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, clientY + 8); doc.setTextColor(30, 30, 30) }
 
     // --- Table ---
+    const tableStartY = clientY + 34
     const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])
     autoTable(doc, {
-      startY: 78, head: [['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT']],
+      startY: tableStartY, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'Total HT']],
       body: tableData.length > 0 ? tableData : [['—', '', '', '', '']],
       headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
       bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
@@ -170,17 +182,36 @@ export default function Devis() {
     doc.setDrawColor(200, 200, 200)
     doc.roundedRect(14, sigY + 4, 76, 25, 2, 2); doc.roundedRect(120, sigY + 4, 76, 25, 2, 2)
 
+    // Conditions de paiement
+    let condY = sigY + 34
+    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
+    const condPaiement = m.conditions_paiement || '30 jours'
+    doc.text(`Conditions de reglement : ${condPaiement} a compter de la date d'acceptation du devis.`, 14, condY)
+    condY += 4
+    doc.text(`Validite du devis : ${d.date_validite ? new Date(d.date_validite).toLocaleDateString('fr-FR') : '30 jours'}.`, 14, condY)
+
     // Autoliquidation mention if TVA = 0
     if (d.tva_pct === 0) {
-      const alY = sigY + 35
-      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 120, 0)
-      doc.text('AUTOLIQUIDATION DE LA TVA', 14, alY)
+      condY += 6
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 120, 0)
+      doc.text('AUTOLIQUIDATION DE LA TVA', 14, condY)
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 90, 0)
-      doc.text('Article 283-2 nonies du CGI. TVA due par le preneur assujetti.', 14, alY + 5)
+      doc.text('Autoliquidation de la TVA - Article 283-2 nonies du CGI. TVA due par le preneur assujetti.', 14, condY + 4)
     }
 
-    doc.setFontSize(7); doc.setTextColor(160, 160, 160)
-    doc.text(`${entreprise} — Généré par TAYCO BAT`, 105, 285, { align: 'center' })
+    // --- Pied de page legal (Art. 289 CGI) ---
+    doc.setFontSize(6); doc.setFont('helvetica', 'normal'); doc.setTextColor(150, 150, 150)
+    doc.setDrawColor(200, 200, 200); doc.line(14, 278, 196, 278)
+    const footParts: string[] = [nomComplet]
+    if (m.capital_social) footParts.push(`Capital : ${m.capital_social}`)
+    if (m.rcs) footParts.push(`RCS ${m.rcs}`)
+    if (siretE) footParts.push(`SIRET : ${siretE}`)
+    if (tvaIntraE) footParts.push(`TVA : ${tvaIntraE}`)
+    doc.text(footParts.join(' | '), 105, 282, { align: 'center' })
+    if (adresseE || telephoneE || emailPro) {
+      const footLine2 = [adresseE, telephoneE, emailPro].filter(Boolean).join(' | ')
+      doc.text(footLine2, 105, 286, { align: 'center' })
+    }
 
     doc.save(`${d.numero}.pdf`)
     setPdfingId(null)
