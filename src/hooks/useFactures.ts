@@ -21,6 +21,7 @@ export interface Facture {
   date_echeance: string | null
   avancement_pct: number
   retenue_garantie_pct: number
+  adresse_chantier: string | null
   avoir_facture_id: string | null
   date_paiement: string | null
   mode_paiement: string | null
@@ -219,7 +220,7 @@ export function useFactures() {
   // 8. Facture directe (sans devis)
   async function createDirecte(params: {
     client_id: string; montant_ht: number; montant_ttc: number; tva_pct: number
-    date_emission: string; date_echeance: string; retenue_garantie_pct: number
+    date_emission: string; date_echeance: string; retenue_garantie_pct: number; adresse_chantier?: string
   }) {
     if (!user) return { error: 'Non connecte', id: null }
     const numero = await generateNumero('FA')
@@ -227,7 +228,7 @@ export function useFactures() {
       numero, client_id: params.client_id, devis_id: null, type: 'directe',
       montant_ht: params.montant_ht, montant_ttc: params.montant_ttc, tva_pct: params.tva_pct,
       statut: 'brouillon', date_emission: params.date_emission, date_echeance: params.date_echeance,
-      retenue_garantie_pct: params.retenue_garantie_pct, user_id: user.id,
+      retenue_garantie_pct: params.retenue_garantie_pct, adresse_chantier: params.adresse_chantier || null, user_id: user.id,
     }).select('id').single()
     if (error) return { error: error.message, id: null }
     await logAudit({ user_id: user.id, action: 'create', table_name: 'factures', record_id: data.id, details: `Facture directe ${numero} creee` })

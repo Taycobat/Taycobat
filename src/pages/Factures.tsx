@@ -200,6 +200,14 @@ export default function Factures() {
       doc.text('AVOIR', 14, y); y += 7
     }
 
+    // Adresse chantier
+    if (f.adresse_chantier) {
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 100, 100)
+      doc.text('Adresse du chantier :', 14, y); y += 4
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
+      doc.text(f.adresse_chantier, 14, y); y += 7
+    }
+
     y += 6
     const tableBody: string[][] = [[typeName, fmt(f.montant_ht), `${f.tva_pct}%`, fmt(f.montant_ttc)]]
     if (f.retenue_garantie_pct > 0) {

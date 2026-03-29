@@ -39,6 +39,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   const [autoliquidation, setAutoliquidation] = useState(false)
   const [dateDevis, setDateDevis] = useState(new Date().toISOString().split('T')[0])
   const [dateValidite, setDateValidite] = useState(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0])
+  const [adresseChantier, setAdresseChantier] = useState('')
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([emptyLigne()])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -56,7 +57,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
 
   const fetchClients = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase.from('clients').select('id, nom, prenom, entreprise, adresse, ville, code_postal')
+    const { data } = await supabase.from('clients').select('id, nom, prenom, entreprise, adresse, ville, code_postal, adresse_chantier, ville_chantier, code_postal_chantier')
       .eq('user_id', user.id).order('nom')
     setClients((data as Client[]) ?? [])
   }, [user])
@@ -64,7 +65,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (open) {
       fetchClients()
-      setTitre(''); setClientId(''); setTvaPct(10); setAutoliquidation(false)
+      setTitre(''); setClientId(''); setTvaPct(10); setAutoliquidation(false); setAdresseChantier('')
       setDateDevis(new Date().toISOString().split('T')[0])
       setDateValidite(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0])
       setLignes([emptyLigne()]); setError(''); setShowNewClient(false)
@@ -116,6 +117,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
       titre, client_id: clientId || null,
       tva_pct: autoliquidation ? 0 : tvaPct, autoliquidation,
       date_devis: dateDevis, date_validite: dateValidite,
+      adresse_chantier: adresseChantier || undefined,
       lignes: lignes.filter((l) => l.description),
     })
     setSaving(false)
@@ -163,7 +165,11 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     <div>
                       <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Client</label>
                       <div className="flex gap-2">
-                        <select value={clientId} onChange={(e) => setClientId(e.target.value)}
+                        <select value={clientId} onChange={(e) => {
+                          setClientId(e.target.value)
+                          const c = clients.find((x) => x.id === e.target.value) as Record<string, string> | undefined
+                          if (c) { const parts = [c.adresse_chantier, c.ville_chantier, c.code_postal_chantier].filter(Boolean); if (parts.length) setAdresseChantier(parts.join(', ')) }
+                        }}
                           className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
                           <option value="">— Client —</option>
                           {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
@@ -223,6 +229,15 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                       </div>
                     </motion.div>
                   )}
+                </div>
+
+                {/* Adresse chantier */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Adresse du chantier</label>
+                  <input type="text" value={adresseChantier} onChange={(e) => setAdresseChantier(e.target.value)}
+                    placeholder="12 rue des Artisans, 95000 Cergy"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                  <p className="text-[11px] text-gray-400 mt-1">Pre-rempli depuis la fiche client si disponible</p>
                 </div>
 
                 {/* TVA selector — 4 boutons incluant Autoliquidation */}

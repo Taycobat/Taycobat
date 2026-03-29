@@ -15,6 +15,7 @@ export interface DevisRow {
   statut: string
   date_devis: string | null
   date_validite: string | null
+  adresse_chantier: string | null
   user_id: string
   created_at: string
   client_display: string
@@ -39,6 +40,7 @@ export interface DevisCreatePayload {
   autoliquidation?: boolean
   date_devis?: string
   date_validite?: string
+  adresse_chantier?: string
   lignes: Omit<DevisLigne, 'id' | 'devis_id'>[]
 }
 
@@ -49,7 +51,7 @@ function toNum(v: unknown): number {
 }
 
 // Colonnes exactes de la table devis
-const DEVIS_COLUMNS = 'id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, date_devis, date_validite, user_id, created_at'
+const DEVIS_COLUMNS = 'id, numero, titre, client_id, montant_ht, montant_ttc, tva_pct, statut, date_devis, date_validite, adresse_chantier, user_id, created_at'
 
 export function useDevis() {
   const { user } = useAuthStore()
@@ -99,6 +101,7 @@ export function useDevis() {
         tva_pct: toNum(d.tva_pct),
         date_devis: d.date_devis ?? null,
         date_validite: d.date_validite ?? null,
+        adresse_chantier: d.adresse_chantier ?? null,
         client_display: d.client_id ? (clientMap[d.client_id] ?? '') : '',
       })),
     )
@@ -143,6 +146,7 @@ export function useDevis() {
         statut: 'brouillon',
         date_devis: payload.date_devis || today,
         date_validite: payload.date_validite || validite,
+        adresse_chantier: payload.adresse_chantier || null,
         user_id: user.id,
       })
       .select('id')

@@ -21,7 +21,7 @@ interface Props {
   onClose: () => void
   onSubmit: (params: {
     client_id: string; montant_ht: number; montant_ttc: number; tva_pct: number
-    date_emission: string; date_echeance: string; retenue_garantie_pct: number
+    date_emission: string; date_echeance: string; retenue_garantie_pct: number; adresse_chantier?: string
   }) => Promise<{ error: string | null; id: string | null }>
 }
 
@@ -36,6 +36,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
   const [tvaPct, setTvaPct] = useState(10)
   const [autoliquidation, setAutoliquidation] = useState(false)
   const [retenue, setRetenue] = useState(0)
+  const [adresseChantier, setAdresseChantier] = useState('')
   const [lignes, setLignes] = useState<Ligne[]>([{ description: '', quantite: 1, unite: 'u', prix_unitaire: 0 }])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -89,7 +90,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
       client_id: clientId, montant_ht: Math.round(totalHT * 100) / 100,
       montant_ttc: totalTTC, tva_pct: effectiveTva,
       date_emission: dateEmission, date_echeance: dateEcheance,
-      retenue_garantie_pct: retenue,
+      retenue_garantie_pct: retenue, adresse_chantier: adresseChantier || undefined,
     })
     setSaving(false)
     if (res.error) setError(res.error); else onClose()
@@ -118,7 +119,11 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
             <div>
               <label className={lb}>Client</label>
               <div className="flex gap-2">
-                <select value={clientId} onChange={(e) => setClientId(e.target.value)} className={ic + ' flex-1 cursor-pointer'}>
+                <select value={clientId} onChange={(e) => {
+                  setClientId(e.target.value)
+                  const c = clients.find((x) => x.id === e.target.value)
+                  if (c) { const parts = [c.adresse_chantier, c.ville_chantier, c.code_postal_chantier].filter(Boolean); if (parts.length) setAdresseChantier(parts.join(', ')) }
+                }} className={ic + ' flex-1 cursor-pointer'}>
                   <option value="">-- Selectionner --</option>
                   {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
                 </select>
@@ -158,6 +163,14 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                 </button>
               </div>
             )}
+
+            {/* Adresse chantier */}
+            <div>
+              <label className={lb}>Adresse du chantier</label>
+              <input type="text" value={adresseChantier} onChange={(e) => setAdresseChantier(e.target.value)}
+                placeholder="12 rue des Artisans, 95000 Cergy" className={ic} />
+              <p className="text-[11px] text-gray-400 mt-1">Pre-rempli depuis la fiche client si disponible</p>
+            </div>
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">

@@ -152,8 +152,18 @@ export default function Devis() {
     // Devis title
     if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, clientY + 8); doc.setTextColor(30, 30, 30) }
 
+    // Adresse chantier
+    let chantierOffset = 0
+    if (d.adresse_chantier) {
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 100, 100)
+      doc.text('Adresse du chantier :', 14, clientY + 18)
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
+      doc.text(d.adresse_chantier, 14, clientY + 23)
+      chantierOffset = 14
+    }
+
     // --- Table ---
-    const tableStartY = clientY + 34
+    const tableStartY = clientY + 34 + chantierOffset
     const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])
     autoTable(doc, {
       startY: tableStartY, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'Total HT']],
