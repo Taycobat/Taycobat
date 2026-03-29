@@ -320,7 +320,7 @@ export default function Factures() {
           <th className="text-right text-xs font-medium text-gray-400 uppercase px-5 py-3">Actions</th>
         </tr></thead><motion.tbody variants={container} initial="hidden" animate="show">
           {filtered.map((f) => { const st = statutStyle[f.statut] ?? statutStyle.brouillon; return (
-            <motion.tr key={f.id} variants={row} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+            <motion.tr key={f.id} variants={row} onClick={() => generatePDF(f)} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer">
               <td className="px-5 py-3"><span className="font-mono font-medium text-gray-900">{f.numero}</span></td>
               <td className="px-5 py-3"><div className="text-gray-900 truncate max-w-[180px]">{f.client_display || '—'}</div>
                 {f.devis_display && <div className="text-[11px] text-gray-400 truncate max-w-[180px]">{f.devis_display}</div>}
@@ -329,7 +329,7 @@ export default function Factures() {
               <td className="px-5 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${f.type === 'avoir' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>{typeLabel[f.type] ?? f.type}</span></td>
               <td className="px-5 py-3 text-right"><span className={`font-semibold tabular-nums ${f.type === 'avoir' ? 'text-red-600' : 'text-gray-900'}`}>{f.type === 'avoir' ? '- ' : ''}{fmt0(f.montant_ttc)}</span></td>
               <td className="px-5 py-3 text-right">{f.retenue_garantie_pct > 0 ? <span className="text-xs text-amber-600 font-medium">{f.retenue_garantie_pct}%</span> : <span className="text-gray-300">—</span>}</td>
-              <td className="px-5 py-3">
+              <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                 <select value={f.statut} onChange={(e) => updateStatut(f.id, e.target.value)} className={`px-2 py-1 rounded-full text-[11px] font-medium border cursor-pointer appearance-none ${st.cls}`}>
                   <option value="brouillon">Brouillon</option><option value="envoyee">Envoyée</option><option value="payee">Payée</option><option value="impayee">Impayée</option><option value="annulee">Annulée</option>
                 </select>
@@ -341,7 +341,7 @@ export default function Factures() {
               <td className="px-5 py-3">{f.date_paiement
                 ? <div><div className="text-xs text-emerald-600 font-medium">{fmt0(f.montant_paye ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.date_paiement).toLocaleDateString('fr-FR')} · {f.mode_paiement}</div></div>
                 : <span className="text-gray-300 text-xs">—</span>}</td>
-              <td className="px-5 py-3"><div className="flex items-center justify-end gap-0.5">
+              <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}><div className="flex items-center justify-end gap-0.5">
                 <button onClick={() => generatePDF(f)} title="PDF" className="p-1.5 rounded-lg text-gray-400 hover:text-[#1a9e52] hover:bg-emerald-50 transition-all cursor-pointer">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></button>
                 {f.statut !== 'annulee' && f.type !== 'avoir' && <button onClick={() => openModal('paiement', f.id)} title="Paiement" className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer">

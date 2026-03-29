@@ -50,6 +50,7 @@ const kpiConfig = [
   {
     key: 'caMonth' as const,
     label: 'CA du mois',
+    link: '/factures',
     format: formatMoney,
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -63,6 +64,7 @@ const kpiConfig = [
   {
     key: 'devisEnAttente' as const,
     label: 'Devis en attente',
+    link: '/devis',
     format: (n: number) => String(n),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -76,6 +78,7 @@ const kpiConfig = [
   {
     key: 'facturesImpayees' as const,
     label: 'Factures impayées',
+    link: '/factures',
     format: (n: number) => String(n),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -89,6 +92,7 @@ const kpiConfig = [
   {
     key: 'clientsActifs' as const,
     label: 'Clients actifs',
+    link: '/clients',
     format: (n: number) => String(n),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -149,7 +153,8 @@ export default function Dashboard() {
           <motion.div
             key={kpi.key}
             variants={item}
-            className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow"
+            onClick={() => navigate(kpi.link)}
+            className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`w-10 h-10 rounded-xl ${kpi.bgLight} flex items-center justify-center ${kpi.textColor}`}>

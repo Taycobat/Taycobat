@@ -153,7 +153,8 @@ export default function Clients() {
                   <motion.tr
                     key={client.id}
                     variants={row}
-                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                    onClick={() => openEdit(client)}
+                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer"
                   >
                     {/* Client */}
                     <td className="px-6 py-4">
@@ -193,7 +194,7 @@ export default function Clients() {
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEdit(client)}
