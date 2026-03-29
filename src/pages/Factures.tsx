@@ -280,9 +280,9 @@ export default function Factures() {
           <p className="text-gray-500 text-sm mt-0.5">{factures.length} documents &middot; Encaissé : {fmt0(totalPayee)} &middot; Reste dû : {fmt0(totalImpayee)}{totalRetenue > 0 ? ` · Retenue : ${fmt0(totalRetenue)}` : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <motion.button onClick={() => setDirecteOpen(true)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+          <motion.button onClick={() => navigate('/factures/nouvelle')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
             className="px-4 py-2 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20">
-            Nouvelle facture directe
+            Nouvelle facture
           </motion.button>
           {[
             { label: 'Facturer un devis', modal: 'facturer' as const, cls: 'bg-white border border-[#1a9e52] text-[#1a9e52] hover:bg-emerald-50' },
