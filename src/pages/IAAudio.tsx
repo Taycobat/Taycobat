@@ -34,29 +34,52 @@ function fmt(n: number) {
 }
 
 function formatDuration(s: number) {
-  const m = Math.floor(s / 60)
-  const sec = s % 60
-  return `${m}:${String(sec).padStart(2, '0')}`
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result as string
+      // Remove data:audio/...;base64, prefix
+      const base64 = result.split(',')[1] ?? result
+      resolve(base64)
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
 }
 
 export default function IAAudio() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { createDevis } = useDevis()
-  const { recording, audioBlob, duration, analyserData, startRecording, stopRecording, reset } = useAudioRecorder()
+  const { recording, audioBlob, duration, analyserData, error: recorderError, startRecording, stopRecording, reset } = useAudioRecorder()
 
   const [langue, setLangue] = useState('fr')
   const [clients, setClients] = useState<Client[]>([])
   const [clientId, setClientId] = useState('')
   const [tvaPct, setTvaPct] = useState(10)
 
-  // AI results
   const [transcribing, setTranscribing] = useState(false)
   const [transcription, setTranscription] = useState('')
   const [titre, setTitre] = useState('')
   const [lignes, setLignes] = useState<Omit<DevisLigne, 'id' | 'devis_id'>[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [debugLog, setDebugLog] = useState<string[]>([])
+
+  function addLog(msg: string) {
+    console.log(`[IA Audio] ${msg}`)
+    setDebugLog((prev) => [...prev.slice(-9), `${new Date().toLocaleTimeString('fr-FR')} — ${msg}`])
+  }
+
+  function handleSelectLangue(code: string) {
+    setLangue(code)
+    const lang = LANGS.find((l) => l.code === code)
+    addLog(`Langue sélectionnée : ${lang?.flag} ${lang?.label} (${code})`)
+  }
 
   const fetchClients = useCallback(async () => {
     if (!user) return
@@ -67,41 +90,49 @@ export default function IAAudio() {
   useEffect(() => { fetchClients() }, [fetchClients])
 
   async function handleTranscribe() {
-    if (!audioBlob) return
+    if (!audioBlob) { addLog('Erreur : pas de blob audio'); return }
     setTranscribing(true)
     setError('')
     setTranscription('')
     setLignes([])
 
     try {
-      // Convert audio blob to base64
-      const arrayBuffer = await audioBlob.arrayBuffer()
-      const bytes = new Uint8Array(arrayBuffer)
-      let binary = ''
-      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
-      const audio_base64 = btoa(binary)
+      addLog(`Conversion audio en base64 (${audioBlob.size} octets, type: ${audioBlob.type})...`)
+      const audio_base64 = await blobToBase64(audioBlob)
+      addLog(`Base64 prêt (${audio_base64.length} caractères)`)
 
       const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch(
-        `https://uwdfytuvpujhiniotqyl.supabase.co/functions/v1/whisper-transcription`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session?.access_token ?? ''}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ audio_base64, langue }),
-        }
-      )
+      if (!session) { setError('Session expirée — reconnectez-vous'); setTranscribing(false); return }
+
+      const url = 'https://uwdfytuvpujhiniotqyl.supabase.co/functions/v1/whisper-transcription'
+      addLog(`Envoi audio vers Edge Function : ${url}`)
+      addLog(`Langue : ${langue}, Token : ${session.access_token.slice(0, 20)}...`)
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audio_base64, langue }),
+      })
+
+      addLog(`Réponse HTTP : ${res.status} ${res.statusText}`)
 
       const data = await res.json()
+      addLog(`Réponse reçue : ${JSON.stringify(data).slice(0, 200)}...`)
 
       if (data.error) {
         setError(data.error)
+        addLog(`Erreur Edge Function : ${data.error}`)
         if (data.transcription) setTranscription(data.transcription)
       } else {
         setTranscription(data.transcription || '')
         setTitre(data.titre || '')
+        addLog(`Transcription : "${(data.transcription || '').slice(0, 100)}"`)
+        addLog(`Titre suggéré : "${data.titre || ''}"`)
+        addLog(`${(data.lignes || []).length} lignes de devis générées`)
+
         setLignes((data.lignes || []).map((l: Record<string, unknown>) => ({
           description: String(l.description || ''),
           quantite: Number(l.quantite) || 1,
@@ -111,7 +142,9 @@ export default function IAAudio() {
         })))
       }
     } catch (err) {
-      setError(`Erreur réseau : ${String(err)}`)
+      const msg = `Erreur réseau : ${String(err)}`
+      setError(msg)
+      addLog(msg)
     }
 
     setTranscribing(false)
@@ -137,17 +170,11 @@ export default function IAAudio() {
 
   async function handleCreateDevis() {
     if (lignes.length === 0) { setError('Aucune ligne à enregistrer'); return }
-    setSaving(true)
-    setError('')
-    const res = await createDevis({
-      titre,
-      client_id: clientId || null,
-      tva_pct: tvaPct,
-      lignes: lignes.filter((l) => l.description),
-    })
+    setSaving(true); setError('')
+    const res = await createDevis({ titre, client_id: clientId || null, tva_pct: tvaPct, lignes: lignes.filter((l) => l.description) })
     setSaving(false)
     if (res.error) setError(res.error)
-    else navigate('/devis')
+    else { addLog('Devis créé avec succès'); navigate('/devis') }
   }
 
   return (
@@ -161,39 +188,35 @@ export default function IAAudio() {
         {/* Left — Recording */}
         <div className="lg:col-span-2 space-y-6">
           {/* Language selector */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Langue de l'enregistrement</label>
             <div className="grid grid-cols-4 gap-2">
-              {LANGS.map((l) => {
-                const isActive = langue === l.code
-                return (
-                  <button
-                    key={l.code}
-                    type="button"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLangue(l.code) }}
-                    className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none ${
-                      isActive
-                        ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52] ring-2 ring-[#1a9e52]/20 font-semibold'
-                        : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="text-lg leading-none">{l.flag}</span>
-                    <span className="truncate px-1 leading-tight">{l.label}</span>
-                    {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#1a9e52]" />}
-                  </button>
-                )
-              })}
+              {LANGS.map((l) => (
+                <div
+                  key={l.code}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleSelectLangue(l.code)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectLangue(l.code) }}
+                  className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none ${
+                    langue === l.code
+                      ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52] ring-2 ring-[#1a9e52]/20 font-semibold'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="text-lg leading-none">{l.flag}</span>
+                  <span className="truncate px-1 leading-tight">{l.label}</span>
+                  {langue === l.code && <span className="w-1.5 h-1.5 rounded-full bg-[#1a9e52]" />}
+                </div>
+              ))}
             </div>
             <p className="text-xs text-gray-400 mt-2">
               Sélectionné : <span className="font-semibold text-[#1a9e52]">{LANGS.find((l) => l.code === langue)?.flag} {LANGS.find((l) => l.code === langue)?.label}</span>
             </p>
-          </motion.div>
+          </div>
 
           {/* Microphone */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center">
-
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center">
             {/* Waveform */}
             <div className="w-full h-20 mb-6 flex items-end justify-center gap-[2px] bg-gray-50 rounded-xl p-3 overflow-hidden">
               {recording ? (
@@ -212,25 +235,24 @@ export default function IAAudio() {
               )}
             </div>
 
-            {/* Duration */}
             {recording && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-2xl font-mono font-bold text-[#1a9e52] mb-4 tabular-nums">
-                {formatDuration(duration)}
-              </motion.div>
+              <div className="text-2xl font-mono font-bold text-[#1a9e52] mb-4 tabular-nums">{formatDuration(duration)}</div>
             )}
 
             {/* Buttons */}
             <div className="flex items-center gap-4">
               {!recording ? (
-                <motion.button onClick={startRecording} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                <motion.button type="button" onClick={() => { addLog('Démarrage enregistrement...'); startRecording() }}
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   className="w-16 h-16 rounded-full bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center cursor-pointer transition-colors">
                   <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
                 </motion.button>
               ) : (
-                <motion.button onClick={stopRecording} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  animate={{ boxShadow: ['0 0 0 0 rgba(26,158,82,0.4)', '0 0 0 14px rgba(26,158,82,0)', '0 0 0 0 rgba(26,158,82,0.4)'] }}
+                <motion.button type="button" onClick={() => { addLog('Arrêt enregistrement'); stopRecording() }}
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  animate={{ boxShadow: ['0 0 0 0 rgba(239,68,68,0.4)', '0 0 0 14px rgba(239,68,68,0)', '0 0 0 0 rgba(239,68,68,0.4)'] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer">
                   <div className="w-6 h-6 rounded-sm bg-white" />
@@ -239,7 +261,8 @@ export default function IAAudio() {
 
               {audioBlob && !recording && (
                 <>
-                  <motion.button onClick={handleTranscribe} disabled={transcribing} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  <motion.button type="button" onClick={handleTranscribe} disabled={transcribing}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     className="px-5 py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center gap-2">
                     {transcribing ? (
                       <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Transcription...</>
@@ -247,14 +270,17 @@ export default function IAAudio() {
                       <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>Générer le devis</>
                     )}
                   </motion.button>
-                  <button onClick={() => { reset(); setTranscription(''); setLignes([]); setTitre('') }}
+                  <button type="button" onClick={() => { reset(); setTranscription(''); setLignes([]); setTitre(''); setDebugLog([]) }}
                     className="px-4 py-3 text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 rounded-xl cursor-pointer">
                     Recommencer
                   </button>
                 </>
               )}
             </div>
-          </motion.div>
+
+            {/* Recorder error */}
+            {recorderError && <p className="text-sm text-red-500 mt-4">{recorderError}</p>}
+          </div>
 
           {/* Transcription */}
           <AnimatePresence>
@@ -267,8 +293,14 @@ export default function IAAudio() {
             )}
           </AnimatePresence>
 
-          {error && (
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>
+          {error && <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>}
+
+          {/* Debug log */}
+          {debugLog.length > 0 && (
+            <div className="bg-gray-900 rounded-xl p-4 text-[11px] font-mono text-emerald-400 space-y-0.5 overflow-x-auto">
+              <div className="text-gray-500 mb-1">Debug log :</div>
+              {debugLog.map((l, i) => <div key={i}>{l}</div>)}
+            </div>
           )}
         </div>
 
@@ -277,45 +309,34 @@ export default function IAAudio() {
           <AnimatePresence>
             {lignes.length > 0 && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                {/* Header fields */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
                   <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
                     <svg className="w-5 h-5 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                     Devis généré par IA
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Titre</label>
+                    <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Titre</label>
                       <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Client</label>
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+                    <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Client</label>
                       <select value={clientId} onChange={(e) => setClientId(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
                         <option value="">— Client —</option>
                         {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
-                      </select>
-                    </div>
+                      </select></div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-400 uppercase mb-2">TVA</label>
-                    <div className="flex gap-2">
-                      {TVA_OPTIONS.map((o) => (
-                        <button key={o.value} onClick={() => setTvaPct(o.value)}
-                          className={`flex-1 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                            tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                          }`}>{o.label}<span className="block text-[10px] font-normal opacity-60">{o.tag}</span></button>
-                      ))}
-                    </div>
+                  <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-2">TVA</label>
+                    <div className="flex gap-2">{TVA_OPTIONS.map((o) => (
+                      <button key={o.value} type="button" onClick={() => setTvaPct(o.value)}
+                        className={`flex-1 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                          tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        }`}>{o.label}<span className="block text-[10px] font-normal opacity-60">{o.tag}</span></button>
+                    ))}</div>
                   </div>
                 </div>
 
-                {/* Lignes */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                    {lignes.length} ligne{lignes.length > 1 ? 's' : ''} de travaux
-                  </label>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{lignes.length} ligne{lignes.length > 1 ? 's' : ''} de travaux</label>
                   <div className="space-y-2">
                     {lignes.map((l, i) => (
                       <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
@@ -331,7 +352,7 @@ export default function IAAudio() {
                         <input type="number" value={l.prix_unitaire || ''} onChange={(e) => updateLigne(i, 'prix_unitaire', e.target.value)} min={0} step="any"
                           className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
                         <span className="text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.total_ht)}</span>
-                        <button onClick={() => removeLigne(i)} className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 cursor-pointer">
+                        <button type="button" onClick={() => removeLigne(i)} className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 cursor-pointer">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                       </motion.div>
@@ -339,7 +360,6 @@ export default function IAAudio() {
                   </div>
                 </div>
 
-                {/* Totals */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="max-w-xs ml-auto space-y-2">
                     <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium tabular-nums">{fmt(totalHT)}</span></div>
@@ -348,8 +368,7 @@ export default function IAAudio() {
                   </div>
                 </div>
 
-                {/* Save */}
-                <motion.button onClick={handleCreateDevis} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+                <motion.button type="button" onClick={handleCreateDevis} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                   className="w-full py-3.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 text-base">
                   {saving ? 'Création en cours...' : 'Créer le devis'}
                 </motion.button>
@@ -358,8 +377,7 @@ export default function IAAudio() {
           </AnimatePresence>
 
           {lignes.length === 0 && !transcribing && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
               <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -376,7 +394,7 @@ export default function IAAudio() {
                 ))}
                 <span className="text-xs bg-gray-50 px-2 py-1 rounded-lg text-gray-400">+6 langues</span>
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
