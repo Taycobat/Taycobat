@@ -101,17 +101,17 @@ export default function IAAudio() {
       const audio_base64 = await blobToBase64(audioBlob)
       addLog(`Base64 prêt (${audio_base64.length} caractères)`)
 
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { setError('Session expirée — reconnectez-vous'); setTranscribing(false); return }
+      const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3ZGZ5dHV2cHVqaGluaW90cXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg2ODAsImV4cCI6MjA5MDE4NDY4MH0.ZZO6BtB0nZUAgaT3kwlh76wHf6Gs9kknvdlQVnJ3rok'
 
       const url = 'https://uwdfytuvpujhiniotqyl.supabase.co/functions/v1/whisper-transcription'
       addLog(`Envoi audio vers Edge Function : ${url}`)
-      addLog(`Langue : ${langue}, Token : ${session.access_token.slice(0, 20)}...`)
+      addLog(`Langue : ${langue}`)
 
       const res = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${ANON_KEY}`,
+          'apikey': ANON_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ audio_base64, langue }),

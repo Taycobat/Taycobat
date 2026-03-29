@@ -6,8 +6,6 @@
 // A) JSON body: { audio_base64: "...", langue: "fr" }
 // B) FormData:  audio (File) + langue (string)
 
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -30,7 +28,7 @@ function err(message: string, status = 500) {
   return new Response(JSON.stringify({ error: message }), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
