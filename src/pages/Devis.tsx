@@ -94,43 +94,57 @@ export default function Devis() {
     }))
 
     const doc = new jsPDF()
+    const adresseE = meta.adresse || ''
+    const telephoneE = meta.telephone || ''
 
-    // Header
-    doc.setFillColor(...green); doc.rect(0, 0, 210, 32, 'F')
-    // Artisan logo in header
-    let textX = 14
+    // --- Header blanc professionnel ---
+    let infoX = 14
     if (artisanLogoB64) {
-      try { doc.addImage(artisanLogoB64, 'PNG', 10, 4, 24, 24) } catch { /* ignore */ }
-      textX = 38
+      try { doc.addImage(artisanLogoB64, 'PNG', 14, 10, 22, 22) } catch { /* ignore */ }
+      infoX = 40
     }
-    doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
-    doc.text(entreprise, textX, 15)
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-    doc.text(`SIRET : ${siretE}`, textX, 22)
-    doc.text(`DEVIS N° ${d.numero}`, 196, 15, { align: 'right' })
-    doc.text(`Date : ${new Date(d.date_devis || d.created_at).toLocaleDateString('fr-FR')}`, 196, 22, { align: 'right' })
-    if (d.date_validite) doc.text(`Valable jusqu'au : ${new Date(d.date_validite).toLocaleDateString('fr-FR')}`, 196, 27, { align: 'right' })
+    doc.setTextColor(30, 30, 30); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
+    doc.text(entreprise, infoX, 17)
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
+    if (siretE) doc.text(`SIRET : ${siretE}`, infoX, 23)
+    if (adresseE) doc.text(adresseE, infoX, 28)
+    if (telephoneE) doc.text(telephoneE, infoX, 33)
 
-    // Client box
-    doc.setTextColor(50, 50, 50); doc.setDrawColor(200, 200, 200)
-    doc.roundedRect(120, 38, 76, 28, 2, 2)
-    doc.setFontSize(8); doc.setTextColor(130, 130, 130); doc.text('DESTINATAIRE', 124, 43)
+    // Document type + number (top right)
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.text(`DEVIS`, 196, 16, { align: 'right' })
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
+    doc.text(`N° ${d.numero}`, 196, 23, { align: 'right' })
+    doc.setFontSize(8); doc.setTextColor(120, 120, 120)
+    doc.text(`Date : ${new Date(d.date_devis || d.created_at).toLocaleDateString('fr-FR')}`, 196, 29, { align: 'right' })
+    if (d.date_validite) doc.text(`Valable jusqu'au : ${new Date(d.date_validite).toLocaleDateString('fr-FR')}`, 196, 34, { align: 'right' })
+
+    // Green separator line
+    doc.setDrawColor(...green); doc.setLineWidth(0.8)
+    doc.line(14, 38, 196, 38)
+
+    // --- Client box ---
+    doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.3)
+    doc.roundedRect(120, 42, 76, 28, 2, 2)
+    doc.setFontSize(7); doc.setTextColor(160, 160, 160); doc.setFont('helvetica', 'bold')
+    doc.text('DESTINATAIRE', 124, 47)
     doc.setTextColor(30, 30, 30); doc.setFontSize(10)
     if (client) {
-      doc.setFont('helvetica', 'bold'); doc.text(`${client.prenom} ${client.nom}`, 124, 50)
+      doc.setFont('helvetica', 'bold'); doc.text(`${client.prenom} ${client.nom}`, 124, 54)
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9)
-      if (client.adresse) doc.text(client.adresse, 124, 56)
-      doc.text(`${client.code_postal || ''} ${client.ville || ''}`.trim(), 124, 61)
+      if (client.adresse) doc.text(client.adresse, 124, 60)
+      doc.text(`${client.code_postal || ''} ${client.ville || ''}`.trim(), 124, 65)
     } else if (d.client_display) {
-      doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, 50)
+      doc.setFont('helvetica', 'bold'); doc.text(d.client_display, 124, 54)
     }
 
-    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 46); doc.setTextColor(30, 30, 30) }
+    // Devis title
+    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, 50); doc.setTextColor(30, 30, 30) }
 
-    // Table
+    // --- Table ---
     const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt2(l.prix_unitaire), fmt2(l.total_ht)])
     autoTable(doc, {
-      startY: 75, head: [['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT']],
+      startY: 78, head: [['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT']],
       body: tableData.length > 0 ? tableData : [['—', '', '', '', '']],
       headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
       bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },

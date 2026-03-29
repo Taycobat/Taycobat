@@ -141,36 +141,51 @@ export default function Factures() {
     let artisanLogoB64: string | null = null
     if (artisanLogoUrl) artisanLogoB64 = await loadImageAsBase64(artisanLogoUrl)
 
-    doc.setFillColor(...green); doc.rect(0, 0, 210, 30, 'F')
-    // Artisan logo in header
-    let textX = 14
-    if (artisanLogoB64) {
-      try { doc.addImage(artisanLogoB64, 'PNG', 10, 3, 22, 22) } catch { /* ignore */ }
-      textX = 36
-    }
-    doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
-    doc.text(entreprise, textX, 13)
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-    if (siret) doc.text(`SIRET : ${siret}`, textX, 20)
-    doc.setFontSize(10); doc.text(`${typeName} N° ${f.numero}`, 196, 12, { align: 'right' })
-    doc.setFontSize(8); doc.text(`Date : ${new Date(f.date_emission || f.created_at).toLocaleDateString('fr-FR')}`, 196, 19, { align: 'right' })
-    if (f.date_echeance) doc.text(`Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 24, { align: 'right' })
+    const adresseE = user?.user_metadata?.adresse || ''
+    const telephoneE = user?.user_metadata?.telephone || ''
 
-    let y = 40
-    if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, 14, y); y += 8 }
-    if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Réf. devis : ${f.devis_display}`, 14, y); y += 8 }
+    // --- Header blanc professionnel ---
+    let infoX = 14
+    if (artisanLogoB64) {
+      try { doc.addImage(artisanLogoB64, 'PNG', 14, 10, 22, 22) } catch { /* ignore */ }
+      infoX = 40
+    }
+    doc.setTextColor(30, 30, 30); doc.setFontSize(16); doc.setFont('helvetica', 'bold')
+    doc.text(entreprise, infoX, 17)
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
+    if (siret) doc.text(`SIRET : ${siret}`, infoX, 23)
+    if (adresseE) doc.text(adresseE, infoX, 28)
+    if (telephoneE) doc.text(telephoneE, infoX, 33)
+
+    // Document type + number (top right)
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.text(typeName.toUpperCase(), 196, 16, { align: 'right' })
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
+    doc.text(`N° ${f.numero}`, 196, 23, { align: 'right' })
+    doc.setFontSize(8); doc.setTextColor(120, 120, 120)
+    doc.text(`Date : ${new Date(f.date_emission || f.created_at).toLocaleDateString('fr-FR')}`, 196, 29, { align: 'right' })
+    if (f.date_echeance) doc.text(`Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`, 196, 34, { align: 'right' })
+
+    // Green separator line
+    doc.setDrawColor(...green); doc.setLineWidth(0.8)
+    doc.line(14, 38, 196, 38)
+
+    // --- Client + metadata ---
+    let y = 44
+    if (f.client_display) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(f.client_display, 14, y); y += 7 }
+    if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Réf. devis : ${f.devis_display}`, 14, y); y += 7 }
 
     // Type-specific info
     if (f.type === 'situation' && f.avancement_pct) {
-      doc.setFontSize(9); doc.setTextColor(26, 158, 82); doc.setFont('helvetica', 'bold')
-      doc.text(`Situation — Avancement ${f.avancement_pct}%`, 14, y); y += 8
+      doc.setFontSize(9); doc.setTextColor(...green); doc.setFont('helvetica', 'bold')
+      doc.text(`Situation — Avancement ${f.avancement_pct}%`, 14, y); y += 7
     }
     if (f.type === 'avoir') {
       doc.setFontSize(9); doc.setTextColor(200, 40, 40); doc.setFont('helvetica', 'bold')
-      doc.text('AVOIR', 14, y); y += 8
+      doc.text('AVOIR', 14, y); y += 7
     }
 
-    y += 4
+    y += 6
     const tableBody: string[][] = [[typeName, fmt(f.montant_ht), `${f.tva_pct}%`, fmt(f.montant_ttc)]]
     if (f.retenue_garantie_pct > 0) {
       const retenueAmount = Math.round(f.montant_ttc * f.retenue_garantie_pct / 100 * 100) / 100
