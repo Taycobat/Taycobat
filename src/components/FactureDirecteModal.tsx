@@ -199,7 +199,9 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
               <div className="space-y-3">
                 {lignes.map((l, i) => (
                   <div key={i} className="flex gap-2 items-start">
-                    <input type="text" value={l.description} onChange={(e) => setLigne(i, 'description', e.target.value)} placeholder="Description" className={ic + ' flex-1'} />
+                    <textarea value={l.description} onChange={(e) => { setLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+                      placeholder="Ex: Pose carrelage 60x60 salle de bain, preparation support, joints epoxy" rows={2}
+                      className={ic + ' flex-1 resize-none overflow-hidden'} />
                     <input type="number" value={l.quantite} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)} min={0} className={ic + ' w-16 text-center'} />
                     <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)} className={ic + ' w-20 cursor-pointer'}>
                       {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}

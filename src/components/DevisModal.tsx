@@ -305,8 +305,9 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     {lignes.map((l, i) => (
                       <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                         className="grid grid-cols-1 sm:grid-cols-[1fr_70px_60px_100px_90px_32px] gap-2 items-center bg-gray-50/50 rounded-xl p-2 border border-gray-100">
-                        <input type="text" value={l.description} onChange={(e) => updateLigne(i, 'description', e.target.value)} placeholder="Désignation"
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                        <textarea value={l.description} onChange={(e) => { updateLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+                          placeholder="Ex: Pose carrelage 60x60, preparation support, joints epoxy" rows={2}
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all resize-none overflow-hidden" />
                         <input type="number" value={l.quantite || ''} onChange={(e) => updateLigne(i, 'quantite', e.target.value)} min={0} step="any"
                           className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
                         <select value={l.unite} onChange={(e) => updateLigne(i, 'unite', e.target.value)}

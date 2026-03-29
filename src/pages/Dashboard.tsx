@@ -104,7 +104,7 @@ const kpiConfig = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { kpis, recentDevis, caData, loading } = useDashboardData()
+  const { kpis, recentDevis, recentFactures, caData, loading } = useDashboardData()
   const displayName = getDisplayName(user)
 
   return (
@@ -238,70 +238,101 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* Recent devis */}
+        {/* Recent documents */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
           className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm"
         >
+          {/* Factures directes KPI */}
+          {kpis.facturesDirectes > 0 && (
+            <div className="mb-5 p-3 bg-blue-50 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg>
+                </div>
+                <div><span className="text-xs font-semibold text-blue-700">{kpis.facturesDirectes} factures directes</span>
+                <span className="block text-[11px] text-blue-500">{formatMoney(kpis.facturesDirectesMontant)}</span></div>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-semibold text-gray-900">Derniers devis</h2>
-            <button className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer">
-              Voir tout
-            </button>
+            <h2 className="text-base font-semibold text-gray-900">Dernieres factures</h2>
+            <button onClick={() => navigate('/factures')} className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer">Voir tout</button>
           </div>
 
           {loading ? (
-            <div className="space-y-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-14 bg-gray-50 rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : recentDevis.length === 0 ? (
-            <div className="text-center py-10">
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <p className="text-sm text-gray-500 mb-1">Aucun devis pour le moment</p>
-              <p className="text-xs text-gray-400">
-                Créez votre premier devis avec l'IA
-              </p>
+            <div className="space-y-4">{[...Array(4)].map((_, i) => <div key={i} className="h-14 bg-gray-50 rounded-xl animate-pulse" />)}</div>
+          ) : recentFactures.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-sm text-gray-500 mb-1">Aucune facture pour le moment</p>
+              <p className="text-xs text-gray-400">Creez une facture depuis un devis ou directement</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {recentDevis.map((devis, i) => (
-                <motion.div
-                  key={devis.id}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + i * 0.05 }}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition-colors">
-                    <svg className="w-4 h-4 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900 truncate">
-                        {devis.numero}
-                      </span>
-                      {statutBadge(devis.statut)}
+              {recentFactures.map((f, i) => {
+                const factureStatut: Record<string, { label: string; cls: string }> = {
+                  brouillon: { label: 'Brouillon', cls: 'bg-gray-50 text-gray-600 border-gray-200' },
+                  payee: { label: 'Payee', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                  impayee: { label: 'Impayee', cls: 'bg-red-50 text-red-600 border-red-200' },
+                  envoyee: { label: 'Envoyee', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+                }
+                const st = factureStatut[f.statut] ?? factureStatut.brouillon
+                return (
+                  <motion.div key={f.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.05 }}
+                    onClick={() => navigate('/factures')}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.type === 'directe' ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-emerald-50 group-hover:bg-emerald-100'}`}>
+                      <svg className={`w-4 h-4 ${f.type === 'directe' ? 'text-blue-600' : 'text-[#1a9e52]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                      </svg>
                     </div>
-                    <div className="text-xs text-gray-400 mt-0.5">
-                      {devis.numero} &middot; {new Date(devis.created_at).toLocaleDateString('fr-FR')}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900 truncate">{f.numero}</span>
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border ${st.cls}`}>{st.label}</span>
+                        {f.type === 'directe' && <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">Directe</span>}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">{new Date(f.created_at).toLocaleDateString('fr-FR')}</div>
                     </div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 flex-shrink-0">
-                    {formatMoney(devis.montant_ttc)}
-                  </span>
-                </motion.div>
-              ))}
+                    <span className="text-sm font-semibold text-gray-900 flex-shrink-0">{formatMoney(f.montant_ttc)}</span>
+                  </motion.div>
+                )
+              })}
             </div>
+          )}
+
+          {/* Derniers devis */}
+          {recentDevis.length > 0 && (
+            <>
+              <div className="flex items-center justify-between mt-6 mb-4 pt-4 border-t border-gray-100">
+                <h2 className="text-base font-semibold text-gray-900">Derniers devis</h2>
+                <button onClick={() => navigate('/devis')} className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer">Voir tout</button>
+              </div>
+              <div className="space-y-3">
+                {recentDevis.map((devis, i) => (
+                  <motion.div key={devis.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 + i * 0.05 }}
+                    onClick={() => navigate(`/devis/${devis.id}`)}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition-colors">
+                      <svg className="w-4 h-4 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900 truncate">{devis.numero}</span>
+                        {statutBadge(devis.statut)}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">{new Date(devis.created_at).toLocaleDateString('fr-FR')}</div>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 flex-shrink-0">{formatMoney(devis.montant_ttc)}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </>
           )}
         </motion.div>
       </div>

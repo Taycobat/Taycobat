@@ -7,6 +7,8 @@ export interface KpiData {
   facturesImpayees: number
   clientsActifs: number
   devisEnAttente: number
+  facturesDirectes: number
+  facturesDirectesMontant: number
 }
 
 export interface CaDataPoint {
@@ -19,6 +21,16 @@ export interface RecentDevis {
   numero: string
   montant_ttc: number
   statut: string
+  created_at: string
+}
+
+export interface RecentFacture {
+  id: string
+  numero: string
+  montant_ttc: number
+  type: string
+  statut: string
+  client_display: string
   created_at: string
 }
 
@@ -35,8 +47,11 @@ export function useDashboardData() {
     facturesImpayees: 0,
     clientsActifs: 0,
     devisEnAttente: 0,
+    facturesDirectes: 0,
+    facturesDirectesMontant: 0,
   })
   const [recentDevis, setRecentDevis] = useState<RecentDevis[]>([])
+  const [recentFactures, setRecentFactures] = useState<RecentFacture[]>([])
   const [caData, setCaData] = useState<CaDataPoint[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -50,7 +65,7 @@ export function useDashboardData() {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-      const [caRes, impayeesRes, clientsRes, devisAttenteRes, recentDevisRes] =
+      const [caRes, impayeesRes, clientsRes, devisAttenteRes, recentDevisRes, directesRes, recentFacturesRes] =
         await Promise.all([
           // 1. CA du mois = factures payee ou envoyee du mois en cours
           supabase
@@ -89,6 +104,21 @@ export function useDashboardData() {
             .eq('user_id', uid)
             .order('created_at', { ascending: false })
             .limit(5),
+
+          // Factures directes
+          supabase
+            .from('factures')
+            .select('montant_ttc')
+            .eq('user_id', uid)
+            .eq('type', 'directe'),
+
+          // 5 dernieres factures
+          supabase
+            .from('factures')
+            .select('id, numero, montant_ttc, type, statut, created_at')
+            .eq('user_id', uid)
+            .order('created_at', { ascending: false })
+            .limit(5),
         ])
 
       // CA du mois
@@ -97,17 +127,28 @@ export function useDashboardData() {
       // Clients actifs = nombre de client_id distincts dans factures
       const uniqueClients = new Set((clientsRes.data ?? []).map((r) => r.client_id).filter(Boolean))
 
+      const directesData = directesRes.data ?? []
       setKpis({
         caMonth,
         facturesImpayees: impayeesRes.count ?? 0,
         clientsActifs: uniqueClients.size,
         devisEnAttente: devisAttenteRes.count ?? 0,
+        facturesDirectes: directesData.length,
+        facturesDirectesMontant: directesData.reduce((s, r) => s + toNumber(r.montant_ttc), 0),
       })
 
       setRecentDevis(
         (recentDevisRes.data ?? []).map((d) => ({
           ...d,
           montant_ttc: toNumber(d.montant_ttc),
+        })),
+      )
+
+      setRecentFactures(
+        (recentFacturesRes.data ?? []).map((f) => ({
+          ...f,
+          montant_ttc: toNumber(f.montant_ttc),
+          client_display: '',
         })),
       )
 
@@ -138,5 +179,5 @@ export function useDashboardData() {
     fetchData()
   }, [user])
 
-  return { kpis, recentDevis, caData, loading }
+  return { kpis, recentDevis, recentFactures, caData, loading }
 }
