@@ -1,17 +1,29 @@
+import { useState, useEffect } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
+import SplashScreen from './SplashScreen'
 
 export default function ProtectedRoute() {
-  const { session, loading } = useAuthStore()
+  const { session, user, loading } = useAuthStore()
+  const [showSplash, setShowSplash] = useState(true)
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => setShowSplash(false), 1200)
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
+
+  if (loading || showSplash) {
+    const prenom = user?.user_metadata?.prenom || ''
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-[#1a9e52] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Chargement...</span>
-        </div>
-      </div>
+      <AnimatePresence>
+        <SplashScreen
+          message={prenom ? `Bonjour ${prenom}...` : 'Chargement de votre espace...'}
+          duration={1200}
+        />
+      </AnimatePresence>
     )
   }
 

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { t, languages } from '../lib/i18n'
 import { useLangStore } from '../store/langStore'
 import { useAuthStore } from '../store/authStore'
 import LanguageSelector from '../components/LanguageSelector'
+import SplashScreen from '../components/SplashScreen'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -19,6 +20,8 @@ export default function Login() {
   const dir = languages.find((l) => l.code === lang)?.dir ?? 'ltr'
   const isRtl = dir === 'rtl'
 
+  const [showSplash, setShowSplash] = useState(false)
+  const [splashName, setSplashName] = useState('')
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,12 +35,15 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
-    if (error) {
+    if (err) {
       setError(t(lang, 'loginError'))
     } else {
-      navigate('/dashboard')
+      const prenom = data.user?.user_metadata?.prenom || data.user?.user_metadata?.full_name || ''
+      setSplashName(prenom)
+      setShowSplash(true)
+      setTimeout(() => navigate('/dashboard'), 1500)
     }
   }
 
@@ -66,6 +72,8 @@ export default function Login() {
   }
 
   return (
+    <>
+    <AnimatePresence>{showSplash && <SplashScreen message={splashName ? `Bonjour ${splashName}...` : 'Chargement de votre espace...'} />}</AnimatePresence>
     <div dir={dir} className="min-h-screen flex">
       {/* Left panel - branding */}
       <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1a9e52] via-[#15803d] to-[#0d5c2b]">
@@ -324,5 +332,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </>
   )
 }
