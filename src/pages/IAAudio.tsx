@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { useDevis } from '../hooks/useDevis'
+import { clientDisplayName } from '../hooks/useClients'
 import type { Client } from '../hooks/useClients'
 import type { DevisLigne } from '../hooks/useDevis'
 
@@ -65,8 +66,10 @@ export default function IAAudio() {
 
   // Quick client creation
   const [showNewClient, setShowNewClient] = useState(false)
+  const [newType, setNewType] = useState<'particulier' | 'societe'>('particulier')
   const [newNom, setNewNom] = useState('')
   const [newPrenom, setNewPrenom] = useState('')
+  const [newRaisonSociale, setNewRaisonSociale] = useState('')
   const [newEmail, setNewEmail] = useState('')
   const [newTel, setNewTel] = useState('')
   const [newVille, setNewVille] = useState('')
@@ -100,17 +103,20 @@ export default function IAAudio() {
   useEffect(() => { fetchClients() }, [fetchClients])
 
   async function handleCreateClient() {
-    if (!user || !newNom) return
+    if (!user) return
+    if (newType === 'societe' && !newRaisonSociale) return
+    if (newType === 'particulier' && !newNom) return
     setCreatingClient(true)
-    const { data, error: err } = await supabase.from('clients')
-      .insert({ nom: newNom, prenom: newPrenom, email: newEmail, telephone: newTel, ville: newVille, user_id: user.id })
-      .select('id').single()
+    const insert = newType === 'societe'
+      ? { type_client: 'societe', raison_sociale: newRaisonSociale, nom_contact: newNom, email: newEmail, telephone: newTel, ville: newVille, nom: '', prenom: '', user_id: user.id }
+      : { type_client: 'particulier', nom: newNom, prenom: newPrenom, email: newEmail, telephone: newTel, ville: newVille, user_id: user.id }
+    const { data, error: err } = await supabase.from('clients').insert(insert).select('id').single()
     setCreatingClient(false)
     if (err) { setError(err.message); return }
     await fetchClients()
     setClientId(data.id)
     setShowNewClient(false)
-    setNewNom(''); setNewPrenom(''); setNewEmail(''); setNewTel(''); setNewVille('')
+    setNewNom(''); setNewPrenom(''); setNewEmail(''); setNewTel(''); setNewVille(''); setNewRaisonSociale('')
   }
 
   async function handleTranscribe() {
@@ -347,7 +353,7 @@ export default function IAAudio() {
                         <select value={clientId} onChange={(e) => setClientId(e.target.value)}
                           className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
                           <option value="">— Client —</option>
-                          {clients.map((c) => <option key={c.id} value={c.id}>{c.prenom} {c.nom}{c.entreprise ? ` — ${c.entreprise}` : ''}</option>)}
+                          {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
                         </select>
                         <button type="button" onClick={() => setShowNewClient(!showNewClient)} title="Nouveau client"
                           className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52] hover:border-[#1a9e52]'}`}>
@@ -358,22 +364,37 @@ export default function IAAudio() {
                   </div>
                   {showNewClient && (
                     <div className="border border-[#1a9e52]/20 bg-emerald-50/30 rounded-xl p-4 space-y-3">
-                      <div className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider">Nouveau client rapide</div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <input type="text" value={newPrenom} onChange={(e) => setNewPrenom(e.target.value)} placeholder="Prénom"
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
-                        <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom *"
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
-                        <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
-                        <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider">Nouveau client</div>
+                        <div className="flex bg-gray-100 rounded-lg p-0.5">
+                          <button type="button" onClick={() => setNewType('particulier')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'particulier' ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>Particulier</button>
+                          <button type="button" onClick={() => setNewType('societe')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'societe' ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>Société</button>
+                        </div>
                       </div>
-                      <input type="text" value={newVille} onChange={(e) => setNewVille(e.target.value)} placeholder="Ville"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                      {newType === 'societe' ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <input type="text" value={newRaisonSociale} onChange={(e) => setNewRaisonSociale(e.target.value)} placeholder="Raison sociale *"
+                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom contact"
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          <input type="text" value={newPrenom} onChange={(e) => setNewPrenom(e.target.value)} placeholder="Prénom"
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom *"
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        </div>
+                      )}
                       <div className="flex justify-end gap-2">
                         <button type="button" onClick={() => setShowNewClient(false)} className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
-                        <button type="button" onClick={handleCreateClient} disabled={creatingClient || !newNom}
+                        <button type="button" onClick={handleCreateClient} disabled={creatingClient || (newType === 'societe' ? !newRaisonSociale : !newNom)}
                           className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-lg disabled:opacity-50 cursor-pointer">
                           {creatingClient ? 'Création...' : 'Créer et sélectionner'}
                         </button>
