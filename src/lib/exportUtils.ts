@@ -39,40 +39,44 @@ export interface FactureForFEC {
   tva_pct: number; client_display: string; client_id: string | null; statut: string
 }
 
-export function generateFEC(factures: FactureForFEC[]): string {
+import { venteCompte as vc, tvaCompte as tc, PLAN_DEFAUT, type PlanComptable } from './planComptable'
+
+export function generateFEC(factures: FactureForFEC[], pc?: PlanComptable): string {
+  const plan = pc ?? PLAN_DEFAUT
   const lines: string[] = [FEC_HEADERS.join('\t')]
   let ecNum = 1
 
   for (const f of factures) {
     const dt = fecDate(f.date_emission || '')
     const tva = Math.round((f.montant_ttc - f.montant_ht) * 100) / 100
-    const clientNum = f.client_id ? `411${f.client_id.substring(0, 6).toUpperCase()}` : '411000'
+    const clientNum = f.client_id ? `${plan.client.substring(0, 3)}${f.client_id.substring(0, 6).toUpperCase()}` : plan.client
     const num = String(ecNum).padStart(6, '0')
+    const vente = vc(plan, f.tva_pct)
 
-    // Client debit line (411)
+    // Client debit line
     lines.push([
-      'VE', 'Journal des ventes', num, dt,
+      plan.journal_ventes, 'Journal des ventes', num, dt,
       clientNum, f.client_display || 'Client', clientNum, f.client_display || 'Client',
       f.numero, dt, `Facture ${f.numero}`,
       fecAmount(f.montant_ttc), fecAmount(0), '', '',
       dt, fecAmount(f.montant_ttc), 'EUR',
     ].join('\t'))
 
-    // Revenue credit line (706)
+    // Revenue credit line
     lines.push([
-      'VE', 'Journal des ventes', num, dt,
-      '706000', 'Prestations de services', '', '',
+      plan.journal_ventes, 'Journal des ventes', num, dt,
+      vente.num, vente.lib, '', '',
       f.numero, dt, `Facture ${f.numero}`,
       fecAmount(0), fecAmount(f.montant_ht), '', '',
       dt, fecAmount(f.montant_ht), 'EUR',
     ].join('\t'))
 
-    // TVA credit line (44571)
+    // TVA credit line
     if (tva > 0) {
-      const tvaCompte = f.tva_pct === 5.5 ? '445711' : f.tva_pct === 10 ? '445712' : '445713'
+      const tvaC = tc(plan, f.tva_pct)
       lines.push([
-        'VE', 'Journal des ventes', num, dt,
-        tvaCompte, `TVA collectee ${f.tva_pct}%`, '', '',
+        plan.journal_ventes, 'Journal des ventes', num, dt,
+        tvaC.num, tvaC.lib, '', '',
         f.numero, dt, `TVA facture ${f.numero}`,
         fecAmount(0), fecAmount(tva), '', '',
         dt, fecAmount(tva), 'EUR',
@@ -85,8 +89,8 @@ export function generateFEC(factures: FactureForFEC[]): string {
   return lines.join('\n')
 }
 
-export function downloadFEC(filename: string, factures: FactureForFEC[]) {
-  const content = generateFEC(factures)
+export function downloadFEC(filename: string, factures: FactureForFEC[], pc?: PlanComptable) {
+  const content = generateFEC(factures, pc)
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a'); a.href = url; a.download = filename; a.click()

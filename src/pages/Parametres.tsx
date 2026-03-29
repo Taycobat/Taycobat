@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import { uploadFile } from '../lib/storage'
 import { searchSiret } from '../lib/siret'
+import { getPlanComptable, PLAN_DEFAUT, PLAN_FIELDS, type PlanComptable } from '../lib/planComptable'
 import { useNavigate } from 'react-router-dom'
 
 export default function Parametres() {
@@ -26,6 +27,15 @@ export default function Parametres() {
   const [tauxPenalites, setTauxPenalites] = useState(meta.taux_penalites || '3 fois le taux legal')
   const [searching, setSearching] = useState(false)
   const [siretFound, setSiretFound] = useState(false)
+
+  // Plan comptable
+  const [planComptable, setPlanComptable] = useState<PlanComptable>(() => getPlanComptable(meta))
+  const [pcSaved, setPcSaved] = useState(false)
+
+  // Expert-comptable
+  const [emailExpert, setEmailExpert] = useState(meta.email_expert || '')
+  const [inviting, setInviting] = useState(false)
+  const [invited, setInvited] = useState(false)
 
   async function handleSiretSearch() {
     if (!siret || siret.replace(/\s/g, '').length < 9) return
@@ -229,7 +239,75 @@ export default function Parametres() {
         </motion.button>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+      {/* Plan comptable */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Plan comptable</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Personnalisez les comptes pour vos exports FEC et rapports</p>
+          </div>
+          <button type="button" onClick={() => { setPlanComptable({ ...PLAN_DEFAUT }); setPcSaved(false) }}
+            className="text-xs font-medium text-gray-400 hover:text-gray-600 cursor-pointer">Reinitialiser</button>
+        </div>
+
+        {(() => {
+          const groups = [...new Set(PLAN_FIELDS.map((f) => f.group))]
+          return groups.map((g) => (
+            <div key={g}>
+              <p className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider mb-2">{g}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {PLAN_FIELDS.filter((f) => f.group === g).map((f) => (
+                  <div key={f.key}>
+                    <label className={lb}>{f.label}</label>
+                    <input type="text" value={planComptable[f.key]} onChange={(e) => setPlanComptable((p) => ({ ...p, [f.key]: e.target.value }))}
+                      className={ic + ' font-mono'} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        })()}
+
+        {pcSaved && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">Plan comptable sauvegarde</div>}
+
+        <motion.button onClick={async () => {
+          setSaving(true)
+          await supabase.auth.updateUser({ data: { ...meta, plan_comptable: planComptable } })
+          setSaving(false); setPcSaved(true); setTimeout(() => setPcSaved(false), 3000)
+        }} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+          className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">
+          {saving ? 'Sauvegarde...' : 'Sauvegarder le plan comptable'}
+        </motion.button>
+      </motion.div>
+
+      {/* Expert-comptable */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 mb-6">
+        <h2 className="text-base font-semibold text-gray-900">Acces expert-comptable</h2>
+        <p className="text-xs text-gray-500">Invitez votre expert-comptable pour qu'il puisse consulter et modifier le plan comptable et telecharger les exports FEC.</p>
+        <div><label className={lb}>Email expert-comptable</label>
+          <div className="flex gap-2">
+            <input type="email" value={emailExpert} onChange={(e) => setEmailExpert(e.target.value)} placeholder="expert@cabinet.fr" className={ic + ' flex-1'} />
+            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+              disabled={inviting || !emailExpert.includes('@')}
+              onClick={async () => {
+                setInviting(true); setInvited(false)
+                await supabase.auth.updateUser({ data: { ...meta, email_expert: emailExpert } })
+                await supabase.functions.invoke('send-email', {
+                  body: { type: 'welcome', to: emailExpert, data: { name: 'Expert-comptable' } },
+                })
+                setInviting(false); setInvited(true); setTimeout(() => setInvited(false), 4000)
+              }}
+              className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0">
+              {inviting ? 'Envoi...' : 'Inviter'}
+            </motion.button>
+          </div>
+          {invited && <p className="text-[11px] text-[#1a9e52] font-semibold mt-1">Invitation envoyee a {emailExpert}</p>}
+        </div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
         className="bg-white rounded-2xl border border-red-100 shadow-sm p-6">
         <h2 className="text-base font-semibold text-gray-900 mb-3">Zone dangereuse</h2>
         <button onClick={handleLogout} className="px-5 py-2.5 text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition-all cursor-pointer">

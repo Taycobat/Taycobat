@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { downloadCSV, downloadFEC, downloadPDFTable, type FactureForFEC } from '../lib/exportUtils'
+import { getPlanComptable } from '../lib/planComptable'
 
 function toNum(v: unknown): number { if (v == null) return 0; const n = typeof v === 'number' ? v : parseFloat(String(v)); return isNaN(n) ? 0 : n }
 function fmt(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(n) }
@@ -127,7 +128,8 @@ export default function Rapports() {
   }
 
   function exportFEC() {
-    downloadFEC(`FEC_PROVISOIRE_${dateDebut}_${dateFin}.txt`, fecData)
+    const pc = getPlanComptable(user?.user_metadata ?? {})
+    downloadFEC(`FEC_PROVISOIRE_${dateDebut}_${dateFin}.txt`, fecData, pc)
   }
 
   return (
