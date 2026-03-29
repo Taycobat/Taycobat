@@ -69,27 +69,22 @@ export async function redirectToCheckout(planKey: PlanKey, billing: 'mensuel' | 
     return
   }
 
-  // Build Stripe Checkout URL via the payment link pattern
-  // In production, this would call a backend endpoint to create a Checkout Session.
-  // For client-only mode, we use Stripe's payment links configured in the dashboard.
-  const params = new URLSearchParams({
-    'prefilled_email': userEmail ?? '',
-    'client_reference_id': planKey,
-  })
-
-  const paymentLinkBase = import.meta.env.VITE_STRIPE_PAYMENT_LINK_BASE as string | undefined
-  if (paymentLinkBase) {
-    window.location.href = `${paymentLinkBase}/${priceId}?${params.toString()}`
-    return
-  }
-
-  // Fallback: use Stripe.js redirectToPaymentMethod
   const stripe = await stripePromise
   if (!stripe) {
     alert('Stripe non configuré. Ajoutez VITE_STRIPE_PUBLIC_KEY dans les variables d\'environnement Vercel.')
     return
   }
 
-  // Use the modern Stripe embedded checkout redirect
-  window.location.href = `https://checkout.stripe.com/pay/${priceId}?prefilled_email=${encodeURIComponent(userEmail ?? '')}`
+  const { error } = await stripe.redirectToCheckout({
+    lineItems: [{ price: priceId, quantity: 1 }],
+    mode: 'subscription',
+    successUrl: `${window.location.origin}/abonnement/succes?session_id={CHECKOUT_SESSION_ID}`,
+    cancelUrl: `${window.location.origin}/abonnement/annulation`,
+    customerEmail: userEmail,
+  })
+
+  if (error) {
+    console.error('Stripe checkout error:', error)
+    alert(error.message)
+  }
 }
