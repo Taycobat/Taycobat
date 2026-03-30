@@ -11,11 +11,6 @@ import SplashScreen from '../components/SplashScreen'
 export default function Login() {
   const navigate = useNavigate()
   const { session, loading: authLoading } = useAuthStore()
-
-  // Already logged in — redirect to dashboard
-  if (!authLoading && session) {
-    return <Navigate to="/dashboard" replace />
-  }
   const { lang } = useLangStore()
   const dir = languages.find((l) => l.code === lang)?.dir ?? 'ltr'
   const isRtl = dir === 'rtl'
@@ -30,6 +25,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Already logged in — redirect to dashboard
+  if (!authLoading && session) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
