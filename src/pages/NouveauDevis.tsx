@@ -10,6 +10,7 @@ import { logAudit } from '../lib/auditLog'
 import { emptyLigne, UNITES, TVA_RATES, type LigneType } from '../hooks/useFactureLignes'
 import LigneActions from '../components/LigneActions'
 import { loadImageAsBase64 } from '../lib/storage'
+import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -156,6 +157,7 @@ export default function NouveauDevis() {
   // PDF preview
   async function generatePreviewPDF() {
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const entreprise = meta.entreprise || 'TAYCOBAT'
     const siret = meta.siret || ''

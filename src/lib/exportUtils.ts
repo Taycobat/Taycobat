@@ -1,3 +1,48 @@
+// --- PDF text sanitizer ---
+// jsPDF's default Helvetica uses WinAnsiEncoding (cp1252).
+// Characters outside that range render as garbled glyphs.
+// This function normalises problematic Unicode into cp1252-safe equivalents.
+export function sanitizePdfText(text: string): string {
+  return text
+    // Normalise Unicode to NFC (composed form) so accented chars stay single codepoints
+    .normalize('NFC')
+    // Non-breaking / narrow / em spaces → regular space
+    .replace(/[\u00A0\u2007\u202F\u2009\u200A\u2003\u2002]/g, ' ')
+    // Fancy plus signs → ASCII +
+    .replace(/[\uFF0B\u207A\u208A\u2795]/g, '+')
+    // Fancy hyphens / dashes → ASCII -
+    .replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\uFE58\uFE63\uFF0D]/g, '-')
+    // Curly quotes → straight quotes
+    .replace(/[\u2018\u2019\u201A]/g, "'")
+    .replace(/[\u201C\u201D\u201E]/g, '"')
+    // Ellipsis → three dots
+    .replace(/\u2026/g, '...')
+    // Bullet → *
+    .replace(/\u2022/g, '*')
+    // Trademark / registered / copyright symbols
+    .replace(/\u2122/g, 'TM')
+    .replace(/\u00AE/g, '(R)')
+    // OE ligatures (outside cp1252 on some builds)
+    .replace(/\u0152/g, 'OE')
+    .replace(/\u0153/g, 'oe')
+    // Strip any remaining non-cp1252 chars (keep basic Latin + Latin-1 Supplement)
+    // cp1252 printable range: 0x20-0x7E, 0xA0-0xFF, plus selected 0x80-0x9F slots
+    .replace(/[^\x20-\x7E\xA0-\xFF\x80\x82-\x8C\x8E\x91-\x9C\x9E\x9F\n\r\t]/g, '')
+}
+
+// Wraps jsPDF doc.text so every string is auto-sanitized.
+// Call once after creating the jsPDF instance: wrapDocText(doc)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function wrapDocText(doc: any) {
+  const original = doc.text.bind(doc)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  doc.text = (text: any, ...args: any[]) => {
+    if (typeof text === 'string') text = sanitizePdfText(text)
+    else if (Array.isArray(text)) text = text.map((t: unknown) => typeof t === 'string' ? sanitizePdfText(t) : t)
+    return original(text, ...args)
+  }
+}
+
 // --- CSV export ---
 export function downloadCSV(filename: string, headers: string[], rows: string[][]) {
   const bom = '\uFEFF'
@@ -108,6 +153,7 @@ export function downloadPDFTable(
   import('jspdf').then(({ default: jsPDF }) => {
     import('jspdf-autotable').then(({ default: autoTable }) => {
       const doc = new jsPDF({ orientation: rows[0]?.length > 6 ? 'landscape' : 'portrait' })
+      wrapDocText(doc)
       const green: [number, number, number] = [26, 158, 82]
 
       doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30)

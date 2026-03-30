@@ -8,6 +8,7 @@ import { searchSiret } from '../lib/siret'
 import { logAudit } from '../lib/auditLog'
 import { emptyLigne, saveLignes, UNITES, TVA_RATES, type LigneType } from '../hooks/useFactureLignes'
 import { loadImageAsBase64 } from '../lib/storage'
+import { wrapDocText } from '../lib/exportUtils'
 import LigneActions from '../components/LigneActions'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -168,6 +169,7 @@ export default function NouvelleFacture() {
   // PDF preview
   async function generatePreviewPDF() {
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const entreprise = meta.entreprise || 'TAYCOBAT'
     const siret = meta.siret || ''

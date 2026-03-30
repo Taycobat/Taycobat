@@ -8,6 +8,7 @@ import type { Facture } from '../hooks/useFactures'
 import { loadImageAsBase64 } from '../lib/storage'
 import FactureDirecteModal from '../components/FactureDirecteModal'
 import { loadLignes } from '../hooks/useFactureLignes'
+import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -139,6 +140,7 @@ export default function Factures() {
 
   async function generatePDF(f: Facture) {
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const mu = user?.user_metadata ?? {}
     const entreprise = mu.entreprise || 'TAYCOBAT'

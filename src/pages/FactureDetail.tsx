@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { loadImageAsBase64 } from '../lib/storage'
 import { loadLignes } from '../hooks/useFactureLignes'
+import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -63,6 +64,7 @@ export default function FactureDetail() {
   async function handlePDF() {
     if (!facture) return
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const mu = user?.user_metadata ?? {}
     const entreprise = mu.entreprise || 'TAYCOBAT'

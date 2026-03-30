@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import type { DevisCreatePayload, DevisRow } from '../hooks/useDevis'
 import DevisModal from '../components/DevisModal'
 import { loadImageAsBase64 } from '../lib/storage'
+import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -97,6 +98,7 @@ export default function Devis() {
     }))
 
     const doc = new jsPDF()
+    wrapDocText(doc)
     const m = meta
     const formeJ = m.forme_juridique || ''
     const adresseE = m.adresse || ''

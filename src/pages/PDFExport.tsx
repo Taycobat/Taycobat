@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
+import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -99,6 +100,7 @@ export default function PDFExport() {
   function generatePDF(d: DevisWithClient) {
     setGenerating(d.id)
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const meta = user?.user_metadata ?? {}
     const entreprise = meta.entreprise || 'TAYCOBAT'

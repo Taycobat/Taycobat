@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import type { DevisLigne } from '../hooks/useDevis'
 import { useEmail } from '../hooks/useEmail'
+import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -123,6 +124,7 @@ export default function DevisDetailPage() {
   function handlePDF() {
     if (!devis) return
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const meta = user?.user_metadata ?? {}
     const entreprise = meta.entreprise || 'TAYCOBAT'

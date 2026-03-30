@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import jsPDF from 'jspdf'
+import { wrapDocText } from '../lib/exportUtils'
 import { useAuthStore } from '../store/authStore'
 
 const TRAVAUX_55 = [
@@ -31,6 +32,7 @@ export default function AttestationTVA() {
 
   function generatePDF() {
     const doc = new jsPDF()
+    wrapDocText(doc)
     const green: [number, number, number] = [26, 158, 82]
     const entreprise = user?.user_metadata?.entreprise || 'TAYCOBAT'
 
