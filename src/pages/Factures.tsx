@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore'
 import type { Facture } from '../hooks/useFactures'
 import { loadImageAsBase64 } from '../lib/storage'
 import FactureDirecteModal from '../components/FactureDirecteModal'
+import { loadLignes } from '../hooks/useFactureLignes'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -212,24 +213,35 @@ export default function Factures() {
     }
 
     y += 6
-    const tableBody: string[][] = [[typeName, fmt(f.montant_ht), `${f.tva_pct}%`, fmt(f.montant_ttc)]]
-    if (f.retenue_garantie_pct > 0) {
-      const retenueAmount = Math.round(f.montant_ttc * f.retenue_garantie_pct / 100 * 100) / 100
-      tableBody.push([`Retenue de garantie ${f.retenue_garantie_pct}%`, '', '', `- ${fmt(retenueAmount)}`])
-    }
+    // Fetch invoice line items from factures_lignes
+    const lignes = await loadLignes(f.id)
+    const prestations = lignes.filter((l) => l.type === 'prestation' && l.description)
+    const tableData = prestations.map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), `${l.tva_pct}%`, fmt(l.total_ht)])
 
     autoTable(doc, {
-      startY: y, head: [['Description', 'Montant HT', 'TVA', 'Montant TTC']],
-      body: tableBody,
+      startY: y, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']],
+      body: tableData.length > 0 ? tableData : [[typeName, '', '', '', `${f.tva_pct}%`, fmt(f.montant_ht)]],
       headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-      bodyStyles: { fontSize: 9 },
+      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
       margin: { left: 14, right: 14 },
     })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30
+
+    // Totals block
+    let totY = finalY + 8
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
+    doc.text('Total HT', 140, totY); doc.text(fmt(f.montant_ht), 196, totY, { align: 'right' }); totY += 5
+    doc.text(`TVA ${f.tva_pct}%`, 140, totY); doc.text(fmt(f.montant_ttc - f.montant_ht), 196, totY, { align: 'right' }); totY += 5
+    if (f.retenue_garantie_pct > 0) {
+      const retenueAmount = Math.round(f.montant_ttc * f.retenue_garantie_pct / 100 * 100) / 100
+      doc.setTextColor(180, 120, 0)
+      doc.text(`Retenue garantie ${f.retenue_garantie_pct}%`, 140, totY); doc.text(`- ${fmt(retenueAmount)}`, 196, totY, { align: 'right' }); totY += 5
+    }
+    doc.setDrawColor(200, 200, 200); doc.line(140, totY, 196, totY); totY += 5
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
-    doc.text(`Net a payer : ${fmt(f.montant_ttc)}`, 196, finalY + 12, { align: 'right' })
+    doc.text(`Net a payer : ${fmt(f.montant_ttc)}`, 196, totY, { align: 'right' })
 
     if (f.date_paiement) {
       doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)

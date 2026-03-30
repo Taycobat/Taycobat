@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { loadImageAsBase64 } from '../lib/storage'
+import { loadLignes } from '../hooks/useFactureLignes'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -89,15 +90,28 @@ export default function FactureDetail() {
     doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
     doc.text(`Date : ${new Date(facture.date_emission).toLocaleDateString('fr-FR')}`, 14, y); y += 10
 
+    // Fetch invoice line items from factures_lignes
+    const lignes = await loadLignes(facture.id)
+    const prestations = lignes.filter((l) => l.type === 'prestation' && l.description)
+    const tableData = prestations.map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), `${l.tva_pct}%`, fmt(l.total_ht)])
+
     autoTable(doc, {
-      startY: y, head: [['Description', 'Montant HT', 'TVA', 'Montant TTC']],
-      body: [[typeName, fmt(facture.montant_ht), `${facture.tva_pct}%`, fmt(facture.montant_ttc)]],
+      startY: y, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']],
+      body: tableData.length > 0 ? tableData : [[typeName, '', '', '', `${facture.tva_pct}%`, fmt(facture.montant_ht)]],
       headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-      bodyStyles: { fontSize: 9 }, margin: { left: 14, right: 14 },
+      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
+      margin: { left: 14, right: 14 },
     })
     const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30
+
+    // Totals block
+    let totY = finalY + 8
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
+    doc.text('Total HT', 140, totY); doc.text(fmt(facture.montant_ht), 196, totY, { align: 'right' }); totY += 5
+    doc.text(`TVA ${facture.tva_pct}%`, 140, totY); doc.text(fmt(facture.montant_ttc - facture.montant_ht), 196, totY, { align: 'right' }); totY += 5
+    doc.setDrawColor(200, 200, 200); doc.line(140, totY, 196, totY); totY += 5
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
-    doc.text(`Net a payer : ${fmt(facture.montant_ttc)}`, 196, finalY + 12, { align: 'right' })
+    doc.text(`Net a payer : ${fmt(facture.montant_ttc)}`, 196, totY, { align: 'right' })
     doc.setFontSize(6); doc.setTextColor(150, 150, 150); doc.text(`${entreprise} — TAYCOBAT`, 105, 285, { align: 'center' })
     doc.save(`${facture.numero}.pdf`)
   }
