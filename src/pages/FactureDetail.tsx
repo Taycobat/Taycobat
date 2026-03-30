@@ -15,7 +15,8 @@ interface FactureData {
   date_emission: string; date_echeance: string | null
   avancement_pct: number; retenue_garantie_pct: number
   date_paiement: string | null; mode_paiement: string | null; montant_paye: number
-  client_id: string | null; devis_id: string | null; user_id: string; created_at: string
+  client_id: string | null; devis_id: string | null; avoir_facture_id: string | null
+  user_id: string; created_at: string
 }
 
 interface ClientInfo { nom: string; prenom: string; email: string; adresse: string; ville: string; code_postal: string }
@@ -93,7 +94,9 @@ export default function FactureDetail() {
     doc.text(`Date : ${new Date(facture.date_emission).toLocaleDateString('fr-FR')}`, 14, y); y += 10
 
     // Fetch invoice line items from factures_lignes
-    const lignes = await loadLignes(facture.id)
+    // For avoirs, load lines from the source facture since createAvoir doesn't copy them
+    const lignesSourceId = (facture.type === 'avoir' && facture.avoir_facture_id) ? facture.avoir_facture_id : facture.id
+    const lignes = await loadLignes(lignesSourceId)
     const prestations = lignes.filter((l) => l.type === 'prestation' && l.description)
     const tableData = prestations.map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), `${l.tva_pct}%`, fmt(l.total_ht)])
 

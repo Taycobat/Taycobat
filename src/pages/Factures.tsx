@@ -216,7 +216,9 @@ export default function Factures() {
 
     y += 6
     // Fetch invoice line items from factures_lignes
-    const lignes = await loadLignes(f.id)
+    // For avoirs, load lines from the source facture since createAvoir doesn't copy them
+    const lignesSourceId = (f.type === 'avoir' && f.avoir_facture_id) ? f.avoir_facture_id : f.id
+    const lignes = await loadLignes(lignesSourceId)
     const prestations = lignes.filter((l) => l.type === 'prestation' && l.description)
     const tableData = prestations.map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), `${l.tva_pct}%`, fmt(l.total_ht)])
 

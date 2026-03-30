@@ -71,12 +71,13 @@ export default function DevisDetailPage() {
     }
 
     const { data: l } = await supabase.from('devis_lignes')
-      .select('id, devis_id, description, quantite, unite, prix_unitaire, total_ht')
+      .select('id, devis_id, description, quantite, unite, prix_unitaire, tva_pct, total_ht')
       .eq('devis_id', id).order('ordre')
 
     setLignes((l ?? []).map((row) => ({
       ...row,
-      quantite: toNum(row.quantite), prix_unitaire: toNum(row.prix_unitaire), total_ht: toNum(row.total_ht),
+      quantite: toNum(row.quantite), prix_unitaire: toNum(row.prix_unitaire),
+      tva_pct: toNum(row.tva_pct), total_ht: toNum(row.total_ht),
     })))
     setLoading(false)
   }, [id, user])
@@ -154,13 +155,12 @@ export default function DevisDetailPage() {
       doc.text(devis.titre, 14, 46); doc.setTextColor(30, 30, 30)
     }
 
-    const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), fmt(l.total_ht)])
+    const tableData = lignes.map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), `${l.tva_pct ?? devis.tva_pct}%`, fmt(l.total_ht)])
     autoTable(doc, {
-      startY: 75, head: [['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT']],
-      body: tableData.length > 0 ? tableData : [['—', '', '', '', '']],
+      startY: 75, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']],
+      body: tableData.length > 0 ? tableData : [['—', '', '', '', '', '']],
       headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
       bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
-      columnStyles: { 0: { cellWidth: 80 }, 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'center', cellWidth: 20 }, 3: { halign: 'right', cellWidth: 30 }, 4: { halign: 'right', cellWidth: 30 } },
       margin: { left: 14, right: 14 },
     })
 
@@ -257,7 +257,7 @@ export default function DevisDetailPage() {
               if (nd && lignes.length > 0) {
                 await supabase.from('devis_lignes').insert(lignes.map((l, i) => ({
                   devis_id: nd.id, description: l.description, quantite: l.quantite,
-                  unite: l.unite, prix_unitaire: l.prix_unitaire, total_ht: l.total_ht, ordre: i + 1,
+                  unite: l.unite, prix_unitaire: l.prix_unitaire, tva_pct: l.tva_pct, total_ht: l.total_ht, ordre: i + 1,
                 })))
               }
               setActionLoading('')

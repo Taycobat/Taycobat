@@ -30,6 +30,7 @@ export interface DevisLigne {
   quantite: number
   unite: string
   prix_unitaire: number
+  tva_pct?: number
   total_ht: number
 }
 
