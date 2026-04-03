@@ -62,14 +62,11 @@ export default function Landing() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-[#1E40AF] rounded-xl flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-            <span className="text-lg font-bold text-gray-900 tracking-tight">TAYCOBAT</span>
-          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="150" height="34" viewBox="0 0 200 44">
+            <text x="0" y="34" fill="#1E40AF" fontSize="36" fontWeight="900" fontFamily="Arial Black, Arial" letterSpacing="-2">TAYCO</text>
+            <rect x="130" y="4" width="3" height="32" fill="#1E40AF"/>
+            <text x="139" y="24" fill="#64748B" fontSize="14" fontWeight="600" fontFamily="Arial" letterSpacing="4">BAT</text>
+          </svg>
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
             <a href="#features" className="hover:text-gray-900 transition-colors">Fonctionnalites</a>
             <a href="#pricing" className="hover:text-gray-900 transition-colors">Tarifs</a>
@@ -234,12 +231,11 @@ export default function Landing() {
       <footer className="border-t border-gray-100 py-10 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-8">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-[#1E40AF] rounded-lg flex items-center justify-center">
-                <span className="text-white text-xs font-bold">T</span>
-              </div>
-              <span className="text-sm font-semibold text-gray-900">TAYCOBAT</span>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="28" viewBox="0 0 200 44">
+              <text x="0" y="34" fill="#1E40AF" fontSize="36" fontWeight="900" fontFamily="Arial Black, Arial" letterSpacing="-2">TAYCO</text>
+              <rect x="130" y="4" width="3" height="32" fill="#1E40AF"/>
+              <text x="139" y="24" fill="#64748B" fontSize="14" fontWeight="600" fontFamily="Arial" letterSpacing="4">BAT</text>
+            </svg>
             <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500">
               <Link to="/mentions-legales" className="hover:text-gray-900 transition-colors">Mentions legales</Link>
               <Link to="/politique-confidentialite" className="hover:text-gray-900 transition-colors">Politique de confidentialite</Link>

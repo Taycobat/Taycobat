@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const GREEN = '#1a9e52'
-const GREEN_DARK = '#0e7a3c'
+const GREEN = '#1E40AF'
+const GREEN_DARK = '#1e3a8a'
 
 function layout(content: string) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -18,10 +18,9 @@ function layout(content: string) {
 <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
 <tr><td style="background:linear-gradient(135deg,${GREEN},${GREEN_DARK});padding:32px 40px">
 <table><tr>
-<td style="background:#fff;border-radius:12px;width:40px;height:40px;text-align:center;vertical-align:middle">
-<span style="color:${GREEN};font-size:20px;font-weight:700">T</span>
-</td>
-<td style="padding-left:12px;color:#fff;font-size:20px;font-weight:700;letter-spacing:-.5px">TAYCOBAT</td>
+<td style="color:#fff;font-size:24px;font-weight:900;letter-spacing:-1.5px;font-family:Arial Black,Arial,sans-serif">TAYCO</td>
+<td style="padding:0 8px"><div style="width:2px;height:20px;background:rgba(255,255,255,0.7)"></div></td>
+<td style="font-size:11px;font-weight:600;letter-spacing:3px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;vertical-align:middle">BAT</td>
 </tr></table>
 </td></tr>
 <tr><td style="padding:32px 40px">${content}</td></tr>

@@ -30,7 +30,7 @@ Tu es l'assistant développeur principal de TAYCOBAT, un logiciel SaaS BTP multi
 6. Quand tu corriges un bug, vérifie les 5 fichiers liés pour éviter les bugs en cascade
 7. Le dashboard doit toujours afficher les vraies données Supabase — jamais de données fictives
 8. Les KPIs du dashboard viennent toujours de la table factures — jamais des devis
-9. Design toujours cohérent vert #1a9e52 sur toutes les pages
+9. Design toujours cohérent bleu #1E40AF sur toutes les pages
 10. Chaque modification doit être testable immédiatement sur taycobat.vercel.app
 
 ## Conventions code
@@ -40,5 +40,5 @@ Tu es l'assistant développeur principal de TAYCOBAT, un logiciel SaaS BTP multi
 - Noms de factures : FA- (facture), AC- (acompte), SI- (situation), SO- (solde), AV- (avoir)
 - Noms de devis : DE-YYYY-XXXX
 - Ne jamais supprimer une facture — créer un avoir à la place
-- Couleur primaire : #1a9e52, gradient : from-[#1a9e52] to-[#0e7a3c]
+- Couleur primaire : #1E40AF, hover : #1D4ED8, gradient : from-[#1E40AF] to-[#1e3a8a]
 - Font : Outfit (via Tailwind system-ui fallback)

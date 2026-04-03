@@ -76,7 +76,7 @@ export default function Login() {
     <AnimatePresence>{showSplash && <SplashScreen message={splashName ? `Bonjour ${splashName}...` : 'Chargement de votre espace...'} />}</AnimatePresence>
     <div dir={dir} className="min-h-screen flex">
       {/* Left panel - branding */}
-      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1E40AF] via-[#15803d] to-[#0d5c2b]">
+      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1E40AF] via-[#1D4ED8] to-[#1e3a8a]">
         {/* Decorative shapes */}
         <div className="absolute inset-0">
           <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-white/5" />
@@ -101,14 +101,11 @@ export default function Login() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                <svg className="w-7 h-7 text-[#1E40AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <span className="text-white text-2xl font-bold tracking-tight">TAYCOBAT</span>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="44" viewBox="0 0 200 44">
+              <text x="0" y="34" fill="#ffffff" fontSize="36" fontWeight="900" fontFamily="Arial Black, Arial" letterSpacing="-2">TAYCO</text>
+              <rect x="130" y="4" width="3" height="32" fill="#ffffff"/>
+              <text x="139" y="24" fill="rgba(255,255,255,0.7)" fontSize="14" fontWeight="600" fontFamily="Arial" letterSpacing="4">BAT</text>
+            </svg>
           </motion.div>
 
           {/* Hero text */}
@@ -154,13 +151,12 @@ export default function Login() {
         {/* Top bar */}
         <div className={`flex items-center justify-between p-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2">
-            <div className="w-9 h-9 bg-[#1E40AF] rounded-xl flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-            <span className="font-bold text-gray-900">TAYCOBAT</span>
+          <div className="lg:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" width="140" height="32" viewBox="0 0 200 44">
+              <text x="0" y="34" fill="#1E40AF" fontSize="36" fontWeight="900" fontFamily="Arial Black, Arial" letterSpacing="-2">TAYCO</text>
+              <rect x="130" y="4" width="3" height="32" fill="#1E40AF"/>
+              <text x="139" y="24" fill="#64748B" fontSize="14" fontWeight="600" fontFamily="Arial" letterSpacing="4">BAT</text>
+            </svg>
           </div>
           <div className="lg:block hidden" />
           <LanguageSelector />

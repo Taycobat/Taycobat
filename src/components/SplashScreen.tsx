@@ -26,23 +26,14 @@ export default function SplashScreen({ message = 'Chargement...', onDone, durati
         <motion.div
           animate={{ scale: [1, 1.06, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-20 h-20 bg-[#1E40AF] rounded-3xl flex items-center justify-center shadow-xl shadow-blue-500/20"
         >
-          <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="220" height="48" viewBox="0 0 200 44">
+            <text x="0" y="34" fill="#1E40AF" fontSize="36" fontWeight="900" fontFamily="Arial Black, Arial" letterSpacing="-2">TAYCO</text>
+            <rect x="130" y="4" width="3" height="32" fill="#1E40AF"/>
+            <text x="139" y="24" fill="#64748B" fontSize="14" fontWeight="600" fontFamily="Arial" letterSpacing="4">BAT</text>
           </svg>
         </motion.div>
       </motion.div>
-
-      {/* App name */}
-      <motion.h1
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="text-2xl font-bold text-gray-900 tracking-tight mb-2"
-      >
-        TAYCOBAT
-      </motion.h1>
 
       {/* Message */}
       <motion.p
