@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import type { DevisCreatePayload, DevisRow } from '../hooks/useDevis'
 import DevisModal from '../components/DevisModal'
+import DocumentPreview from '../components/DocumentPreview'
 import { loadImageAsBase64 } from '../lib/storage'
 import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
@@ -55,6 +56,7 @@ export default function Devis() {
 
   useEffect(() => { if (searchParams.get('new') === '1') { setModalOpen(true); setSearchParams({}, { replace: true }) } }, [searchParams, setSearchParams])
   const [pdfingId, setPdfingId] = useState<string | null>(null)
+  const [previewDevis, setPreviewDevis] = useState<DevisRow | null>(null)
 
   const filtered = useMemo(() => {
     return devisList.filter((d) => {
@@ -336,6 +338,11 @@ export default function Devis() {
                       <td className="px-6 py-4"><span className="text-sm text-gray-500">{new Date(devis.created_at).toLocaleDateString('fr-FR')}</span></td>
                       <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
+                          {/* Preview button */}
+                          <button onClick={() => setPreviewDevis(devis)} title="Aperçu"
+                            className="p-2 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-all cursor-pointer">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                          </button>
                           {/* Duplicate button */}
                           <button onClick={() => duplicateDevis(devis.id)} title="Dupliquer"
                             className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
@@ -371,6 +378,19 @@ export default function Devis() {
       </motion.div>
 
       <DevisModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleCreate} />
+
+      <DocumentPreview
+        open={!!previewDevis}
+        onClose={() => setPreviewDevis(null)}
+        document={previewDevis ? {
+          type: 'devis', id: previewDevis.id, numero: previewDevis.numero, titre: previewDevis.titre,
+          client_id: previewDevis.client_id, montant_ht: previewDevis.montant_ht, montant_ttc: previewDevis.montant_ttc,
+          tva_pct: previewDevis.tva_pct, statut: previewDevis.statut, date_devis: previewDevis.date_devis,
+          date_validite: previewDevis.date_validite, adresse_chantier: previewDevis.adresse_chantier,
+          created_at: previewDevis.created_at,
+        } : null}
+        onDownloadPDF={previewDevis ? () => handlePDF(previewDevis) : undefined}
+      />
     </div>
   )
 }

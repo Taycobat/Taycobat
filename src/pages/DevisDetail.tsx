@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore'
 import type { DevisLigne } from '../hooks/useDevis'
 import { useEmail } from '../hooks/useEmail'
 import { wrapDocText } from '../lib/exportUtils'
+import DocumentPreview from '../components/DocumentPreview'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -49,6 +50,7 @@ export default function DevisDetailPage() {
   const [lignes, setLignes] = useState<DevisLigne[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState('')
+  const [previewOpen, setPreviewOpen] = useState(false)
   const { sendDevis } = useEmail()
 
   const fetchData = useCallback(async () => {
@@ -238,9 +240,14 @@ export default function DevisDetailPage() {
               {actionLoading === 'convertir' ? 'Création...' : 'Convertir en facture'}
             </motion.button>
           )}
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setPreviewOpen(true)}
+            className="px-4 py-2 text-sm font-semibold text-violet-700 bg-violet-50 border border-violet-200 hover:bg-violet-100 rounded-xl transition-all cursor-pointer flex items-center gap-1.5">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            Apercu
+          </motion.button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handlePDF}
             className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">
-            Générer PDF
+            Generer PDF
           </motion.button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
             onClick={async () => {
@@ -390,6 +397,18 @@ export default function DevisDetailPage() {
           </motion.div>
         </div>
       </div>
+
+      <DocumentPreview
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        document={devis ? {
+          type: 'devis', id: devis.id, numero: devis.numero, titre: devis.titre,
+          client_id: devis.client_id, montant_ht: devis.montant_ht, montant_ttc: devis.montant_ttc,
+          tva_pct: devis.tva_pct, statut: devis.statut, date_devis: devis.date_devis,
+          date_validite: devis.date_validite, created_at: devis.created_at,
+        } : null}
+        onDownloadPDF={handlePDF}
+      />
     </div>
   )
 }

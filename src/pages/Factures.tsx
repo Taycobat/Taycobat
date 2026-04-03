@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore'
 import type { Facture } from '../hooks/useFactures'
 import { loadImageAsBase64 } from '../lib/storage'
 import FactureDirecteModal from '../components/FactureDirecteModal'
+import DocumentPreview from '../components/DocumentPreview'
 import { loadLignes } from '../hooks/useFactureLignes'
 import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
@@ -37,6 +38,7 @@ export default function Factures() {
   const { user } = useAuthStore()
   const { factures, loading, factureFromDevis, createAcompte, createSituation, createSolde, createAvoir, createDirecte, enregistrerPaiement, updateStatut } = useFactures()
   const [directeOpen, setDirecteOpen] = useState(false)
+  const [previewFacture, setPreviewFacture] = useState<Facture | null>(null)
 
   useEffect(() => { if (searchParams.get('new') === '1') { setDirecteOpen(true); setSearchParams({}, { replace: true }) } }, [searchParams, setSearchParams])
   const { devisList } = useDevis()
@@ -371,6 +373,8 @@ export default function Factures() {
                 ? <div><div className="text-xs text-emerald-600 font-medium">{fmt0(f.montant_paye ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.date_paiement).toLocaleDateString('fr-FR')} · {f.mode_paiement}</div></div>
                 : <span className="text-gray-300 text-xs">—</span>}</td>
               <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}><div className="flex items-center justify-end gap-0.5">
+                <button onClick={() => setPreviewFacture(f)} title="Aperçu" className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-all cursor-pointer">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
                 <button onClick={() => generatePDF(f)} title="PDF" className="p-1.5 rounded-lg text-gray-400 hover:text-[#1a9e52] hover:bg-emerald-50 transition-all cursor-pointer">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></button>
                 {f.statut !== 'annulee' && f.type !== 'avoir' && <button onClick={() => openModal('paiement', f.id)} title="Paiement" className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
@@ -500,6 +504,24 @@ export default function Factures() {
       </AnimatePresence>
 
       <FactureDirecteModal open={directeOpen} onClose={() => setDirecteOpen(false)} onSubmit={createDirecte} />
+
+      <DocumentPreview
+        open={!!previewFacture}
+        onClose={() => setPreviewFacture(null)}
+        document={previewFacture ? {
+          type: 'facture', id: previewFacture.id, numero: previewFacture.numero,
+          facture_type: previewFacture.type, client_id: previewFacture.client_id,
+          montant_ht: previewFacture.montant_ht, montant_ttc: previewFacture.montant_ttc,
+          tva_pct: previewFacture.tva_pct, statut: previewFacture.statut,
+          date_emission: previewFacture.date_emission, date_echeance: previewFacture.date_echeance,
+          avancement_pct: previewFacture.avancement_pct, retenue_garantie_pct: previewFacture.retenue_garantie_pct,
+          avoir_facture_id: previewFacture.avoir_facture_id, date_paiement: previewFacture.date_paiement,
+          mode_paiement: previewFacture.mode_paiement, montant_paye: previewFacture.montant_paye,
+          adresse_chantier: previewFacture.adresse_chantier, devis_display: previewFacture.devis_display,
+          created_at: previewFacture.created_at,
+        } : null}
+        onDownloadPDF={previewFacture ? () => generatePDF(previewFacture) : undefined}
+      />
     </div>
   )
 }

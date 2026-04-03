@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore'
 import { loadImageAsBase64 } from '../lib/storage'
 import { loadLignes } from '../hooks/useFactureLignes'
 import { wrapDocText } from '../lib/exportUtils'
+import DocumentPreview from '../components/DocumentPreview'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -40,6 +41,7 @@ export default function FactureDetail() {
   const [facture, setFacture] = useState<FactureData | null>(null)
   const [client, setClient] = useState<ClientInfo | null>(null)
   const [loading, setLoading] = useState(true)
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
     if (!id || !user) return
@@ -182,6 +184,10 @@ export default function FactureDetail() {
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3">
+            <button onClick={() => setPreviewOpen(true)} className="px-4 py-2.5 text-sm font-semibold text-violet-700 bg-violet-50 border border-violet-200 hover:bg-violet-100 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              Apercu
+            </button>
             <button onClick={handlePDF} className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer">Telecharger PDF</button>
             {facture.statut !== 'payee' && facture.statut !== 'annulee' && (
               <button onClick={() => handleStatut('payee')} className="px-4 py-2.5 text-sm font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-xl transition-colors cursor-pointer">Marquer payee</button>
@@ -193,6 +199,23 @@ export default function FactureDetail() {
           </div>
         </div>
       </motion.div>
+
+      <DocumentPreview
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        document={facture ? {
+          type: 'facture', id: facture.id, numero: facture.numero,
+          facture_type: facture.type, client_id: facture.client_id,
+          montant_ht: facture.montant_ht, montant_ttc: facture.montant_ttc,
+          tva_pct: facture.tva_pct, statut: facture.statut,
+          date_emission: facture.date_emission, date_echeance: facture.date_echeance,
+          avancement_pct: facture.avancement_pct, retenue_garantie_pct: facture.retenue_garantie_pct,
+          avoir_facture_id: facture.avoir_facture_id, date_paiement: facture.date_paiement,
+          mode_paiement: facture.mode_paiement, montant_paye: facture.montant_paye,
+          created_at: facture.created_at,
+        } : null}
+        onDownloadPDF={handlePDF}
+      />
     </div>
   )
 }
