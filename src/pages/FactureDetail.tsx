@@ -29,7 +29,7 @@ const typeLabel: Record<string, string> = { facture: 'Facture', directe: 'Factur
 const statutStyle: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-600' },
   envoyee: { label: 'Envoyee', cls: 'bg-blue-100 text-blue-700' },
-  payee: { label: 'Payee', cls: 'bg-emerald-100 text-emerald-700' },
+  payee: { label: 'Payee', cls: 'bg-blue-100 text-blue-700' },
   impayee: { label: 'Impayee', cls: 'bg-red-100 text-red-600' },
   annulee: { label: 'Annulee', cls: 'bg-gray-100 text-gray-400' },
 }
@@ -68,7 +68,7 @@ export default function FactureDetail() {
     if (!facture) return
     const doc = new jsPDF()
     wrapDocText(doc)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const mu = user?.user_metadata ?? {}
     const entreprise = mu.entreprise || 'TAYCOBAT'
     const siret = mu.siret || ''
@@ -84,11 +84,11 @@ export default function FactureDetail() {
     doc.text(entreprise, infoX, 17)
     doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
     if (siret) doc.text(`SIRET : ${siret}`, infoX, 23)
-    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text(typeName.toUpperCase(), 196, 16, { align: 'right' })
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
     doc.text(`N\u00b0 ${facture.numero}`, 196, 23, { align: 'right' })
-    doc.setDrawColor(...green); doc.setLineWidth(0.8); doc.line(14, 30, 196, 30)
+    doc.setDrawColor(...blue); doc.setLineWidth(0.8); doc.line(14, 30, 196, 30)
 
     let y = 36
     if (client) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(`${client.prenom} ${client.nom}`, 14, y); y += 6 }
@@ -105,8 +105,8 @@ export default function FactureDetail() {
     autoTable(doc, {
       startY: y, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']],
       body: tableData.length > 0 ? tableData : [[typeName, '', '', '', `${facture.tva_pct}%`, fmt(facture.montant_ht)]],
-      headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
+      headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [239, 246, 255] },
       margin: { left: 14, right: 14 },
     })
     const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30
@@ -117,7 +117,7 @@ export default function FactureDetail() {
     doc.text('Total HT', 140, totY); doc.text(fmt(facture.montant_ht), 196, totY, { align: 'right' }); totY += 5
     doc.text(`TVA ${facture.tva_pct}%`, 140, totY); doc.text(fmt(facture.montant_ttc - facture.montant_ht), 196, totY, { align: 'right' }); totY += 5
     doc.setDrawColor(200, 200, 200); doc.line(140, totY, 196, totY); totY += 5
-    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text(`Net a payer : ${fmt(facture.montant_ttc)}`, 196, totY, { align: 'right' })
     doc.setFontSize(6); doc.setTextColor(150, 150, 150); doc.text(`${entreprise} — TAYCOBAT`, 105, 285, { align: 'center' })
     doc.save(`${facture.numero}.pdf`)
@@ -151,7 +151,7 @@ export default function FactureDetail() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Date emission</p><p className="text-sm font-medium text-gray-900">{new Date(facture.date_emission).toLocaleDateString('fr-FR')}</p></div>
             <div><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Echeance</p><p className="text-sm font-medium text-gray-900">{facture.date_echeance ? new Date(facture.date_echeance).toLocaleDateString('fr-FR') : '—'}</p></div>
-            <div><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Montant TTC</p><p className="text-lg font-bold text-[#1a9e52]">{fmt(facture.montant_ttc)}</p></div>
+            <div><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Montant TTC</p><p className="text-lg font-bold text-[#1E40AF]">{fmt(facture.montant_ttc)}</p></div>
             <div><p className="text-xs text-gray-400 uppercase font-semibold mb-1">TVA</p><p className="text-sm font-medium text-gray-900">{facture.tva_pct}%</p></div>
           </div>
 
@@ -167,18 +167,18 @@ export default function FactureDetail() {
           )}
 
           {/* Totaux */}
-          <div className="bg-emerald-50 rounded-xl p-4 space-y-2 mb-6">
+          <div className="bg-blue-50 rounded-xl p-4 space-y-2 mb-6">
             <div className="flex justify-between text-sm"><span className="text-gray-600">Total HT</span><span className="font-medium">{fmt(facture.montant_ht)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-600">TVA {facture.tva_pct}%</span><span className="font-medium">{fmt(facture.montant_ttc - facture.montant_ht)}</span></div>
             {retenue > 0 && <div className="flex justify-between text-sm text-amber-600"><span>Retenue garantie {facture.retenue_garantie_pct}%</span><span>-{fmt(retenue)}</span></div>}
-            <div className="border-t border-emerald-200 pt-2 flex justify-between font-bold text-[#1a9e52]"><span>Total TTC</span><span>{fmt(facture.montant_ttc)}</span></div>
+            <div className="border-t border-blue-200 pt-2 flex justify-between font-bold text-[#1E40AF]"><span>Total TTC</span><span>{fmt(facture.montant_ttc)}</span></div>
           </div>
 
           {/* Paiement */}
           {facture.date_paiement && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-6">
-              <p className="text-xs text-emerald-700 uppercase font-semibold mb-1">Paiement enregistre</p>
-              <p className="text-sm text-emerald-800">{fmt(facture.montant_paye)} — {facture.mode_paiement} — {new Date(facture.date_paiement).toLocaleDateString('fr-FR')}</p>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+              <p className="text-xs text-blue-700 uppercase font-semibold mb-1">Paiement enregistre</p>
+              <p className="text-sm text-blue-800">{fmt(facture.montant_paye)} — {facture.mode_paiement} — {new Date(facture.date_paiement).toLocaleDateString('fr-FR')}</p>
             </div>
           )}
 
@@ -188,9 +188,9 @@ export default function FactureDetail() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
               Apercu
             </button>
-            <button onClick={handlePDF} className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer">Telecharger PDF</button>
+            <button onClick={handlePDF} className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer">Telecharger PDF</button>
             {facture.statut !== 'payee' && facture.statut !== 'annulee' && (
-              <button onClick={() => handleStatut('payee')} className="px-4 py-2.5 text-sm font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-xl transition-colors cursor-pointer">Marquer payee</button>
+              <button onClick={() => handleStatut('payee')} className="px-4 py-2.5 text-sm font-semibold text-blue-700 border border-blue-200 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer">Marquer payee</button>
             )}
             {facture.statut === 'brouillon' && (
               <button onClick={() => handleStatut('envoyee')} className="px-4 py-2.5 text-sm font-semibold text-blue-700 border border-blue-200 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer">Marquer envoyee</button>

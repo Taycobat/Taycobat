@@ -63,7 +63,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-[#1a9e52] rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-[#1E40AF] rounded-xl flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
@@ -76,7 +76,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/login')} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">Connexion</button>
-            <button onClick={cta} className="text-sm font-semibold bg-[#1a9e52] hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl transition-colors cursor-pointer">Essai gratuit</button>
+            <button onClick={cta} className="text-sm font-semibold bg-[#1E40AF] hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-colors cursor-pointer">Essai gratuit</button>
           </div>
         </div>
       </nav>
@@ -85,14 +85,14 @@ export default function Landing() {
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#1a9e52] bg-emerald-50 px-3 py-1.5 rounded-full mb-6">
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#1E40AF] bg-blue-50 px-3 py-1.5 rounded-full mb-6">
               Logiciel BTP multilingue
             </span>
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="text-5xl md:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight mb-6">
             Gerez votre entreprise BTP{' '}
-            <span className="text-[#1a9e52]">dans votre langue</span>
+            <span className="text-[#1E40AF]">dans votre langue</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
             className="text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
@@ -110,7 +110,7 @@ export default function Landing() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={cta}
-              className="px-8 py-4 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-2xl text-lg shadow-xl shadow-emerald-500/20 transition-colors cursor-pointer">
+              className="px-8 py-4 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-2xl text-lg shadow-xl shadow-blue-500/20 transition-colors cursor-pointer">
               Commencer gratuitement
             </button>
             <p className="text-sm text-gray-400">14 jours gratuits — sans carte bancaire</p>
@@ -148,11 +148,11 @@ export default function Landing() {
                 viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                 className="relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
                 {f.badge && (
-                  <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider text-[#1a9e52] bg-emerald-50 px-2 py-1 rounded-full">
+                  <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider text-[#1E40AF] bg-blue-50 px-2 py-1 rounded-full">
                     {f.badge}
                   </span>
                 )}
-                <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center text-[#1a9e52] mb-4">
+                <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-[#1E40AF] mb-4">
                   <Icon d={f.icon} />
                 </div>
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{f.title}</h3>
@@ -167,14 +167,14 @@ export default function Landing() {
       <section className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-            className="bg-gradient-to-br from-[#1a9e52] to-[#0e7a3c] rounded-3xl p-10 md:p-16 text-white text-center">
+            className="bg-gradient-to-br from-[#1E40AF] to-[#1e3a8a] rounded-3xl p-10 md:p-16 text-white text-center">
             <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Dictez. L'IA cree le devis.</h2>
-            <p className="text-emerald-100 max-w-2xl mx-auto mb-8 text-lg leading-relaxed">
+            <p className="text-blue-100 max-w-2xl mx-auto mb-8 text-lg leading-relaxed">
               Parlez dans votre langue — francais, arabe, turc, roumain, polonais... L'IA transcrit, traduit et structure
               votre devis automatiquement avec les prix du marche BTP francais.
             </p>
@@ -198,14 +198,14 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PLANS.map((p) => (
               <motion.div key={p.name} variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-                className={`bg-white rounded-2xl border p-6 text-center ${p.popular ? 'border-[#1a9e52] shadow-lg shadow-emerald-500/10' : 'border-gray-100'}`}>
-                {p.popular && <span className="text-xs font-bold uppercase text-[#1a9e52]">Le plus populaire</span>}
+                className={`bg-white rounded-2xl border p-6 text-center ${p.popular ? 'border-[#1E40AF] shadow-lg shadow-blue-500/10' : 'border-gray-100'}`}>
+                {p.popular && <span className="text-xs font-bold uppercase text-[#1E40AF]">Le plus populaire</span>}
                 <h3 className="text-lg font-bold text-gray-900 mt-2">{p.name}</h3>
                 <p className="text-sm text-gray-400 mb-4">{p.desc}</p>
                 <div className="text-4xl font-bold text-gray-900 mb-1">{p.price} <span className="text-base font-normal text-gray-400">€/mois</span></div>
                 <p className="text-xs text-gray-400 mb-6">Facturation annuelle</p>
                 <button onClick={cta}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm cursor-pointer transition-colors ${p.popular ? 'bg-[#1a9e52] hover:bg-emerald-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}>
+                  className={`w-full py-3 rounded-xl font-semibold text-sm cursor-pointer transition-colors ${p.popular ? 'bg-[#1E40AF] hover:bg-blue-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}>
                   Essai gratuit 14 jours
                 </button>
               </motion.div>
@@ -223,7 +223,7 @@ export default function Landing() {
               Rejoignez les artisans qui gagnent du temps chaque jour avec TAYCOBAT.
             </p>
             <button onClick={cta}
-              className="px-8 py-4 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-2xl text-lg shadow-xl shadow-emerald-500/20 transition-colors cursor-pointer">
+              className="px-8 py-4 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-2xl text-lg shadow-xl shadow-blue-500/20 transition-colors cursor-pointer">
               Commencer l'essai gratuit
             </button>
           </motion.div>
@@ -235,7 +235,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-[#1a9e52] rounded-lg flex items-center justify-center">
+              <div className="w-7 h-7 bg-[#1E40AF] rounded-lg flex items-center justify-center">
                 <span className="text-white text-xs font-bold">T</span>
               </div>
               <span className="text-sm font-semibold text-gray-900">TAYCOBAT</span>

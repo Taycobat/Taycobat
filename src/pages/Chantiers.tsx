@@ -5,7 +5,7 @@ import type { Chantier } from '../hooks/useChantiers'
 
 const statutStyle: Record<string, { label: string; cls: string; bar: string }> = {
   planifie: { label: 'Planifié', cls: 'bg-blue-50 text-blue-700 border-blue-200', bar: 'bg-blue-500' },
-  en_cours: { label: 'En cours', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', bar: 'bg-gradient-to-r from-[#1a9e52] to-emerald-400' },
+  en_cours: { label: 'En cours', cls: 'bg-blue-50 text-blue-700 border-blue-200', bar: 'bg-gradient-to-r from-[#1E40AF] to-blue-400' },
   termine: { label: 'Terminé', cls: 'bg-gray-50 text-gray-600 border-gray-200', bar: 'bg-gray-400' },
   suspendu: { label: 'Suspendu', cls: 'bg-amber-50 text-amber-700 border-amber-200', bar: 'bg-amber-500' },
 }

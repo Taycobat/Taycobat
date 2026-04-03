@@ -5,7 +5,7 @@ export default function CGU() {
     <div className="min-h-screen bg-white">
       <nav className="border-b border-gray-100 px-6 h-16 flex items-center">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#1a9e52] rounded-xl flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#1E40AF] rounded-xl flex items-center justify-center">
             <span className="text-white text-xs font-bold">T</span>
           </div>
           <span className="font-bold text-gray-900">TAYCOBAT</span>
@@ -35,7 +35,7 @@ export default function CGU() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">3. Abonnement et paiement</h2>
           <ul className="text-sm text-gray-600 space-y-2 list-disc pl-5">
-            <li>Les prix sont indiques en euros TTC sur la page <Link to="/tarifs" className="text-[#1a9e52] underline">Tarifs</Link>.</li>
+            <li>Les prix sont indiques en euros TTC sur la page <Link to="/tarifs" className="text-[#1E40AF] underline">Tarifs</Link>.</li>
             <li>Le paiement est effectue par carte bancaire via Stripe, plateforme certifiee PCI-DSS.</li>
             <li>L'abonnement est reconduit automatiquement (mensuel ou annuel selon le choix).</li>
             <li>Vous pouvez annuler a tout moment. L'acces reste actif jusqu'a la fin de la periode payee.</li>

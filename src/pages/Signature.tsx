@@ -153,7 +153,7 @@ export default function SignaturePage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Devis</label>
               <select value={selectedDevis} onChange={(e) => setSelectedDevis(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
+                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] cursor-pointer">
                 <option value="">— Sélectionner un devis —</option>
                 {devisList.map((d) => (
                   <option key={d.id} value={d.id}>{d.numero} — {d.titre || d.client_display || '—'} — {fmt(d.montant_ttc)}</option>
@@ -166,7 +166,7 @@ export default function SignaturePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email du client</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="client@exemple.com"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
             </div>
 
             {/* Language selector */}
@@ -177,7 +177,7 @@ export default function SignaturePage() {
                   <button key={l.code} onClick={() => setMsgLang(l.code)}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all cursor-pointer ${
                       msgLang === l.code
-                        ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]'
+                        ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]'
                         : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                     }`}>
                     <span>{l.flag}</span> {l.label}
@@ -190,19 +190,19 @@ export default function SignaturePage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
               <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] resize-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] resize-none"
                 dir={msgLang === 'ar' ? 'rtl' : 'ltr'} />
             </div>
 
             {sent && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium">
                 Devis envoyé avec succès !
               </div>
             )}
 
             <motion.button onClick={handleSend} disabled={sending || !selectedDevis || !email}
               whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2">
+              className="w-full py-3 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2">
               {sending ? (
                 <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
               ) : (

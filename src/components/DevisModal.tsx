@@ -140,7 +140,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
             <div className="flex items-center gap-3">
               <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">Annuler</button>
               <motion.button onClick={handleSubmit} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-                className="px-5 py-2 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center gap-2">
+                className="px-5 py-2 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center gap-2">
                 {saving ? <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                 : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                 Créer le devis
@@ -160,7 +160,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Titre du devis</label>
                       <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Ex: Rénovation cuisine"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all" />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Client</label>
@@ -170,12 +170,12 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                           const c = clients.find((x) => x.id === e.target.value) as Record<string, string> | undefined
                           if (c) { const parts = [c.adresse_chantier, c.ville_chantier, c.code_postal_chantier].filter(Boolean); if (parts.length) setAdresseChantier(parts.join(', ')) }
                         }}
-                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
+                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all cursor-pointer">
                           <option value="">— Client —</option>
                           {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
                         </select>
                         <button type="button" onClick={() => setShowNewClient(!showNewClient)} title="Nouveau client"
-                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52] hover:border-[#1a9e52]'}`}>
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-400 hover:text-[#1E40AF] hover:border-[#1E40AF]'}`}>
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                         </button>
                       </div>
@@ -185,45 +185,45 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                   {/* Quick client creation */}
                   {showNewClient && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                      className="border border-[#1a9e52]/20 bg-emerald-50/30 rounded-xl p-4 space-y-3">
+                      className="border border-[#1E40AF]/20 bg-blue-50/30 rounded-xl p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider">Nouveau client</div>
+                        <div className="text-xs font-semibold text-[#1E40AF] uppercase tracking-wider">Nouveau client</div>
                         <div className="flex bg-gray-100 rounded-lg p-0.5">
-                          <button type="button" onClick={() => setNewType('particulier')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'particulier' ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>Particulier</button>
-                          <button type="button" onClick={() => setNewType('societe')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'societe' ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>Société</button>
+                          <button type="button" onClick={() => setNewType('particulier')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'particulier' ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'}`}>Particulier</button>
+                          <button type="button" onClick={() => setNewType('societe')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'societe' ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'}`}>Société</button>
                         </div>
                       </div>
                       {newType === 'societe' ? (
                         <div className="grid grid-cols-2 gap-3">
                           <input type="text" value={newRaisonSociale} onChange={(e) => setNewRaisonSociale(e.target.value)} placeholder="Raison sociale *"
-                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom contact"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="text" value={newVille} onChange={(e) => setNewVille(e.target.value)} placeholder="Ville"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-3">
                           <input type="text" value={newPrenom} onChange={(e) => setNewPrenom(e.target.value)} placeholder="Prénom"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom *"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="text" value={newVille} onChange={(e) => setNewVille(e.target.value)} placeholder="Ville"
-                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         </div>
                       )}
                       <div className="flex justify-end gap-2">
                         <button type="button" onClick={() => setShowNewClient(false)} className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
                         <button type="button" onClick={handleCreateClient} disabled={creatingClient || (newType === 'societe' ? !newRaisonSociale : !newNom)}
-                          className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-lg disabled:opacity-50 cursor-pointer">
+                          className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-lg disabled:opacity-50 cursor-pointer">
                           {creatingClient ? 'Création...' : 'Créer et sélectionner'}
                         </button>
                       </div>
@@ -236,7 +236,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Adresse du chantier</label>
                   <input type="text" value={adresseChantier} onChange={(e) => setAdresseChantier(e.target.value)}
                     placeholder="12 rue des Artisans, 95000 Cergy"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all" />
                   <p className="text-[11px] text-gray-400 mt-1">Pre-rempli depuis la fiche client si disponible</p>
                 </div>
 
@@ -247,7 +247,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     {TVA_OPTIONS.map((o) => (
                       <button key={o.value} type="button" onClick={() => { setTvaPct(o.value); setAutoliquidation(false) }}
                         className={`py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                          !autoliquidation && tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                          !autoliquidation && tvaPct === o.value ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                         }`}>
                         {o.label}
                         <span className="block text-[10px] font-normal mt-0.5 opacity-60">{o.tag}</span>
@@ -276,12 +276,12 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     <div>
                       <label className="block text-xs text-gray-500 mb-1.5">Date du devis</label>
                       <input type="date" value={dateDevis} onChange={(e) => setDateDevis(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1.5">Date de validité</label>
                       <input type="date" value={dateValidite} onChange={(e) => setDateValidite(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                     </div>
                   </div>
                 </div>
@@ -301,7 +301,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="flex items-center justify-between mb-4">
                     <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Lignes de travaux</label>
-                    <button type="button" onClick={addLigne} className="flex items-center gap-1.5 text-sm font-medium text-[#1a9e52] hover:text-emerald-700 transition-colors cursor-pointer">
+                    <button type="button" onClick={addLigne} className="flex items-center gap-1.5 text-sm font-medium text-[#1E40AF] hover:text-blue-700 transition-colors cursor-pointer">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                       Ajouter
                     </button>
@@ -322,16 +322,16 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                         className="grid grid-cols-1 sm:grid-cols-[3fr_80px_80px_100px_100px_40px] gap-2 items-start bg-gray-50/50 rounded-xl p-2 border border-gray-100">
                         <textarea value={l.description} onChange={(e) => { updateLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px' }}
                           placeholder="Ex: Pose carrelage 60x60 salle de bain, preparation support, joints epoxy, fourniture comprise..." rows={3}
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all resize-vertical min-h-[72px] max-h-[160px]" />
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all resize-vertical min-h-[72px] max-h-[160px]" />
                         <input type="number" value={l.quantite || ''} onChange={(e) => updateLigne(i, 'quantite', e.target.value)} min={0} step="any"
-                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all" />
                         <select value={l.unite} onChange={(e) => updateLigne(i, 'unite', e.target.value)}
-                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all cursor-pointer">
+                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all cursor-pointer">
                           {['u', 'm²', 'ml', 'm³', 'h', 'j', 'forfait', 'kg', 'lot'].map((u) => <option key={u} value={u}>{u}</option>)}
                         </select>
                         <input type="number" value={l.prix_unitaire || ''} onChange={(e) => updateLigne(i, 'prix_unitaire', e.target.value)} min={0} step="any" placeholder="0,00"
-                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
-                        <span className="text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.total_ht)}</span>
+                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all" />
+                        <span className="text-sm font-semibold text-[#1E40AF] text-right tabular-nums">{fmt(l.total_ht)}</span>
                         <button type="button" onClick={() => removeLigne(i)} disabled={lignes.length <= 1}
                           className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer disabled:opacity-30">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -346,7 +346,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium text-gray-900 tabular-nums">{fmt(totalHT)}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-gray-500">TVA {tvaPct} %</span><span className="font-medium text-gray-900 tabular-nums">{fmt(totalTVA)}</span></div>
-                    <div className="flex justify-between text-lg pt-3 border-t border-gray-200"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(totalTTC)}</span></div>
+                    <div className="flex justify-between text-lg pt-3 border-t border-gray-200"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1E40AF] tabular-nums">{fmt(totalTTC)}</span></div>
                     {autoliquidation && <div className="text-[11px] text-amber-700 bg-amber-50 rounded-lg p-2 mt-2">Autoliquidation TVA - Art. 283-2 nonies du CGI. TVA due par le preneur assujetti.</div>}
                   </div>
                 </div>
@@ -363,10 +363,10 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
               <div className="flex-1 overflow-y-auto p-5">
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm text-[11px] leading-relaxed">
                   {/* Preview header */}
-                  <div className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] p-4 text-white">
+                  <div className="bg-gradient-to-r from-[#1E40AF] to-[#1e3a8a] p-4 text-white">
                     <div className="flex justify-between items-start">
-                      <div><div className="font-bold text-sm">{entreprise}</div>{user?.user_metadata?.siret && <div className="text-emerald-200 text-[10px] mt-0.5">SIRET : {user.user_metadata.siret}</div>}</div>
-                      <div className="text-right"><div className="font-mono font-bold text-[10px]">DE-{new Date().getFullYear()}-XXXX</div><div className="text-emerald-200 text-[10px]">{new Date().toLocaleDateString('fr-FR')}</div></div>
+                      <div><div className="font-bold text-sm">{entreprise}</div>{user?.user_metadata?.siret && <div className="text-blue-200 text-[10px] mt-0.5">SIRET : {user.user_metadata.siret}</div>}</div>
+                      <div className="text-right"><div className="font-mono font-bold text-[10px]">DE-{new Date().getFullYear()}-XXXX</div><div className="text-blue-200 text-[10px]">{new Date().toLocaleDateString('fr-FR')}</div></div>
                     </div>
                   </div>
                   <div className="p-4 space-y-3">
@@ -407,7 +407,7 @@ export default function DevisModal({ open, onClose, onSubmit }: Props) {
                     <div className="bg-gray-50 rounded-lg p-2.5 space-y-1">
                       <div className="flex justify-between"><span className="text-gray-400">Total HT</span><span className="font-medium tabular-nums">{fmt(totalHT)}</span></div>
                       <div className="flex justify-between"><span className="text-gray-400">TVA {tvaPct}%</span><span className="font-medium tabular-nums">{fmt(totalTVA)}</span></div>
-                      <div className="flex justify-between pt-1 border-t border-gray-200 text-xs"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(totalTTC)}</span></div>
+                      <div className="flex justify-between pt-1 border-t border-gray-200 text-xs"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1E40AF] tabular-nums">{fmt(totalTTC)}</span></div>
                     </div>
 
                     {/* Signature zones */}

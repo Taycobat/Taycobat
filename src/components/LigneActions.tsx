@@ -65,7 +65,7 @@ export default function LigneActions({ value, onChange }: Props) {
   }
 
   const btn = 'w-7 h-7 rounded-[6px] flex items-center justify-center transition-all cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
-  const btnDefault = 'bg-[#F3F4F6] border border-[#D1D5DB] text-[#6B7280] hover:bg-[#DCFCE7] hover:border-[#1a9e52] hover:text-[#1a9e52]'
+  const btnDefault = 'bg-[#F3F4F6] border border-[#D1D5DB] text-[#6B7280] hover:bg-[#DBEAFE] hover:border-[#1E40AF] hover:text-[#1E40AF]'
   const btnRec = 'bg-[#FEE2E2] border border-red-300 text-[#EF4444] animate-pulse'
 
   return (

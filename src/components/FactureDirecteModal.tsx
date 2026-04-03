@@ -13,7 +13,7 @@ const TVA_OPTIONS = [
 ]
 const UNITES = ['u', 'm\u00b2', 'ml', 'm\u00b3', 'h', 'j', 'forfait', 'kg', 'lot']
 
-const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all'
+const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all'
 const lb = 'block text-xs font-semibold text-gray-400 uppercase mb-1.5'
 
 interface Props {
@@ -128,7 +128,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                   {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
                 </select>
                 <button type="button" onClick={() => setShowNewClient(!showNewClient)} title="Nouveau client"
-                  className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52] hover:border-[#1a9e52]'}`}>
+                  className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-400 hover:text-[#1E40AF] hover:border-[#1E40AF]'}`}>
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                 </button>
               </div>
@@ -140,7 +140,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                 <div className="flex gap-2">
                   {(['particulier', 'societe'] as const).map((t) => (
                     <button key={t} type="button" onClick={() => setNewType(t)}
-                      className={`flex-1 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${newType === t ? 'bg-white text-[#1a9e52] shadow-sm border border-[#1a9e52]/20' : 'text-gray-500'}`}>
+                      className={`flex-1 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${newType === t ? 'bg-white text-[#1E40AF] shadow-sm border border-[#1E40AF]/20' : 'text-gray-500'}`}>
                       {t === 'particulier' ? 'Particulier' : 'Societe'}
                     </button>
                   ))}
@@ -158,7 +158,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                   <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email" className={ic} />
                 </div>
                 <button type="button" onClick={handleCreateClient}
-                  className="w-full py-2 rounded-xl bg-[#1a9e52] text-white text-sm font-semibold cursor-pointer hover:bg-emerald-700 transition-colors">
+                  className="w-full py-2 rounded-xl bg-[#1E40AF] text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors">
                   Creer le client
                 </button>
               </div>
@@ -186,7 +186,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
               <div className="grid grid-cols-4 gap-2">
                 {TVA_OPTIONS.map((t) => (
                   <button key={t.value} type="button" onClick={() => { setTvaPct(t.value); setAutoliquidation(false) }}
-                    className={`py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${!autoliquidation && tvaPct === t.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52] ring-2 ring-emerald-200' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                    className={`py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${!autoliquidation && tvaPct === t.value ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF] ring-2 ring-blue-200' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
                     {t.label}<span className="block text-[10px] font-normal mt-0.5 opacity-60">{t.tag}</span>
                   </button>
                 ))}
@@ -212,7 +212,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className={lb + ' mb-0'}>Lignes de travaux</label>
-                <button type="button" onClick={addLigne} className="flex items-center gap-1 text-xs font-semibold text-[#1a9e52] hover:text-emerald-700 cursor-pointer">
+                <button type="button" onClick={addLigne} className="flex items-center gap-1 text-xs font-semibold text-[#1E40AF] hover:text-blue-700 cursor-pointer">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                   Ajouter une ligne
                 </button>
@@ -245,18 +245,18 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
                           placeholder="Ex: Pose carrelage 60x60 salle de bain, preparation support, joints epoxy, fourniture comprise..."
                           rows={3}
                           className={`px-3 py-2 rounded-lg border bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 transition-all resize-vertical min-h-[72px] max-h-[160px] ${
-                            hasError ? 'border-red-300 focus:ring-red-200 focus:border-red-400' : 'border-gray-200 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]'
+                            hasError ? 'border-red-300 focus:ring-red-200 focus:border-red-400' : 'border-gray-200 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]'
                           }`}
                         />
                         <input type="number" value={l.quantite} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)}
-                          min={0} step="any" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          min={0} step="any" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)}
-                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
+                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] cursor-pointer">
                           {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
                         </select>
                         <input type="number" value={l.prix_unitaire} onChange={(e) => setLigne(i, 'prix_unitaire', parseFloat(e.target.value) || 0)}
-                          min={0} step={0.01} placeholder="0,00" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
-                        <div className="py-2 text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{lineTotal.toFixed(2)}</div>
+                          min={0} step={0.01} placeholder="0,00" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
+                        <div className="py-2 text-sm font-semibold text-[#1E40AF] text-right tabular-nums">{lineTotal.toFixed(2)}</div>
                         {lignes.length > 1 ? (
                           <button type="button" onClick={() => { removeLigne(i); setLigneErrors((prev) => { const n = { ...prev }; delete n[i]; return n }) }}
                             className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
@@ -276,7 +276,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
               <div className="flex justify-between text-sm text-gray-600"><span>Total HT</span><span className="font-medium">{totalHT.toFixed(2)} EUR</span></div>
               <div className="flex justify-between text-sm text-gray-600"><span>TVA {effectiveTva}%</span><span className="font-medium">{totalTVA.toFixed(2)} EUR</span></div>
               {retenue > 0 && <div className="flex justify-between text-sm text-amber-600"><span>Retenue garantie {retenue}%</span><span className="font-medium">-{retenueAmount.toFixed(2)} EUR</span></div>}
-              <div className="border-t border-gray-200 pt-2 flex justify-between text-base font-bold text-[#1a9e52]">
+              <div className="border-t border-gray-200 pt-2 flex justify-between text-base font-bold text-[#1E40AF]">
                 <span>Total TTC</span><span>{totalTTC.toFixed(2)} EUR</span>
               </div>
               {retenue > 0 && (
@@ -288,7 +288,7 @@ export default function FactureDirecteModal({ open, onClose, onSubmit }: Props) 
             <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
               <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl cursor-pointer">Annuler</button>
               <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} disabled={saving} onClick={handleSubmit}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer">
                 {saving ? 'Creation...' : 'Creer la facture'}
               </motion.button>
             </div>

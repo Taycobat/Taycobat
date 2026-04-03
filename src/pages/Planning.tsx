@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useChantiers } from '../hooks/useChantiers'
 
-const COLORS = ['bg-[#1a9e52]', 'bg-blue-500', 'bg-amber-500', 'bg-purple-500', 'bg-rose-500', 'bg-cyan-500']
+const COLORS = ['bg-[#1E40AF]', 'bg-blue-500', 'bg-amber-500', 'bg-purple-500', 'bg-rose-500', 'bg-cyan-500']
 
 export default function Planning() {
   const { chantiers, loading } = useChantiers()
@@ -61,7 +61,7 @@ export default function Planning() {
                   {days.map((d, i) => (
                     <div key={i} style={{ width: 28 }} className={`text-center text-[10px] py-1 ${
                       d.getDay() === 0 || d.getDay() === 6 ? 'bg-gray-50 text-gray-300' : 'text-gray-400'
-                    } ${d.toDateString() === today.toDateString() ? 'bg-emerald-50 text-[#1a9e52] font-bold' : ''}`}>
+                    } ${d.toDateString() === today.toDateString() ? 'bg-blue-50 text-[#1E40AF] font-bold' : ''}`}>
                       {d.getDate()}
                     </div>
                   ))}
@@ -88,7 +88,7 @@ export default function Planning() {
                       {days.map((d, i) => (
                         <div key={i} style={{ width: 28 }} className={`h-full ${
                           d.getDay() === 0 || d.getDay() === 6 ? 'bg-gray-50/50' : ''
-                        } ${d.toDateString() === today.toDateString() ? 'border-l-2 border-[#1a9e52]' : ''}`} />
+                        } ${d.toDateString() === today.toDateString() ? 'border-l-2 border-[#1E40AF]' : ''}`} />
                       ))}
                       {hasBar && barStart <= barEnd && (
                         <div className={`absolute top-2 h-6 rounded-full ${COLORS[ci % COLORS.length]} opacity-80`}

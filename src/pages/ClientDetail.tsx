@@ -18,8 +18,8 @@ interface DocRow { id: string; numero: string; montant_ttc: number; statut: stri
 
 const statutCls: Record<string, string> = {
   brouillon: 'bg-gray-100 text-gray-600', envoye: 'bg-blue-100 text-blue-700',
-  signe: 'bg-emerald-100 text-emerald-700', accepte: 'bg-emerald-100 text-emerald-700',
-  refuse: 'bg-red-100 text-red-600', payee: 'bg-emerald-100 text-emerald-700',
+  signe: 'bg-blue-100 text-blue-700', accepte: 'bg-blue-100 text-blue-700',
+  refuse: 'bg-red-100 text-red-600', payee: 'bg-blue-100 text-blue-700',
   impayee: 'bg-red-100 text-red-600', envoyee: 'bg-blue-100 text-blue-700',
   annulee: 'bg-gray-100 text-gray-400',
 }
@@ -66,7 +66,7 @@ export default function ClientDetail() {
         {/* Client info */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#1a9e52] to-emerald-400 flex items-center justify-center text-white font-bold text-xl">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#1E40AF] to-blue-400 flex items-center justify-center text-white font-bold text-xl">
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -90,7 +90,7 @@ export default function ClientDetail() {
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Devis</p><p className="text-xl font-bold text-gray-900">{devis.length}</p><p className="text-xs text-gray-500">{fmt(totalDevis)}</p></div>
           <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Factures</p><p className="text-xl font-bold text-gray-900">{factures.length}</p><p className="text-xs text-gray-500">{fmt(totalFactures)}</p></div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Total CA</p><p className="text-xl font-bold text-[#1a9e52]">{fmt(totalFactures)}</p></div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Total CA</p><p className="text-xl font-bold text-[#1E40AF]">{fmt(totalFactures)}</p></div>
         </div>
 
         {/* Devis list */}

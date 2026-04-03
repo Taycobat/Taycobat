@@ -154,13 +154,13 @@ export function downloadPDFTable(
     import('jspdf-autotable').then(({ default: autoTable }) => {
       const doc = new jsPDF({ orientation: rows[0]?.length > 6 ? 'landscape' : 'portrait' })
       wrapDocText(doc)
-      const green: [number, number, number] = [26, 158, 82]
+      const blue: [number, number, number] = [30, 64, 175]
 
       doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30)
       doc.text(title, 14, 18)
       doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120)
       doc.text(`Genere le ${new Date().toLocaleDateString('fr-FR')} — TAYCOBAT`, 14, 24)
-      doc.setDrawColor(...green); doc.setLineWidth(0.6); doc.line(14, 27, doc.internal.pageSize.width - 14, 27)
+      doc.setDrawColor(...blue); doc.setLineWidth(0.6); doc.line(14, 27, doc.internal.pageSize.width - 14, 27)
 
       const body = [...rows]
       if (totals) body.push(totals)
@@ -169,9 +169,9 @@ export function downloadPDFTable(
         startY: 32,
         head: [headers],
         body,
-        headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+        headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
         bodyStyles: { fontSize: 7.5 },
-        alternateRowStyles: { fillColor: [245, 250, 247] },
+        alternateRowStyles: { fillColor: [239, 246, 255] },
         margin: { left: 14, right: 14 },
         didParseCell: (data) => {
           if (totals && data.section === 'body' && data.row.index === rows.length) {

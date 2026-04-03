@@ -27,8 +27,8 @@ const statutStyle: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-gray-50 text-gray-600 border-gray-200' },
   envoye: { label: 'Envoyé', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
   en_attente: { label: 'En attente', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  signe: { label: 'Signé', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  accepte: { label: 'Accepté', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  signe: { label: 'Signé', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  accepte: { label: 'Accepté', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
   refuse: { label: 'Refusé', cls: 'bg-red-50 text-red-600 border-red-200' },
 }
 
@@ -75,7 +75,7 @@ export default function Devis() {
 
   async function handlePDF(d: DevisRow) {
     setPdfingId(d.id)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const meta = user?.user_metadata ?? {}
     const entreprise = meta.entreprise || 'TAYCOBAT'
     const siretE = meta.siret || ''
@@ -127,7 +127,7 @@ export default function Devis() {
     lines.forEach((l, i) => doc.text(l, infoX, infoY + 11 + i * 4))
 
     // Document type + number (top right)
-    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text('DEVIS', 196, 16, { align: 'right' })
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
     doc.text(`N\u00b0 ${d.numero}`, 196, 23, { align: 'right' })
@@ -137,7 +137,7 @@ export default function Devis() {
 
     // Green separator
     const sepY = Math.max(38, infoY + 11 + lines.length * 4 + 2)
-    doc.setDrawColor(...green); doc.setLineWidth(0.8)
+    doc.setDrawColor(...blue); doc.setLineWidth(0.8)
     doc.line(14, sepY, 196, sepY)
 
     // --- Client box ---
@@ -157,7 +157,7 @@ export default function Devis() {
     }
 
     // Devis title
-    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(d.titre, 14, clientY + 8); doc.setTextColor(30, 30, 30) }
+    if (d.titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue); doc.text(d.titre, 14, clientY + 8); doc.setTextColor(30, 30, 30) }
 
     // Adresse chantier
     let chantierOffset = 0
@@ -175,8 +175,8 @@ export default function Devis() {
     autoTable(doc, {
       startY: tableStartY, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'Total HT']],
       body: tableData.length > 0 ? tableData : [['—', '', '', '', '']],
-      headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
+      headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [239, 246, 255] },
       columnStyles: { 0: { cellWidth: 80 }, 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'center', cellWidth: 20 }, 3: { halign: 'right', cellWidth: 30 }, 4: { halign: 'right', cellWidth: 30 } },
       margin: { left: 14, right: 14 },
     })
@@ -185,12 +185,12 @@ export default function Devis() {
     const finalY = (doc as any).lastAutoTable?.finalY ?? 140
     const tva = d.montant_ttc - d.montant_ht
     const boxX = 120; const boxY = finalY + 10
-    doc.setFillColor(245, 250, 247); doc.roundedRect(boxX, boxY, 76, 32, 2, 2, 'F')
+    doc.setFillColor(239, 246, 255); doc.roundedRect(boxX, boxY, 76, 32, 2, 2, 'F')
     doc.setFontSize(9); doc.setTextColor(100, 100, 100)
     doc.text('Total HT', boxX + 4, boxY + 8); doc.text(fmt2(d.montant_ht), boxX + 72, boxY + 8, { align: 'right' })
     doc.text(`TVA ${d.tva_pct}%`, boxX + 4, boxY + 16); doc.text(fmt2(tva), boxX + 72, boxY + 16, { align: 'right' })
     doc.setDrawColor(200, 200, 200); doc.line(boxX + 4, boxY + 20, boxX + 72, boxY + 20)
-    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text('Total TTC', boxX + 4, boxY + 28); doc.text(fmt2(d.montant_ttc), boxX + 72, boxY + 28, { align: 'right' })
 
     // Signature
@@ -250,7 +250,7 @@ export default function Devis() {
           </p>
         </div>
         <motion.button onClick={() => navigate('/devis/nouveau')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer">
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-colors cursor-pointer">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           Nouveau devis
         </motion.button>
@@ -262,7 +262,7 @@ export default function Devis() {
         {[
           { label: 'Brouillon', count: counts.brouillon, cls: 'bg-gray-100 text-gray-600' },
           { label: 'Envoyé', count: counts.envoye, cls: 'bg-blue-50 text-blue-700' },
-          { label: 'Signé', count: counts.signe, cls: 'bg-emerald-50 text-emerald-700' },
+          { label: 'Signé', count: counts.signe, cls: 'bg-blue-50 text-blue-700' },
           { label: 'Refusé', count: counts.refuse, cls: 'bg-red-50 text-red-600' },
         ].map((p) => (
           <div key={p.label} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${p.cls}`}>
@@ -277,13 +277,13 @@ export default function Devis() {
         <div className="relative flex-1 max-w-md">
           <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher par numéro, titre, client..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all" />
         </div>
         <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
           {STATUTS.map((s) => (
             <button key={s.key} onClick={() => setFilterStatut(s.key)}
               className={`px-3.5 py-2.5 text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
-                filterStatut === s.key ? 'bg-[#1a9e52] text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                filterStatut === s.key ? 'bg-[#1E40AF] text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}>{s.label}</button>
           ))}
         </div>
@@ -350,7 +350,7 @@ export default function Devis() {
                           </button>
                           {/* PDF button */}
                           <button onClick={() => handlePDF(devis)} title="Générer PDF" disabled={pdfingId === devis.id}
-                            className="p-2 rounded-lg text-gray-400 hover:text-[#1a9e52] hover:bg-emerald-50 transition-all cursor-pointer disabled:opacity-40">
+                            className="p-2 rounded-lg text-gray-400 hover:text-[#1E40AF] hover:bg-blue-50 transition-all cursor-pointer disabled:opacity-40">
                             {pdfingId === devis.id ? (
                               <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                             ) : (

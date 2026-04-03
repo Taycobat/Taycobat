@@ -87,7 +87,7 @@ export default function Bibliotheque() {
               onClick={() => { setActiveMetier(m.id); setSearch('') }}
               className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-all cursor-pointer ${
                 activeMetier === m.id
-                  ? 'bg-[#1a9e52]/10 text-[#1a9e52] font-semibold'
+                  ? 'bg-[#1E40AF]/10 text-[#1E40AF] font-semibold'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -111,13 +111,13 @@ export default function Bibliotheque() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un article dans toute la bibliothèque..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all"
             />
           </div>
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={() => setDrawerOpen(true)}
-            className="relative flex items-center gap-2 px-4 py-2.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer"
+            className="relative flex items-center gap-2 px-4 py-2.5 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-colors cursor-pointer"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -142,12 +142,12 @@ export default function Bibliotheque() {
                     onClick={() => toggleItem(item, item.metier)}
                     className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                       isSelected(item, item.metier)
-                        ? 'border-[#1a9e52] bg-emerald-50/50'
+                        ? 'border-[#1E40AF] bg-blue-50/50'
                         : 'border-gray-100 bg-white hover:border-gray-200'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                      isSelected(item, item.metier) ? 'border-[#1a9e52] bg-[#1a9e52]' : 'border-gray-300'
+                      isSelected(item, item.metier) ? 'border-[#1E40AF] bg-[#1E40AF]' : 'border-gray-300'
                     }`}>
                       {isSelected(item, item.metier) && (
                         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -160,7 +160,7 @@ export default function Bibliotheque() {
                       <div className="text-xs text-gray-400">{item.metier}</div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-sm font-semibold text-[#1a9e52]">{fmt(item.pu)}</div>
+                      <div className="text-sm font-semibold text-[#1E40AF]">{fmt(item.pu)}</div>
                       <div className="text-xs text-gray-400">/{item.unit}</div>
                     </div>
                   </motion.div>
@@ -177,12 +177,12 @@ export default function Bibliotheque() {
                       onClick={() => toggleItem(item, metier.nom)}
                       className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                         isSelected(item, metier.nom)
-                          ? 'border-[#1a9e52] bg-emerald-50/50'
+                          ? 'border-[#1E40AF] bg-blue-50/50'
                           : 'border-gray-100 bg-white hover:border-gray-200'
                       }`}
                     >
                       <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        isSelected(item, metier.nom) ? 'border-[#1a9e52] bg-[#1a9e52]' : 'border-gray-300'
+                        isSelected(item, metier.nom) ? 'border-[#1E40AF] bg-[#1E40AF]' : 'border-gray-300'
                       }`}>
                         {isSelected(item, metier.nom) && (
                           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -194,7 +194,7 @@ export default function Bibliotheque() {
                         <div className="text-sm font-medium text-gray-900 truncate">{item.lib}</div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-sm font-semibold text-[#1a9e52]">{fmt(item.pu)}</div>
+                        <div className="text-sm font-semibold text-[#1E40AF]">{fmt(item.pu)}</div>
                         <div className="text-xs text-gray-400">/{item.unit}</div>
                       </div>
                     </motion.div>
@@ -242,10 +242,10 @@ export default function Bibliotheque() {
                       </div>
                       <div className="flex items-center gap-3">
                         <input type="number" value={item.qty} min={1} onChange={(e) => updateCartQty(item.key, parseInt(e.target.value) || 1)}
-                          className="w-16 px-2 py-1.5 rounded-lg border border-gray-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          className="w-16 px-2 py-1.5 rounded-lg border border-gray-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         <span className="text-xs text-gray-400">{item.unit}</span>
                         <span className="text-xs text-gray-400">× {fmt(item.pu)}</span>
-                        <span className="ml-auto text-sm font-semibold text-[#1a9e52]">{fmt(item.qty * item.pu)}</span>
+                        <span className="ml-auto text-sm font-semibold text-[#1E40AF]">{fmt(item.qty * item.pu)}</span>
                       </div>
                     </div>
                   ))
@@ -256,9 +256,9 @@ export default function Bibliotheque() {
                 <div className="border-t border-gray-100 p-4 space-y-3">
                   <div className="flex justify-between text-base font-bold text-gray-900">
                     <span>Total HT</span>
-                    <span className="text-[#1a9e52]">{fmt(totalHT)}</span>
+                    <span className="text-[#1E40AF]">{fmt(totalHT)}</span>
                   </div>
-                  <button className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer">
+                  <button className="w-full py-3 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors cursor-pointer">
                     Insérer dans le devis
                   </button>
                 </div>

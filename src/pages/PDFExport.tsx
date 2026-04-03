@@ -40,8 +40,8 @@ function toNum(v: unknown): number {
 const statutStyle: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-gray-50 text-gray-600 border-gray-200' },
   envoye: { label: 'Envoyé', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  signe: { label: 'Signé', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  accepte: { label: 'Accepté', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  signe: { label: 'Signé', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  accepte: { label: 'Accepté', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
   refuse: { label: 'Refusé', cls: 'bg-red-50 text-red-600 border-red-200' },
 }
 
@@ -101,13 +101,13 @@ export default function PDFExport() {
     setGenerating(d.id)
     const doc = new jsPDF()
     wrapDocText(doc)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const meta = user?.user_metadata ?? {}
     const entreprise = meta.entreprise || 'TAYCOBAT'
     const siretEntreprise = meta.siret || ''
 
     // Header
-    doc.setFillColor(...green)
+    doc.setFillColor(...blue)
     doc.rect(0, 0, 210, 32, 'F')
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(18)
@@ -145,7 +145,7 @@ export default function PDFExport() {
     if (d.titre) {
       doc.setFontSize(11)
       doc.setFont('helvetica', 'bold')
-      doc.setTextColor(...green)
+      doc.setTextColor(...blue)
       doc.text(d.titre, 14, 46)
       doc.setTextColor(30, 30, 30)
     }
@@ -164,9 +164,9 @@ export default function PDFExport() {
       startY: 75,
       head: [['Désignation', 'Qté', 'Unité', 'P.U. HT', 'Total HT']],
       body: tableData.length > 0 ? tableData : [['—', '', '', '', '']],
-      headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
       bodyStyles: { fontSize: 9 },
-      alternateRowStyles: { fillColor: [245, 250, 247] },
+      alternateRowStyles: { fillColor: [239, 246, 255] },
       columnStyles: {
         0: { cellWidth: 80 },
         1: { halign: 'center', cellWidth: 20 },
@@ -183,7 +183,7 @@ export default function PDFExport() {
 
     // Totals box
     const boxX = 120; const boxY = finalY + 10
-    doc.setFillColor(245, 250, 247)
+    doc.setFillColor(239, 246, 255)
     doc.roundedRect(boxX, boxY, 76, 32, 2, 2, 'F')
     doc.setFontSize(9)
     doc.setTextColor(100, 100, 100)
@@ -195,7 +195,7 @@ export default function PDFExport() {
     doc.line(boxX + 4, boxY + 20, boxX + 72, boxY + 20)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...green)
+    doc.setTextColor(...blue)
     doc.text('Total TTC', boxX + 4, boxY + 28)
     doc.text(fmt(d.montant_ttc), boxX + 72, boxY + 28, { align: 'right' })
 
@@ -248,7 +248,7 @@ export default function PDFExport() {
                     <span className="text-sm font-mono font-semibold text-gray-900">{d.numero}</span>
                     <span className={`ml-2 inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium border ${st.cls}`}>{st.label}</span>
                   </div>
-                  <span className="text-lg font-bold text-[#1a9e52]">{fmt(d.montant_ttc)}</span>
+                  <span className="text-lg font-bold text-[#1E40AF]">{fmt(d.montant_ttc)}</span>
                 </div>
                 {d.titre && <p className="text-sm text-gray-700 truncate mb-1">{d.titre}</p>}
                 <p className="text-xs text-gray-400 mb-4">
@@ -262,7 +262,7 @@ export default function PDFExport() {
                     Aperçu
                   </button>
                   <button onClick={() => generatePDF(d)} disabled={generating === d.id}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-sm transition-all cursor-pointer disabled:opacity-60">
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl shadow-sm transition-all cursor-pointer disabled:opacity-60">
                     {generating === d.id ? (
                       <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                     ) : (
@@ -288,7 +288,7 @@ export default function PDFExport() {
                 <h2 className="text-lg font-semibold text-gray-900">Aperçu — {preview.numero}</h2>
                 <div className="flex items-center gap-2">
                   <button onClick={() => { generatePDF(preview); setPreview(null) }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer">Télécharger PDF</button>
+                    className="px-4 py-2 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer">Télécharger PDF</button>
                   <button onClick={() => setPreview(null)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 cursor-pointer">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -296,15 +296,15 @@ export default function PDFExport() {
               </div>
               <div className="p-6 space-y-6">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] rounded-xl p-5 text-white">
+                <div className="bg-gradient-to-r from-[#1E40AF] to-[#1e3a8a] rounded-xl p-5 text-white">
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="text-xl font-bold">{user?.user_metadata?.entreprise || 'TAYCOBAT'}</div>
-                      {user?.user_metadata?.siret && <div className="text-sm text-emerald-200 mt-1">SIRET : {user.user_metadata.siret}</div>}
+                      {user?.user_metadata?.siret && <div className="text-sm text-blue-200 mt-1">SIRET : {user.user_metadata.siret}</div>}
                     </div>
                     <div className="text-right">
                       <div className="font-mono font-bold">{preview.numero}</div>
-                      <div className="text-sm text-emerald-200">{new Date(preview.created_at).toLocaleDateString('fr-FR')}</div>
+                      <div className="text-sm text-blue-200">{new Date(preview.created_at).toLocaleDateString('fr-FR')}</div>
                     </div>
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function PDFExport() {
                 <div className="bg-gray-50 rounded-xl p-4 space-y-2 max-w-xs ml-auto">
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium">{fmt(preview.montant_ht)}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">TVA {preview.tva_pct}%</span><span className="font-medium">{fmt(preview.montant_ttc - preview.montant_ht)}</span></div>
-                  <div className="flex justify-between text-base pt-2 border-t border-gray-200"><span className="font-bold">Total TTC</span><span className="font-bold text-[#1a9e52]">{fmt(preview.montant_ttc)}</span></div>
+                  <div className="flex justify-between text-base pt-2 border-t border-gray-200"><span className="font-bold">Total TTC</span><span className="font-bold text-[#1E40AF]">{fmt(preview.montant_ttc)}</span></div>
                 </div>
               </div>
             </motion.div>

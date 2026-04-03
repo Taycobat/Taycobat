@@ -18,7 +18,7 @@ type Ligne = ReturnType<typeof emptyLigne>
 
 function fmt(n: number) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(n) }
 
-const ic = 'w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all'
+const ic = 'w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all'
 
 export default function NouveauDevis() {
   const navigate = useNavigate()
@@ -158,7 +158,7 @@ export default function NouveauDevis() {
   async function generatePreviewPDF() {
     const doc = new jsPDF()
     wrapDocText(doc)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const entreprise = meta.entreprise || 'TAYCOBAT'
     const siret = meta.siret || ''
     let artisanLogoB64: string | null = null
@@ -169,25 +169,25 @@ export default function NouveauDevis() {
     doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100)
     if (siret) doc.text(`SIRET : ${siret}`, infoX, 23)
     if (meta.adresse) doc.text(meta.adresse as string, infoX, 27)
-    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text('DEVIS', 196, 16, { align: 'right' })
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue); doc.text('DEVIS', 196, 16, { align: 'right' })
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60); doc.text(`N\u00b0 ${numero}`, 196, 23, { align: 'right' })
     doc.setFontSize(8); doc.setTextColor(120, 120, 120); doc.text(`Date : ${new Date(dateDevis).toLocaleDateString('fr-FR')}`, 196, 29, { align: 'right' })
     doc.text(`Valable jusqu'au : ${new Date(dateValidite).toLocaleDateString('fr-FR')}`, 196, 34, { align: 'right' })
-    doc.setDrawColor(...green); doc.setLineWidth(0.8); doc.line(14, 38, 196, 38)
+    doc.setDrawColor(...blue); doc.setLineWidth(0.8); doc.line(14, 38, 196, 38)
     let y = 44
     const cl = clients.find((c) => c.id === clientId)
     if (cl) { doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(clientDisplayName(cl), 120, y); y += 6 }
-    if (titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green); doc.text(titre, 14, 44) }
+    if (titre) { doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue); doc.text(titre, 14, 44) }
     if (adresseChantier) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Chantier : ${adresseChantier}`, 14, 50) }
     y = Math.max(y, 56) + 4
     const tableData = prestations.filter((l) => l.description).map((l) => [l.description, String(l.quantite), l.unite, fmt(l.prix_unitaire), `${l.tva_pct}%`, fmt(l.total_ht)])
-    autoTable(doc, { startY: y, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']], body: tableData.length > 0 ? tableData : [['—', '', '', '', '', '']], headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 }, bodyStyles: { fontSize: 8 }, alternateRowStyles: { fillColor: [245, 250, 247] }, margin: { left: 14, right: 14 } })
+    autoTable(doc, { startY: y, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']], body: tableData.length > 0 ? tableData : [['—', '', '', '', '', '']], headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 }, bodyStyles: { fontSize: 8 }, alternateRowStyles: { fillColor: [239, 246, 255] }, margin: { left: 14, right: 14 } })
     const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30
     let totY = finalY + 8
     doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
     doc.text('Total HT', 140, totY); doc.text(fmt(netHT), 196, totY, { align: 'right' }); totY += 5
     doc.text('Total TTC', 140, totY); doc.text(fmt(totalTTC), 196, totY, { align: 'right' }); totY += 6
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text('Net a payer', 140, totY); doc.text(fmt(totalTTC), 196, totY, { align: 'right' })
     totY += 12; doc.setTextColor(100, 100, 100); doc.setFontSize(8); doc.setFont('helvetica', 'normal')
     doc.text("Signature de l'artisan", 14, totY); doc.text('Bon pour accord — le client', 120, totY)
@@ -214,7 +214,7 @@ export default function NouveauDevis() {
           </div>
           <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
             {[{ k: 'edition' as const, l: 'Edition' }, { k: 'preview' as const, l: 'Previsualisation' }].map((t) => (
-              <button key={t.k} onClick={() => setTab(t.k)} className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${tab === t.k ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>{t.l}</button>
+              <button key={t.k} onClick={() => setTab(t.k)} className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${tab === t.k ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'}`}>{t.l}</button>
             ))}
           </div>
           {lastSaved && <span className="text-[11px] text-gray-400">Sauvegarde {lastSaved}</span>}
@@ -222,11 +222,11 @@ export default function NouveauDevis() {
         <div className="flex items-center gap-2">
           <button onClick={() => navigate('/devis')} className="px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl cursor-pointer">Annuler</button>
           <motion.button onClick={() => doSave()} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-60 cursor-pointer">
+            className="px-4 py-2 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-60 cursor-pointer">
             {saving ? 'Sauvegarde...' : 'Enregistrer'}
           </motion.button>
           <motion.button onClick={() => doSave(true)} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 text-sm font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-xl transition-colors disabled:opacity-60 cursor-pointer">
+            className="px-4 py-2 text-sm font-semibold text-white bg-blue-800 hover:bg-blue-900 rounded-xl transition-colors disabled:opacity-60 cursor-pointer">
             Finaliser et envoyer
           </motion.button>
         </div>
@@ -237,7 +237,7 @@ export default function NouveauDevis() {
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-center gap-3">
           <svg className="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           <span className="text-sm text-amber-700">Certaines mentions legales obligatoires ne sont pas renseignees</span>
-          <button onClick={() => navigate('/parametres')} className="text-sm font-semibold text-[#1a9e52] hover:underline cursor-pointer ml-2">Configurer maintenant</button>
+          <button onClick={() => navigate('/parametres')} className="text-sm font-semibold text-[#1E40AF] hover:underline cursor-pointer ml-2">Configurer maintenant</button>
         </div>
       )}
 
@@ -282,7 +282,7 @@ export default function NouveauDevis() {
                       {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
                     </select>
                     <button type="button" onClick={() => setShowNewClient(!showNewClient)}
-                      className={`w-10 h-10 rounded-xl border flex items-center justify-center cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52]'}`}>
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-400 hover:text-[#1E40AF]'}`}>
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                     </button>
                   </div>
@@ -291,7 +291,7 @@ export default function NouveauDevis() {
                   <div className="p-3 bg-gray-50 rounded-xl space-y-2 border border-gray-200">
                     <div className="flex gap-2">
                       {(['particulier', 'societe'] as const).map((t) => (
-                        <button key={t} type="button" onClick={() => setNewType(t)} className={`flex-1 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${newType === t ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>{t === 'particulier' ? 'Particulier' : 'Societe'}</button>
+                        <button key={t} type="button" onClick={() => setNewType(t)} className={`flex-1 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${newType === t ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'}`}>{t === 'particulier' ? 'Particulier' : 'Societe'}</button>
                       ))}
                     </div>
                     {newType === 'particulier' ? (
@@ -300,10 +300,10 @@ export default function NouveauDevis() {
                       <div className="flex gap-2">
                         <input value={newRaison} onChange={(e) => setNewRaison(e.target.value)} placeholder="Raison sociale *" className={ic + ' flex-1'} />
                         <input value={newSiret} onChange={(e) => setNewSiret(e.target.value)} placeholder="SIRET" className={ic + ' w-36 font-mono'} />
-                        <button type="button" disabled={searchingSiret || newSiret.length < 9} onClick={async () => { setSearchingSiret(true); const r = await searchSiret(newSiret); if (r?.raisonSociale) setNewRaison(r.raisonSociale); setSearchingSiret(false) }} className="px-3 py-2 text-xs font-semibold text-white bg-[#1a9e52] rounded-lg cursor-pointer disabled:opacity-40">{searchingSiret ? '...' : 'SIRET'}</button>
+                        <button type="button" disabled={searchingSiret || newSiret.length < 9} onClick={async () => { setSearchingSiret(true); const r = await searchSiret(newSiret); if (r?.raisonSociale) setNewRaison(r.raisonSociale); setSearchingSiret(false) }} className="px-3 py-2 text-xs font-semibold text-white bg-[#1E40AF] rounded-lg cursor-pointer disabled:opacity-40">{searchingSiret ? '...' : 'SIRET'}</button>
                       </div>
                     )}
-                    <button type="button" onClick={handleCreateClient} className="w-full py-2 rounded-lg bg-[#1a9e52] text-white text-sm font-semibold cursor-pointer hover:bg-emerald-700">Creer le client</button>
+                    <button type="button" onClick={handleCreateClient} className="w-full py-2 rounded-lg bg-[#1E40AF] text-white text-sm font-semibold cursor-pointer hover:bg-blue-700">Creer le client</button>
                   </div>
                 )}
                 <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Adresse du chantier</label>
@@ -312,7 +312,7 @@ export default function NouveauDevis() {
             </div>
 
             {/* DESCRIPTION */}
-            <button onClick={() => setDescription(description || ' ')} className="text-xs text-[#1a9e52] font-semibold hover:underline cursor-pointer">+ Ajouter une description</button>
+            <button onClick={() => setDescription(description || ' ')} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">+ Ajouter une description</button>
             {description && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Description generale du devis..." className={ic + ' resize-vertical min-h-[60px]'} />
@@ -321,7 +321,7 @@ export default function NouveauDevis() {
 
             {/* TABLEAU LIGNES */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="grid grid-cols-[40px_3fr_80px_80px_110px_90px_110px_40px] gap-1 px-4 py-2.5 bg-[#1a9e52] text-white text-[11px] font-semibold uppercase">
+              <div className="grid grid-cols-[40px_3fr_80px_80px_110px_90px_110px_40px] gap-1 px-4 py-2.5 bg-[#1E40AF] text-white text-[11px] font-semibold uppercase">
                 <span>N°</span><span>Designation</span><span className="text-center">Qte</span><span className="text-center">Unite</span><span className="text-right">Prix U. HT</span><span className="text-center">TVA</span><span className="text-right">Total HT</span><span />
               </div>
 
@@ -331,16 +331,16 @@ export default function NouveauDevis() {
                 )}
                 {lignes.map((l, i) => {
                   if (l.type === 'section') return (
-                    <div key={i} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border-l-4 border-[#1a9e52]">
-                      <span className="text-xs font-bold text-[#1a9e52] w-10">{i + 1}</span>
-                      <input type="text" value={l.description} onChange={(e) => setLigne(i, 'description', e.target.value)} placeholder="Titre de section..." className="flex-1 px-2 py-1.5 rounded-lg border border-emerald-200 bg-white text-sm font-semibold text-[#1a9e52] focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20" />
+                    <div key={i} className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-l-4 border-[#1E40AF]">
+                      <span className="text-xs font-bold text-[#1E40AF] w-10">{i + 1}</span>
+                      <input type="text" value={l.description} onChange={(e) => setLigne(i, 'description', e.target.value)} placeholder="Titre de section..." className="flex-1 px-2 py-1.5 rounded-lg border border-blue-200 bg-white text-sm font-semibold text-[#1E40AF] focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20" />
                       <button onClick={() => removeLigne(i)} className="p-1 text-gray-300 hover:text-red-500 cursor-pointer"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
                     </div>
                   )
                   if (l.type === 'texte') return (
                     <div key={i} className="flex items-center gap-2 px-4 py-2 bg-gray-50">
                       <span className="text-xs text-gray-400 w-10">{i + 1}</span>
-                      <textarea value={l.description} onChange={(e) => setLigne(i, 'description', e.target.value)} placeholder="Texte libre..." rows={2} className="flex-1 px-2 py-1.5 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 resize-vertical min-h-[40px]" />
+                      <textarea value={l.description} onChange={(e) => setLigne(i, 'description', e.target.value)} placeholder="Texte libre..." rows={2} className="flex-1 px-2 py-1.5 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 resize-vertical min-h-[40px]" />
                       <button onClick={() => removeLigne(i)} className="p-1 text-gray-300 hover:text-red-500 cursor-pointer"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
                     </div>
                   )
@@ -355,18 +355,18 @@ export default function NouveauDevis() {
                       <span className="text-xs text-gray-400 pt-2.5">{i + 1}</span>
                       <div className="flex gap-1">
                         <textarea value={l.description} onChange={(e) => { setLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px' }}
-                          placeholder="Designation de la prestation..." rows={3} className="flex-1 px-2 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 resize-vertical min-h-[72px] max-h-[160px]" />
+                          placeholder="Designation de la prestation..." rows={3} className="flex-1 px-2 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 resize-vertical min-h-[72px] max-h-[160px]" />
                         <LigneActions value={l.description} onChange={(t) => setLigne(i, 'description', t)} />
                       </div>
-                      <input type="number" value={l.quantite || ''} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)} min={0} step="any" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20" />
-                      <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)} className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20">
+                      <input type="number" value={l.quantite || ''} onChange={(e) => setLigne(i, 'quantite', parseFloat(e.target.value) || 0)} min={0} step="any" className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20" />
+                      <select value={l.unite} onChange={(e) => setLigne(i, 'unite', e.target.value)} className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20">
                         {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
                       </select>
-                      <input type="number" value={l.prix_unitaire || ''} onChange={(e) => setLigne(i, 'prix_unitaire', parseFloat(e.target.value) || 0)} min={0} step={0.01} className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20" />
-                      <select value={l.tva_pct} onChange={(e) => setLigne(i, 'tva_pct', parseFloat(e.target.value))} className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20">
+                      <input type="number" value={l.prix_unitaire || ''} onChange={(e) => setLigne(i, 'prix_unitaire', parseFloat(e.target.value) || 0)} min={0} step={0.01} className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20" />
+                      <select value={l.tva_pct} onChange={(e) => setLigne(i, 'tva_pct', parseFloat(e.target.value))} className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20">
                         {TVA_RATES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                       </select>
-                      <div className="py-2.5 text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.total_ht)}</div>
+                      <div className="py-2.5 text-sm font-semibold text-[#1E40AF] text-right tabular-nums">{fmt(l.total_ht)}</div>
                       <div className="flex flex-col gap-0.5 pt-1">
                         <button onClick={() => moveLigne(i, i - 1)} className="p-0.5 text-gray-300 hover:text-gray-600 cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg></button>
                         <button onClick={() => moveLigne(i, i + 1)} className="p-0.5 text-gray-300 hover:text-gray-600 cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></button>
@@ -380,12 +380,12 @@ export default function NouveauDevis() {
 
               <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-100">
                 <div className="flex gap-2">
-                  <button onClick={() => addLigne('prestation')} className="px-3 py-1.5 text-xs font-semibold text-[#1a9e52] bg-emerald-50 hover:bg-emerald-100 rounded-lg cursor-pointer">+ Fourniture</button>
+                  <button onClick={() => addLigne('prestation')} className="px-3 py-1.5 text-xs font-semibold text-[#1E40AF] bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer">+ Fourniture</button>
                   <button onClick={() => addLigne('prestation')} className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer">+ Main d'oeuvre</button>
                   <button onClick={() => addLigne('prestation')} className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer">+ Ouvrage</button>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => addLigne('section')} className="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg cursor-pointer">Section</button>
+                  <button onClick={() => addLigne('section')} className="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer">Section</button>
                   <button onClick={() => addLigne('texte')} className="px-3 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer">Texte</button>
                   <button onClick={() => addLigne('saut_page')} className="px-3 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer">Saut de page</button>
                 </div>
@@ -397,21 +397,21 @@ export default function NouveauDevis() {
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
                 <span className="text-xs font-semibold text-gray-400 uppercase">Remise</span>
                 <div className="flex gap-2">
-                  <button onClick={() => setAjustementType('pct')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${ajustementType === 'pct' ? 'bg-[#1a9e52] text-white' : 'bg-gray-100 text-gray-600'}`}>%</button>
-                  <button onClick={() => setAjustementType('fixe')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${ajustementType === 'fixe' ? 'bg-[#1a9e52] text-white' : 'bg-gray-100 text-gray-600'}`}>EUR</button>
+                  <button onClick={() => setAjustementType('pct')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${ajustementType === 'pct' ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-600'}`}>%</button>
+                  <button onClick={() => setAjustementType('fixe')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${ajustementType === 'fixe' ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-600'}`}>EUR</button>
                 </div>
                 <input type="number" value={ajustement} onChange={(e) => setAjustement(parseFloat(e.target.value) || 0)} min={0} className={ic + ' w-32'} />
                 <span className="text-sm text-gray-500">= -{fmt(ajustementAmount)}</span>
               </div>
             ) : (
-              <button onClick={() => setAjustement(0.01)} className="text-xs text-[#1a9e52] font-semibold hover:underline cursor-pointer">+ Definir un ajustement (remise)</button>
+              <button onClick={() => setAjustement(0.01)} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">+ Definir un ajustement (remise)</button>
             )}
 
             {/* GESTION DECHETS */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-gray-400 uppercase">Gestion des dechets</h3>
-                <button onClick={() => setShowDechets(!showDechets)} className="text-xs text-[#1a9e52] font-semibold hover:underline cursor-pointer">{showDechets ? 'Masquer' : '+ Definir'}</button>
+                <button onClick={() => setShowDechets(!showDechets)} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">{showDechets ? 'Masquer' : '+ Definir'}</button>
               </div>
               {showDechets && <textarea placeholder="Bordereau de suivi des dechets (BSD), tri selectif, evacuation..." rows={2} className={ic + ' mt-3 resize-vertical min-h-[44px]'} />}
             </div>
@@ -421,7 +421,7 @@ export default function NouveauDevis() {
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-gray-400 uppercase">Conditions de paiement</h3>
-                  <button onClick={() => setShowConditions(!showConditions)} className="text-xs text-[#1a9e52] font-semibold hover:underline cursor-pointer">{showConditions ? 'Masquer' : '+ Ajouter'}</button>
+                  <button onClick={() => setShowConditions(!showConditions)} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">{showConditions ? 'Masquer' : '+ Ajouter'}</button>
                 </div>
                 <p className="text-sm text-gray-600">Delai : {meta.conditions_paiement || '30 jours'}</p>
                 {meta.iban && <p className="text-sm text-gray-600 font-mono">IBAN : {meta.iban as string}</p>}
@@ -436,7 +436,7 @@ export default function NouveauDevis() {
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-2">
                 <div className="flex justify-between text-sm text-gray-600"><span>Total net HT</span><span className="tabular-nums">{fmt(netHT)}</span></div>
                 <div className="flex justify-between text-sm text-gray-600"><span>Total TTC</span><span className="tabular-nums">{fmt(totalTTC)}</span></div>
-                <div className="bg-[#1a9e52] text-white rounded-xl px-4 py-3 flex justify-between items-center mt-2">
+                <div className="bg-[#1E40AF] text-white rounded-xl px-4 py-3 flex justify-between items-center mt-2">
                   <span className="font-semibold text-sm">NET A PAYER</span>
                   <span className="text-xl font-bold tabular-nums">{fmt(totalTTC)}</span>
                 </div>

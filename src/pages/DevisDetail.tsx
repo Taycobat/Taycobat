@@ -36,8 +36,8 @@ const statutConfig: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-600 border-gray-200' },
   envoye: { label: 'Envoyé', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
   en_attente: { label: 'En attente', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  signe: { label: 'Signé', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  accepte: { label: 'Accepté', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  signe: { label: 'Signé', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  accepte: { label: 'Accepté', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
   refuse: { label: 'Refusé', cls: 'bg-red-50 text-red-600 border-red-200' },
 }
 
@@ -128,12 +128,12 @@ export default function DevisDetailPage() {
     if (!devis) return
     const doc = new jsPDF()
     wrapDocText(doc)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const meta = user?.user_metadata ?? {}
     const entreprise = meta.entreprise || 'TAYCOBAT'
     const siret = meta.siret || ''
 
-    doc.setFillColor(...green); doc.rect(0, 0, 210, 32, 'F')
+    doc.setFillColor(...blue); doc.rect(0, 0, 210, 32, 'F')
     doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
     doc.text(entreprise, 14, 15)
     doc.setFontSize(9); doc.setFont('helvetica', 'normal')
@@ -153,7 +153,7 @@ export default function DevisDetailPage() {
     }
 
     if (devis.titre) {
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
       doc.text(devis.titre, 14, 46); doc.setTextColor(30, 30, 30)
     }
 
@@ -161,8 +161,8 @@ export default function DevisDetailPage() {
     autoTable(doc, {
       startY: 75, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']],
       body: tableData.length > 0 ? tableData : [['—', '', '', '', '', '']],
-      headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
+      headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [239, 246, 255] },
       margin: { left: 14, right: 14 },
     })
 
@@ -170,12 +170,12 @@ export default function DevisDetailPage() {
     const finalY = (doc as any).lastAutoTable?.finalY ?? 140
     const tva = devis.montant_ttc - devis.montant_ht
     const boxX = 120; const boxY = finalY + 10
-    doc.setFillColor(245, 250, 247); doc.roundedRect(boxX, boxY, 76, 32, 2, 2, 'F')
+    doc.setFillColor(239, 246, 255); doc.roundedRect(boxX, boxY, 76, 32, 2, 2, 'F')
     doc.setFontSize(9); doc.setTextColor(100, 100, 100)
     doc.text('Total HT', boxX + 4, boxY + 8); doc.text(fmt(devis.montant_ht), boxX + 72, boxY + 8, { align: 'right' })
     doc.text(`TVA ${devis.tva_pct}%`, boxX + 4, boxY + 16); doc.text(fmt(tva), boxX + 72, boxY + 16, { align: 'right' })
     doc.setDrawColor(200, 200, 200); doc.line(boxX + 4, boxY + 20, boxX + 72, boxY + 20)
-    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text('Total TTC', boxX + 4, boxY + 28); doc.text(fmt(devis.montant_ttc), boxX + 72, boxY + 28, { align: 'right' })
 
     const sigY = boxY + 42; doc.setTextColor(100, 100, 100); doc.setFontSize(8); doc.setFont('helvetica', 'normal')
@@ -197,7 +197,7 @@ export default function DevisDetailPage() {
   if (!devis) return (
     <div className="p-8 text-center py-20">
       <p className="text-gray-500 mb-4">Devis non trouvé</p>
-      <Link to="/devis" className="text-[#1a9e52] font-medium hover:underline">Retour aux devis</Link>
+      <Link to="/devis" className="text-[#1E40AF] font-medium hover:underline">Retour aux devis</Link>
     </div>
   )
 
@@ -236,7 +236,7 @@ export default function DevisDetailPage() {
           {canConvert && (
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleConvertir}
               disabled={actionLoading === 'convertir'}
-              className="px-4 py-2 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50">
+              className="px-4 py-2 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition-all cursor-pointer disabled:opacity-50">
               {actionLoading === 'convertir' ? 'Création...' : 'Convertir en facture'}
             </motion.button>
           )}
@@ -327,7 +327,7 @@ export default function DevisDetailPage() {
               <div className="max-w-xs ml-auto space-y-2">
                 <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium text-gray-900 tabular-nums">{fmt(devis.montant_ht)}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-500">TVA {devis.tva_pct}%</span><span className="font-medium text-gray-900 tabular-nums">{fmt(tva)}</span></div>
-                <div className="flex justify-between text-lg pt-2 border-t border-gray-200"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(devis.montant_ttc)}</span></div>
+                <div className="flex justify-between text-lg pt-2 border-t border-gray-200"><span className="font-bold text-gray-900">Total TTC</span><span className="font-bold text-[#1E40AF] tabular-nums">{fmt(devis.montant_ttc)}</span></div>
               </div>
             </div>
           </motion.div>
@@ -342,7 +342,7 @@ export default function DevisDetailPage() {
             {client ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a9e52] to-emerald-400 flex items-center justify-center text-white font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1E40AF] to-blue-400 flex items-center justify-center text-white font-semibold">
                     {(client.prenom?.[0] ?? client.nom?.[0] ?? '?').toUpperCase()}
                   </div>
                   <div>
@@ -390,10 +390,10 @@ export default function DevisDetailPage() {
 
           {/* Quick total card */}
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-            className="bg-gradient-to-br from-[#1a9e52] to-[#0e7a3c] rounded-2xl p-5 text-white">
-            <div className="text-emerald-200 text-xs font-semibold uppercase tracking-wider mb-2">Total TTC</div>
+            className="bg-gradient-to-br from-[#1E40AF] to-[#1e3a8a] rounded-2xl p-5 text-white">
+            <div className="text-blue-200 text-xs font-semibold uppercase tracking-wider mb-2">Total TTC</div>
             <div className="text-3xl font-bold tabular-nums">{fmt(devis.montant_ttc)}</div>
-            <div className="text-emerald-200 text-sm mt-1">HT : {fmt(devis.montant_ht)}</div>
+            <div className="text-blue-200 text-sm mt-1">HT : {fmt(devis.montant_ht)}</div>
           </motion.div>
         </div>
       </div>

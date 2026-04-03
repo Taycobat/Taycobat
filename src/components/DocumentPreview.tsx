@@ -165,7 +165,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
             <div className="flex items-center gap-2">
               {onDownloadPDF && (
                 <button onClick={onDownloadPDF}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-lg transition-colors cursor-pointer">
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-lg transition-colors cursor-pointer">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -212,7 +212,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-2xl font-bold text-[#1a9e52]">{docTitle}</div>
+                      <div className="text-2xl font-bold text-[#1E40AF]">{docTitle}</div>
                       <div className="text-sm text-gray-600 mt-1">N° {doc.numero}</div>
                       <div className="text-xs text-gray-400 mt-1">Date : {dateStr}</div>
                       {isDevis && (doc as DevisData).date_validite && (
@@ -225,16 +225,16 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                   </div>
 
                   {/* Green separator */}
-                  <div className="h-0.5 bg-[#1a9e52] mb-6" />
+                  <div className="h-0.5 bg-[#1E40AF] mb-6" />
 
                   {/* === CLIENT + DEVIS TITLE === */}
                   <div className="flex justify-between items-start mb-6 gap-4">
                     <div>
                       {isDevis && (doc as DevisData).titre && (
-                        <div className="text-base font-bold text-[#1a9e52] mb-2">{(doc as DevisData).titre}</div>
+                        <div className="text-base font-bold text-[#1E40AF] mb-2">{(doc as DevisData).titre}</div>
                       )}
                       {isFacture && (doc as FactureData).facture_type === 'situation' && (doc as FactureData).avancement_pct && (
-                        <div className="text-sm font-bold text-[#1a9e52] mb-2">Situation — Avancement {(doc as FactureData).avancement_pct}%</div>
+                        <div className="text-sm font-bold text-[#1E40AF] mb-2">Situation — Avancement {(doc as FactureData).avancement_pct}%</div>
                       )}
                       {isFacture && (doc as FactureData).facture_type === 'avoir' && (
                         <div className="text-sm font-bold text-red-600 mb-2">AVOIR</div>
@@ -272,7 +272,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                   <div className="overflow-x-auto mb-6">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-[#1a9e52] text-white">
+                        <tr className="bg-[#1E40AF] text-white">
                           <th className="text-left px-3 py-2 font-semibold text-xs">Designation</th>
                           <th className="text-center px-2 py-2 font-semibold text-xs w-16">Qte</th>
                           <th className="text-center px-2 py-2 font-semibold text-xs w-16">Unite</th>
@@ -283,7 +283,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                       </thead>
                       <tbody>
                         {lignes.length > 0 ? lignes.map((l, i) => (
-                          <tr key={i} className={i % 2 === 1 ? 'bg-emerald-50/40' : ''}>
+                          <tr key={i} className={i % 2 === 1 ? 'bg-blue-50/40' : ''}>
                             <td className="px-3 py-2 text-gray-900">{l.description}</td>
                             <td className="px-2 py-2 text-center text-gray-600 tabular-nums">{l.quantite}</td>
                             <td className="px-2 py-2 text-center text-gray-500">{l.unite}</td>
@@ -300,7 +300,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
 
                   {/* === TOTAUX === */}
                   <div className="flex justify-end mb-8">
-                    <div className="w-64 bg-emerald-50 rounded-lg p-4 space-y-2">
+                    <div className="w-64 bg-blue-50 rounded-lg p-4 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Total HT</span>
                         <span className="font-medium text-gray-900 tabular-nums">{fmt(doc.montant_ht)}</span>
@@ -315,18 +315,18 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                           <span>-{fmt(retenue)}</span>
                         </div>
                       )}
-                      <div className="border-t border-emerald-200 pt-2 flex justify-between">
+                      <div className="border-t border-blue-200 pt-2 flex justify-between">
                         <span className="font-bold text-gray-900">{isDevis ? 'Total TTC' : 'Net a payer'}</span>
-                        <span className="font-bold text-[#1a9e52] text-lg tabular-nums">{fmt(doc.montant_ttc)}</span>
+                        <span className="font-bold text-[#1E40AF] text-lg tabular-nums">{fmt(doc.montant_ttc)}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* === PAIEMENT ENREGISTRE (facture only) === */}
                   {isFacture && (doc as FactureData).date_paiement && (
-                    <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      <div className="text-xs font-semibold text-emerald-700 uppercase mb-1">Paiement enregistre</div>
-                      <div className="text-sm text-emerald-800">
+                    <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-xs font-semibold text-blue-700 uppercase mb-1">Paiement enregistre</div>
+                      <div className="text-sm text-blue-800">
                         {fmt((doc as FactureData).montant_paye ?? 0)} — {(doc as FactureData).mode_paiement} — {new Date((doc as FactureData).date_paiement!).toLocaleDateString('fr-FR')}
                       </div>
                     </div>
@@ -361,7 +361,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <div className="text-xs font-bold text-[#1a9e52] uppercase mb-2">Conditions de reglement</div>
+                        <div className="text-xs font-bold text-[#1E40AF] uppercase mb-2">Conditions de reglement</div>
                         <div className="text-xs text-gray-400">Delai de paiement : {condPaiement} a compter de la date de reception de la facture.</div>
                         <div className="text-xs text-gray-400">Modes de reglement acceptes : virement bancaire, cheque, carte bancaire.</div>
                         {ibanE && <div className="text-xs text-gray-400">Coordonnees bancaires (IBAN) : {ibanE}</div>}

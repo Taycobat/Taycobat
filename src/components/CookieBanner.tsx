@@ -37,7 +37,7 @@ export default function CookieBanner() {
                 Nous utilisons des cookies essentiels au fonctionnement du site et des cookies analytiques
                 pour ameliorer votre experience. Conformement au RGPD et aux recommandations de la CNIL,
                 vous pouvez accepter ou refuser les cookies non essentiels.{' '}
-                <a href="/politique-confidentialite" className="text-[#1a9e52] underline">En savoir plus</a>
+                <a href="/politique-confidentialite" className="text-[#1E40AF] underline">En savoir plus</a>
               </p>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
@@ -46,7 +46,7 @@ export default function CookieBanner() {
                 Refuser
               </button>
               <button onClick={accept}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer">
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer">
                 Accepter
               </button>
             </div>

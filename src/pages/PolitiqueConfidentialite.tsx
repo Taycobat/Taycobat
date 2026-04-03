@@ -5,7 +5,7 @@ export default function PolitiqueConfidentialite() {
     <div className="min-h-screen bg-white">
       <nav className="border-b border-gray-100 px-6 h-16 flex items-center">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#1a9e52] rounded-xl flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#1E40AF] rounded-xl flex items-center justify-center">
             <span className="text-white text-xs font-bold">T</span>
           </div>
           <span className="font-bold text-gray-900">TAYCOBAT</span>
@@ -76,7 +76,7 @@ export default function PolitiqueConfidentialite() {
         </ul>
         <p className="text-sm text-gray-600 leading-relaxed mb-4">
           Pour exercer vos droits : <strong>contact@taycobat.fr</strong><br />
-          Vous pouvez egalement saisir la CNIL : <a href="https://www.cnil.fr" className="text-[#1a9e52]">www.cnil.fr</a>
+          Vous pouvez egalement saisir la CNIL : <a href="https://www.cnil.fr" className="text-[#1E40AF]">www.cnil.fr</a>
         </p>
 
         <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">8. Cookies</h2>

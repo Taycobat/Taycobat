@@ -16,7 +16,7 @@ const empty: ClientForm = {
   tva_intracom: '', adresse_chantier: '', ville_chantier: '', code_postal_chantier: '', notes: '',
 }
 
-const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all'
+const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all'
 
 export default function ClientModal({ open, client, onClose, onSubmit }: Props) {
   const [form, setForm] = useState<ClientForm>(empty)
@@ -87,7 +87,7 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
                 {[{ key: 'particulier', label: 'Particulier' }, { key: 'societe', label: 'Société' }].map((t) => (
                   <button key={t.key} type="button" onClick={() => set('type_client', t.key)}
                     className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                      form.type_client === t.key ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'
+                      form.type_client === t.key ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'
                     }`}>{t.label}</button>
                 ))}
               </div>
@@ -118,7 +118,7 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
                     <div className="flex gap-2">
                       <input type="text" value={form.siret} onChange={(e) => set('siret', e.target.value)} maxLength={17} placeholder="123 456 789 00012" className={ic + ' font-mono flex-1'} />
                       <button type="button" onClick={handleSiretSearch} disabled={searchingSiret || form.siret.replace(/\s/g, '').length < 9}
-                        className="px-3 py-2.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0 flex items-center gap-1.5">
+                        className="px-3 py-2.5 text-xs font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0 flex items-center gap-1.5">
                         {searchingSiret ? (
                           <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                         ) : (
@@ -128,7 +128,7 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
                       </button>
                     </div>
                     {siretFound ? (
-                      <p className="text-[11px] text-[#1a9e52] font-semibold mt-1">Informations trouvees — champs pre-remplis</p>
+                      <p className="text-[11px] text-[#1E40AF] font-semibold mt-1">Informations trouvees — champs pre-remplis</p>
                     ) : (
                       <p className="text-[11px] text-gray-400 mt-1">Pre-remplit raison sociale et adresse automatiquement</p>
                     )}
@@ -184,7 +184,7 @@ export default function ClientModal({ open, client, onClose, onSubmit }: Props) 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
                 <button type="button" onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl cursor-pointer">Annuler</button>
                 <motion.button type="submit" disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer">
                   {saving ? 'Enregistrement...' : isEdit ? 'Enregistrer' : 'Créer le client'}
                 </motion.button>
               </div>

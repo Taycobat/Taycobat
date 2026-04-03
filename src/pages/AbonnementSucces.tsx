@@ -22,8 +22,8 @@ export default function AbonnementSucces() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         className="bg-white rounded-2xl border border-gray-100 shadow-lg max-w-md w-full p-8 text-center">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg className="w-8 h-8 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg className="w-8 h-8 text-[#1E40AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -38,7 +38,7 @@ export default function AbonnementSucces() {
           </p>
         )}
         <button onClick={() => navigate('/dashboard')}
-          className="w-full py-3 rounded-xl bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm transition-colors cursor-pointer">
+          className="w-full py-3 rounded-xl bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm transition-colors cursor-pointer">
           Accéder au dashboard
         </button>
         <p className="text-xs text-gray-400 mt-3">Redirection automatique dans {countdown}s</p>

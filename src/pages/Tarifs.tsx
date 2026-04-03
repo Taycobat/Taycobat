@@ -43,7 +43,7 @@ export default function Tarifs() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
         className="text-center mb-10">
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">
-          Tarifs simples, <span className="text-[#1a9e52]">sans surprise</span>
+          Tarifs simples, <span className="text-[#1E40AF]">sans surprise</span>
         </h1>
         <p className="text-gray-500 max-w-lg mx-auto">
           Moins cher que la concurrence. 14 jours d'essai gratuit, sans carte bancaire.
@@ -55,15 +55,15 @@ export default function Tarifs() {
         <div className="bg-white border border-gray-200 rounded-xl p-1 flex">
           <button onClick={() => setBilling('mensuel')}
             className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-              billing === 'mensuel' ? 'bg-[#1a9e52] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              billing === 'mensuel' ? 'bg-[#1E40AF] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
             }`}>Mensuel</button>
           <button onClick={() => setBilling('annuel')}
             className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
-              billing === 'annuel' ? 'bg-[#1a9e52] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              billing === 'annuel' ? 'bg-[#1E40AF] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
             }`}>
             Annuel
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-              billing === 'annuel' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-[#1a9e52]'
+              billing === 'annuel' ? 'bg-white/20 text-white' : 'bg-blue-100 text-[#1E40AF]'
             }`}>-{annualSavePct}%</span>
           </button>
         </div>
@@ -79,10 +79,10 @@ export default function Tarifs() {
           return (
             <motion.div key={key} custom={i} variants={anim} initial="hidden" animate="show"
               className={`relative bg-white rounded-2xl border shadow-sm overflow-hidden transition-shadow hover:shadow-md ${
-                isPopular ? 'border-[#1a9e52] shadow-emerald-500/10' : 'border-gray-100'
+                isPopular ? 'border-[#1E40AF] shadow-blue-500/10' : 'border-gray-100'
               }`}>
               {isPopular && (
-                <div className="absolute top-0 left-0 right-0 bg-[#1a9e52] text-white text-xs font-bold text-center py-1.5 uppercase tracking-wider">
+                <div className="absolute top-0 left-0 right-0 bg-[#1E40AF] text-white text-xs font-bold text-center py-1.5 uppercase tracking-wider">
                   Le plus populaire
                 </div>
               )}
@@ -96,12 +96,12 @@ export default function Tarifs() {
                 </div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm text-gray-400 line-through">{plan.obat} € Obat</span>
-                  <span className="text-xs font-bold text-[#1a9e52] bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-[#1E40AF] bg-blue-50 px-2 py-0.5 rounded-full">
                     -{fmt(saving)} €/mois
                   </span>
                 </div>
                 {billing === 'annuel' && (
-                  <p className="text-xs text-[#1a9e52] font-medium mb-4">
+                  <p className="text-xs text-[#1E40AF] font-medium mb-4">
                     Soit {fmt(price * 12)} €/an — Économisez {fmt((plan.mensuel - price) * 12)} €/an
                   </p>
                 )}
@@ -112,7 +112,7 @@ export default function Tarifs() {
                   disabled={loadingPlan !== null}
                   className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors cursor-pointer disabled:opacity-60 ${
                     isPopular
-                      ? 'bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20'
+                      ? 'bg-[#1E40AF] hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   }`}>
                   {loadingPlan === key ? (
@@ -132,7 +132,7 @@ export default function Tarifs() {
                 <ul className="mt-6 space-y-3">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600">
-                      <svg className="w-4 h-4 text-[#1a9e52] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="w-4 h-4 text-[#1E40AF] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                       {f}
@@ -147,15 +147,15 @@ export default function Tarifs() {
 
       {/* Comparison banner */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-        className="bg-gradient-to-r from-[#1a9e52] to-[#0e7a3c] rounded-2xl p-8 text-white text-center mb-16">
+        className="bg-gradient-to-r from-[#1E40AF] to-[#1e3a8a] rounded-2xl p-8 text-white text-center mb-16">
         <h2 className="text-xl font-bold mb-2">Pourquoi choisir TAYCOBAT ?</h2>
-        <p className="text-emerald-100 mb-4 max-w-xl mx-auto text-sm">
+        <p className="text-blue-100 mb-4 max-w-xl mx-auto text-sm">
           Jusqu'à 21 €/mois moins cher qu'Obat, avec plus de fonctionnalités : IA Audio, multilingue, conformité BTP intégrée.
         </p>
         <div className="flex justify-center gap-8 text-sm">
-          <div><span className="block text-2xl font-bold">14 jours</span><span className="text-emerald-200">Essai gratuit</span></div>
-          <div><span className="block text-2xl font-bold">0 €</span><span className="text-emerald-200">Sans carte bancaire</span></div>
-          <div><span className="block text-2xl font-bold">-30%</span><span className="text-emerald-200">vs Obat</span></div>
+          <div><span className="block text-2xl font-bold">14 jours</span><span className="text-blue-200">Essai gratuit</span></div>
+          <div><span className="block text-2xl font-bold">0 €</span><span className="text-blue-200">Sans carte bancaire</span></div>
+          <div><span className="block text-2xl font-bold">-30%</span><span className="text-blue-200">vs Obat</span></div>
         </div>
       </motion.div>
 

@@ -76,7 +76,7 @@ export default function Login() {
     <AnimatePresence>{showSplash && <SplashScreen message={splashName ? `Bonjour ${splashName}...` : 'Chargement de votre espace...'} />}</AnimatePresence>
     <div dir={dir} className="min-h-screen flex">
       {/* Left panel - branding */}
-      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1a9e52] via-[#15803d] to-[#0d5c2b]">
+      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1E40AF] via-[#15803d] to-[#0d5c2b]">
         {/* Decorative shapes */}
         <div className="absolute inset-0">
           <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-white/5" />
@@ -103,7 +103,7 @@ export default function Login() {
           >
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                <svg className="w-7 h-7 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-7 h-7 text-[#1E40AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
@@ -120,10 +120,10 @@ export default function Login() {
           >
             <h1 className="text-5xl xl:text-6xl font-bold text-white leading-[1.1] tracking-tight">
               {t(lang, 'welcome').split('TAYCOBAT')[0]}
-              <span className="text-emerald-200">TAYCOBAT</span>
+              <span className="text-blue-200">TAYCOBAT</span>
               {t(lang, 'welcome').split('TAYCOBAT')[1]}
             </h1>
-            <p className="text-xl text-emerald-100/80 max-w-md leading-relaxed">
+            <p className="text-xl text-blue-100/80 max-w-md leading-relaxed">
               {t(lang, 'subtitle')}
             </p>
           </motion.div>
@@ -142,7 +142,7 @@ export default function Login() {
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-emerald-200/60 text-sm mt-1">{stat.label}</div>
+                <div className="text-blue-200/60 text-sm mt-1">{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -155,7 +155,7 @@ export default function Login() {
         <div className={`flex items-center justify-between p-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2">
-            <div className="w-9 h-9 bg-[#1a9e52] rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-[#1E40AF] rounded-xl flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
@@ -198,7 +198,7 @@ export default function Login() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm"
+                className="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 text-sm"
               >
                 {success}
               </motion.div>
@@ -218,7 +218,7 @@ export default function Login() {
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all"
                     required
                     dir={dir}
                   />
@@ -234,7 +234,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="vous@exemple.com"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all"
                   required
                   dir="ltr"
                 />
@@ -249,7 +249,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all"
                   required
                   dir="ltr"
                 />
@@ -269,7 +269,7 @@ export default function Login() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all"
                     required
                     dir="ltr"
                   />
@@ -280,7 +280,7 @@ export default function Login() {
                 <div className={`flex justify-end ${isRtl ? 'justify-start' : ''}`}>
                   <button
                     type="button"
-                    className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer"
+                    className="text-sm text-[#1E40AF] hover:text-blue-700 font-medium transition-colors cursor-pointer"
                   >
                     {t(lang, 'forgotPassword')}
                   </button>
@@ -292,7 +292,7 @@ export default function Login() {
                 disabled={loading}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-3.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer"
+                className="w-full py-3.5 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer"
               >
                 {loading ? (
                   <svg className="animate-spin h-5 w-5 mx-auto text-white" fill="none" viewBox="0 0 24 24">
@@ -323,7 +323,7 @@ export default function Login() {
                   setError('')
                   setSuccess('')
                 }}
-                className="text-[#1a9e52] hover:text-emerald-700 font-semibold transition-colors cursor-pointer"
+                className="text-[#1E40AF] hover:text-blue-700 font-semibold transition-colors cursor-pointer"
               >
                 {mode === 'login' ? t(lang, 'signup') : t(lang, 'login')}
               </button>

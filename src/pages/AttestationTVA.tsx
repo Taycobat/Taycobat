@@ -33,10 +33,10 @@ export default function AttestationTVA() {
   function generatePDF() {
     const doc = new jsPDF()
     wrapDocText(doc)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const entreprise = user?.user_metadata?.entreprise || 'TAYCOBAT'
 
-    doc.setFillColor(...green); doc.rect(0, 0, 210, 24, 'F')
+    doc.setFillColor(...blue); doc.rect(0, 0, 210, 24, 'F')
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont('helvetica', 'bold')
     doc.text(`ATTESTATION SIMPLIFIÉE — TVA ${taux}%`, 105, 14, { align: 'center' })
 
@@ -85,7 +85,7 @@ export default function AttestationTVA() {
           <div className="flex gap-3">
             {([5.5, 10] as const).map((t) => (
               <button key={t} onClick={() => { setTaux(t); setSelected([]) }}
-                className={`flex-1 py-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${taux === t ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                className={`flex-1 py-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${taux === t ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
                 {t}%<span className="block text-[10px] font-normal mt-0.5 opacity-60">{t === 5.5 ? 'Travaux énergie' : 'Rénovation'}</span>
               </button>
             ))}
@@ -94,14 +94,14 @@ export default function AttestationTVA() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Nom du client</label>
-            <input type="text" value={nom} onChange={(e) => setNom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+            <input type="text" value={nom} onChange={(e) => setNom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
           <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Date</label>
-            <input type="date" value={dateAttestation} onChange={(e) => setDateAttestation(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+            <input type="date" value={dateAttestation} onChange={(e) => setDateAttestation(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
         </div>
         <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Adresse des travaux</label>
-          <input type="text" value={adresse} onChange={(e) => setAdresse(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+          <input type="text" value={adresse} onChange={(e) => setAdresse(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
         <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Nature des travaux (libre)</label>
-          <input type="text" value={nature} onChange={(e) => setNature(e.target.value)} placeholder="Ex: Rénovation salle de bain" className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+          <input type="text" value={nature} onChange={(e) => setNature(e.target.value)} placeholder="Ex: Rénovation salle de bain" className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
 
         {/* Travaux checklist */}
         <div>
@@ -109,8 +109,8 @@ export default function AttestationTVA() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {travaux.map((t) => (
               <button key={t} onClick={() => toggle(t)} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-sm text-left transition-all cursor-pointer ${
-                selected.includes(t) ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52] font-medium' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${selected.includes(t) ? 'border-[#1a9e52] bg-[#1a9e52]' : 'border-gray-300'}`}>
+                selected.includes(t) ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF] font-medium' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${selected.includes(t) ? 'border-[#1E40AF] bg-[#1E40AF]' : 'border-gray-300'}`}>
                   {selected.includes(t) && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                 </div>
                 {t}
@@ -120,7 +120,7 @@ export default function AttestationTVA() {
         </div>
 
         <motion.button onClick={generatePDF} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-          className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer">
+          className="w-full py-3 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors cursor-pointer">
           Générer l'attestation PDF
         </motion.button>
       </motion.div>

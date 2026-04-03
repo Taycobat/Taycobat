@@ -20,7 +20,7 @@ export default function AbonnementAnnulation() {
         </p>
         <div className="flex gap-3">
           <button onClick={() => navigate('/tarifs')}
-            className="flex-1 py-3 rounded-xl bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm transition-colors cursor-pointer">
+            className="flex-1 py-3 rounded-xl bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm transition-colors cursor-pointer">
             Revoir les tarifs
           </button>
           <button onClick={() => navigate('/dashboard')}

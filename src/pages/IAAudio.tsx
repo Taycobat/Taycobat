@@ -228,18 +228,18 @@ export default function IAAudio() {
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectLangue(l.code) }}
                   className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none ${
                     langue === l.code
-                      ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52] ring-2 ring-[#1a9e52]/20 font-semibold'
+                      ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF] ring-2 ring-[#1E40AF]/20 font-semibold'
                       : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
                   }`}
                 >
                   <span className="text-lg leading-none">{l.flag}</span>
                   <span className="truncate px-1 leading-tight">{l.label}</span>
-                  {langue === l.code && <span className="w-1.5 h-1.5 rounded-full bg-[#1a9e52]" />}
+                  {langue === l.code && <span className="w-1.5 h-1.5 rounded-full bg-[#1E40AF]" />}
                 </div>
               ))}
             </div>
             <p className="text-xs text-gray-400 mt-2">
-              Sélectionné : <span className="font-semibold text-[#1a9e52]">{LANGS.find((l) => l.code === langue)?.flag} {LANGS.find((l) => l.code === langue)?.label}</span>
+              Sélectionné : <span className="font-semibold text-[#1E40AF]">{LANGS.find((l) => l.code === langue)?.flag} {LANGS.find((l) => l.code === langue)?.label}</span>
             </p>
           </div>
 
@@ -249,12 +249,12 @@ export default function IAAudio() {
             <div className="w-full h-20 mb-6 flex items-end justify-center gap-[2px] bg-gray-50 rounded-xl p-3 overflow-hidden">
               {recording ? (
                 Array.from(analyserData).slice(0, 48).map((v, i) => (
-                  <motion.div key={i} className="w-1.5 rounded-full bg-[#1a9e52]"
+                  <motion.div key={i} className="w-1.5 rounded-full bg-[#1E40AF]"
                     animate={{ height: Math.max(4, (v / 255) * 56) }}
                     transition={{ duration: 0.08 }} />
                 ))
               ) : audioBlob ? (
-                <div className="text-sm text-[#1a9e52] font-medium flex items-center gap-2">
+                <div className="text-sm text-[#1E40AF] font-medium flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                   Enregistrement prêt ({formatDuration(duration)})
                 </div>
@@ -264,7 +264,7 @@ export default function IAAudio() {
             </div>
 
             {recording && (
-              <div className="text-2xl font-mono font-bold text-[#1a9e52] mb-4 tabular-nums">{formatDuration(duration)}</div>
+              <div className="text-2xl font-mono font-bold text-[#1E40AF] mb-4 tabular-nums">{formatDuration(duration)}</div>
             )}
 
             {/* Buttons */}
@@ -272,7 +272,7 @@ export default function IAAudio() {
               {!recording ? (
                 <motion.button type="button" onClick={() => { addLog('Démarrage enregistrement...'); startRecording() }}
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="w-16 h-16 rounded-full bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center cursor-pointer transition-colors">
+                  className="w-16 h-16 rounded-full bg-[#1E40AF] hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30 flex items-center justify-center cursor-pointer transition-colors">
                   <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
@@ -291,7 +291,7 @@ export default function IAAudio() {
                 <>
                   <motion.button type="button" onClick={handleTranscribe} disabled={transcribing}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    className="px-5 py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center gap-2">
+                    className="px-5 py-3 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center gap-2">
                     {transcribing ? (
                       <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Transcription...</>
                     ) : (
@@ -331,61 +331,61 @@ export default function IAAudio() {
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
                   <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    <svg className="w-5 h-5 text-[#1E40AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                     Devis généré par IA
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Titre</label>
                       <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
                     <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Client</label>
                       <div className="flex gap-2">
                         <select value={clientId} onChange={(e) => setClientId(e.target.value)}
-                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] cursor-pointer">
+                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] cursor-pointer">
                           <option value="">— Client —</option>
                           {clients.map((c) => <option key={c.id} value={c.id}>{clientDisplayName(c)}</option>)}
                         </select>
                         <button type="button" onClick={() => setShowNewClient(!showNewClient)} title="Nouveau client"
-                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-400 hover:text-[#1a9e52] hover:border-[#1a9e52]'}`}>
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${showNewClient ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-400 hover:text-[#1E40AF] hover:border-[#1E40AF]'}`}>
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                         </button>
                       </div>
                     </div>
                   </div>
                   {showNewClient && (
-                    <div className="border border-[#1a9e52]/20 bg-emerald-50/30 rounded-xl p-4 space-y-3">
+                    <div className="border border-[#1E40AF]/20 bg-blue-50/30 rounded-xl p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider">Nouveau client</div>
+                        <div className="text-xs font-semibold text-[#1E40AF] uppercase tracking-wider">Nouveau client</div>
                         <div className="flex bg-gray-100 rounded-lg p-0.5">
-                          <button type="button" onClick={() => setNewType('particulier')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'particulier' ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>Particulier</button>
-                          <button type="button" onClick={() => setNewType('societe')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'societe' ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500'}`}>Société</button>
+                          <button type="button" onClick={() => setNewType('particulier')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'particulier' ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'}`}>Particulier</button>
+                          <button type="button" onClick={() => setNewType('societe')} className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer ${newType === 'societe' ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500'}`}>Société</button>
                         </div>
                       </div>
                       {newType === 'societe' ? (
                         <div className="grid grid-cols-2 gap-3">
                           <input type="text" value={newRaisonSociale} onChange={(e) => setNewRaisonSociale(e.target.value)} placeholder="Raison sociale *"
-                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom contact"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-3">
                           <input type="text" value={newPrenom} onChange={(e) => setNewPrenom(e.target.value)} placeholder="Prénom"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="text" value={newNom} onChange={(e) => setNewNom(e.target.value)} placeholder="Nom *"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                           <input type="tel" value={newTel} onChange={(e) => setNewTel(e.target.value)} placeholder="Téléphone"
-                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         </div>
                       )}
                       <div className="flex justify-end gap-2">
                         <button type="button" onClick={() => setShowNewClient(false)} className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
                         <button type="button" onClick={handleCreateClient} disabled={creatingClient || (newType === 'societe' ? !newRaisonSociale : !newNom)}
-                          className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-lg disabled:opacity-50 cursor-pointer">
+                          className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-lg disabled:opacity-50 cursor-pointer">
                           {creatingClient ? 'Création...' : 'Créer et sélectionner'}
                         </button>
                       </div>
@@ -396,7 +396,7 @@ export default function IAAudio() {
                       {TVA_OPTIONS.map((o) => (
                         <button key={o.value} type="button" onClick={() => { setTvaPct(o.value); setAutoliquidation(false) }}
                           className={`py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                            !autoliquidation && tvaPct === o.value ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                            !autoliquidation && tvaPct === o.value ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                           }`}>{o.label}<span className="block text-[10px] font-normal opacity-60">{o.tag}</span></button>
                       ))}
                       <button type="button" onClick={() => setAutoliquidation(true)}
@@ -421,16 +421,16 @@ export default function IAAudio() {
                         className="grid grid-cols-[3fr_80px_80px_100px_100px_40px] gap-2 items-start bg-gray-50/50 rounded-xl p-2 border border-gray-100">
                         <textarea value={l.description} onChange={(e) => { updateLigne(i, 'description', e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(160, Math.max(72, e.target.scrollHeight)) + 'px' }}
                           placeholder="Description de la prestation..." rows={3}
-                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] resize-vertical min-h-[72px] max-h-[160px]" />
+                          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-[14px] leading-5 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] resize-vertical min-h-[72px] max-h-[160px]" />
                         <input type="number" value={l.quantite || ''} onChange={(e) => updateLigne(i, 'quantite', e.target.value)} min={0} step="any"
-                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
+                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
                         <select value={l.unite} onChange={(e) => updateLigne(i, 'unite', e.target.value)}
-                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]">
+                          className="px-1 py-2 rounded-lg border border-gray-200 bg-white text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]">
                           {['u', 'm²', 'ml', 'm³', 'h', 'forfait', 'kg', 'lot'].map((u) => <option key={u} value={u}>{u}</option>)}
                         </select>
                         <input type="number" value={l.prix_unitaire || ''} onChange={(e) => updateLigne(i, 'prix_unitaire', e.target.value)} min={0} step="any"
-                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" />
-                        <span className="text-sm font-semibold text-[#1a9e52] text-right tabular-nums">{fmt(l.total_ht)}</span>
+                          className="px-2 py-2 rounded-lg border border-gray-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" />
+                        <span className="text-sm font-semibold text-[#1E40AF] text-right tabular-nums">{fmt(l.total_ht)}</span>
                         <button type="button" onClick={() => removeLigne(i)} className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 cursor-pointer">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
@@ -443,12 +443,12 @@ export default function IAAudio() {
                   <div className="max-w-xs ml-auto space-y-2">
                     <div className="flex justify-between text-sm"><span className="text-gray-500">Total HT</span><span className="font-medium tabular-nums">{fmt(totalHT)}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-gray-500">TVA {tvaPct}%</span><span className="font-medium tabular-nums">{fmt(totalTVA)}</span></div>
-                    <div className="flex justify-between text-lg pt-3 border-t border-gray-200"><span className="font-bold">Total TTC</span><span className="font-bold text-[#1a9e52] tabular-nums">{fmt(totalTTC)}</span></div>
+                    <div className="flex justify-between text-lg pt-3 border-t border-gray-200"><span className="font-bold">Total TTC</span><span className="font-bold text-[#1E40AF] tabular-nums">{fmt(totalTTC)}</span></div>
                   </div>
                 </div>
 
                 <motion.button type="button" onClick={handleCreateDevis} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-                  className="w-full py-3.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 text-base">
+                  className="w-full py-3.5 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 text-base">
                   {saving ? 'Création en cours...' : 'Créer le devis'}
                 </motion.button>
               </motion.div>
@@ -457,8 +457,8 @@ export default function IAAudio() {
 
           {lignes.length === 0 && !transcribing && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#1E40AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
               </div>

@@ -82,7 +82,7 @@ export default function Notifications() {
               <td className="px-6 py-4"><span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${r.jours > 30 ? 'bg-red-50 text-red-600' : r.jours > 14 ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>{r.jours}j</span></td>
               <td className="px-6 py-4 text-right">
                 <button onClick={() => sendRelance(r.id)} disabled={sending === r.id}
-                  className="px-3 py-1.5 text-xs font-semibold text-[#1a9e52] border border-[#1a9e52]/30 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer disabled:opacity-50">
+                  className="px-3 py-1.5 text-xs font-semibold text-[#1E40AF] border border-[#1E40AF]/30 hover:bg-blue-50 rounded-lg transition-all cursor-pointer disabled:opacity-50">
                   {sending === r.id ? 'Envoi...' : 'Relancer'}
                 </button>
               </td>

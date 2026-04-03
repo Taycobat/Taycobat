@@ -99,7 +99,7 @@ export default function Parametres() {
     navigate('/login')
   }
 
-  const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]'
+  const ic = 'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]'
   const lb = 'block text-xs font-semibold text-gray-400 uppercase mb-1.5'
 
   return (
@@ -118,14 +118,14 @@ export default function Parametres() {
           {photoUrl ? (
             <img src={photoUrl} alt="Photo" className="w-16 h-16 rounded-full object-cover border-2 border-gray-200" />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1a9e52] to-emerald-400 flex items-center justify-center text-white font-bold text-xl">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1E40AF] to-blue-400 flex items-center justify-center text-white font-bold text-xl">
               {(prenom || nom || '?').charAt(0).toUpperCase()}
             </div>
           )}
           <div>
             <input ref={photoRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
             <button type="button" onClick={() => photoRef.current?.click()} disabled={uploading}
-              className="text-sm font-medium text-[#1a9e52] hover:text-emerald-700 cursor-pointer disabled:opacity-50">
+              className="text-sm font-medium text-[#1E40AF] hover:text-blue-700 cursor-pointer disabled:opacity-50">
               {uploading ? 'Upload...' : photoUrl ? 'Changer la photo' : 'Ajouter une photo'}
             </button>
             <p className="text-[11px] text-gray-400 mt-0.5">Visible sur vos devis et factures PDF</p>
@@ -134,12 +134,12 @@ export default function Parametres() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Prénom</label>
-            <input type="text" value={prenom} onChange={(e) => setPrenom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+            <input type="text" value={prenom} onChange={(e) => setPrenom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
           <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Nom</label>
-            <input type="text" value={nom} onChange={(e) => setNom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+            <input type="text" value={nom} onChange={(e) => setNom(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
         </div>
         <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Téléphone</label>
-          <input type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]" /></div>
+          <input type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]" /></div>
         <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Email</label>
           <input type="email" value={user?.email ?? ''} disabled className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm bg-gray-50 text-gray-500" /></div>
       </motion.div>
@@ -162,7 +162,7 @@ export default function Parametres() {
             <div>
               <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
               <button type="button" onClick={() => logoRef.current?.click()} disabled={uploading}
-                className="text-sm font-medium text-[#1a9e52] hover:text-emerald-700 cursor-pointer disabled:opacity-50">
+                className="text-sm font-medium text-[#1E40AF] hover:text-blue-700 cursor-pointer disabled:opacity-50">
                 {uploading ? 'Upload...' : logoUrl ? 'Changer le logo' : 'Ajouter un logo'}
               </button>
               <p className="text-[11px] text-gray-400 mt-0.5">Affiche sur vos devis et factures PDF</p>
@@ -186,7 +186,7 @@ export default function Parametres() {
             <div className="flex gap-2">
               <input type="text" value={siret} onChange={(e) => setSiret(e.target.value)} maxLength={17} placeholder="123 456 789 00012" className={ic + ' font-mono flex-1'} />
               <button type="button" onClick={handleSiretSearch} disabled={searching || siret.replace(/\s/g, '').length < 9}
-                className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0 flex items-center gap-2">
+                className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0 flex items-center gap-2">
                 {searching ? (
                   <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                 ) : (
@@ -196,7 +196,7 @@ export default function Parametres() {
               </button>
             </div>
             {siretFound ? (
-              <p className="text-[11px] text-[#1a9e52] font-semibold mt-1">Informations trouvees — champs pre-remplis</p>
+              <p className="text-[11px] text-[#1E40AF] font-semibold mt-1">Informations trouvees — champs pre-remplis</p>
             ) : (
               <p className="text-[11px] text-gray-400 mt-1">Entrez votre SIRET et cliquez Rechercher pour pre-remplir automatiquement</p>
             )}
@@ -231,10 +231,10 @@ export default function Parametres() {
             </select></div>
         </div>
 
-        {saved && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">Parametres sauvegardes</div>}
+        {saved && <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium">Parametres sauvegardes</div>}
 
         <motion.button onClick={handleSave} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-          className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">
+          className="w-full py-3 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer">
           {saving ? 'Sauvegarde...' : 'Sauvegarder'}
         </motion.button>
       </motion.div>
@@ -255,7 +255,7 @@ export default function Parametres() {
           const groups = [...new Set(PLAN_FIELDS.map((f) => f.group))]
           return groups.map((g) => (
             <div key={g}>
-              <p className="text-xs font-semibold text-[#1a9e52] uppercase tracking-wider mb-2">{g}</p>
+              <p className="text-xs font-semibold text-[#1E40AF] uppercase tracking-wider mb-2">{g}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PLAN_FIELDS.filter((f) => f.group === g).map((f) => (
                   <div key={f.key}>
@@ -269,14 +269,14 @@ export default function Parametres() {
           ))
         })()}
 
-        {pcSaved && <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">Plan comptable sauvegarde</div>}
+        {pcSaved && <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium">Plan comptable sauvegarde</div>}
 
         <motion.button onClick={async () => {
           setSaving(true)
           await supabase.auth.updateUser({ data: { ...meta, plan_comptable: planComptable } })
           setSaving(false); setPcSaved(true); setTimeout(() => setPcSaved(false), 3000)
         }} disabled={saving} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-          className="w-full py-3 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">
+          className="w-full py-3 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer">
           {saving ? 'Sauvegarde...' : 'Sauvegarder le plan comptable'}
         </motion.button>
       </motion.div>
@@ -299,11 +299,11 @@ export default function Parametres() {
                 })
                 setInviting(false); setInvited(true); setTimeout(() => setInvited(false), 4000)
               }}
-              className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0">
+              className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 flex-shrink-0">
               {inviting ? 'Envoi...' : 'Inviter'}
             </motion.button>
           </div>
-          {invited && <p className="text-[11px] text-[#1a9e52] font-semibold mt-1">Invitation envoyee a {emailExpert}</p>}
+          {invited && <p className="text-[11px] text-[#1E40AF] font-semibold mt-1">Invitation envoyee a {emailExpert}</p>}
         </div>
       </motion.div>
 

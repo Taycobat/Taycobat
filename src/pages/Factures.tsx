@@ -23,7 +23,7 @@ const TYPES = [
 const statutStyle: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-gray-50 text-gray-600 border-gray-200' },
   envoyee: { label: 'Envoyée', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  payee: { label: 'Payée', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  payee: { label: 'Payée', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
   impayee: { label: 'Impayée', cls: 'bg-red-50 text-red-600 border-red-200' },
   annulee: { label: 'Annulée', cls: 'bg-gray-50 text-gray-400 border-gray-200' },
 }
@@ -143,7 +143,7 @@ export default function Factures() {
   async function generatePDF(f: Facture) {
     const doc = new jsPDF()
     wrapDocText(doc)
-    const green: [number, number, number] = [26, 158, 82]
+    const blue: [number, number, number] = [30, 64, 175]
     const mu = user?.user_metadata ?? {}
     const entreprise = mu.entreprise || 'TAYCOBAT'
     const siret = mu.siret || ''
@@ -181,7 +181,7 @@ export default function Factures() {
     hLines.forEach((l, i) => doc.text(l, infoX, infoY + 11 + i * 4))
 
     // Document type + number
-    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text(typeName.toUpperCase(), 196, 16, { align: 'right' })
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
     doc.text(`N\u00b0 ${f.numero}`, 196, 23, { align: 'right' })
@@ -191,7 +191,7 @@ export default function Factures() {
 
     // Green separator
     const sepY = Math.max(38, infoY + 11 + hLines.length * 4 + 2)
-    doc.setDrawColor(...green); doc.setLineWidth(0.8)
+    doc.setDrawColor(...blue); doc.setLineWidth(0.8)
     doc.line(14, sepY, 196, sepY)
 
     // --- Client + metadata ---
@@ -200,7 +200,7 @@ export default function Factures() {
     if (f.devis_display) { doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100); doc.text(`Ref. devis : ${f.devis_display}`, 14, y); y += 7 }
 
     if (f.type === 'situation' && f.avancement_pct) {
-      doc.setFontSize(9); doc.setTextColor(...green); doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9); doc.setTextColor(...blue); doc.setFont('helvetica', 'bold')
       doc.text(`Situation - Avancement ${f.avancement_pct}%`, 14, y); y += 7
     }
     if (f.type === 'avoir') {
@@ -227,8 +227,8 @@ export default function Factures() {
     autoTable(doc, {
       startY: y, head: [['Designation', 'Qte', 'Unite', 'P.U. HT', 'TVA', 'Total HT']],
       body: tableData.length > 0 ? tableData : [[typeName, '', '', '', `${f.tva_pct}%`, fmt(f.montant_ht)]],
-      headStyles: { fillColor: green, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [245, 250, 247] },
+      headStyles: { fillColor: blue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [239, 246, 255] },
       margin: { left: 14, right: 14 },
     })
 
@@ -246,7 +246,7 @@ export default function Factures() {
       doc.text(`Retenue garantie ${f.retenue_garantie_pct}%`, 140, totY); doc.text(`- ${fmt(retenueAmount)}`, 196, totY, { align: 'right' }); totY += 5
     }
     doc.setDrawColor(200, 200, 200); doc.line(140, totY, 196, totY); totY += 5
-    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text(`Net a payer : ${fmt(f.montant_ttc)}`, 196, totY, { align: 'right' })
 
     if (f.date_paiement) {
@@ -256,7 +256,7 @@ export default function Factures() {
 
     // --- Conditions de paiement & mentions legales (Art. 289 CGI) ---
     let condY = finalY + 28
-    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...green)
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
     doc.text('CONDITIONS DE REGLEMENT', 14, condY)
     condY += 5
     doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
@@ -287,7 +287,7 @@ export default function Factures() {
   }
 
   // Input class helper
-  const ic = "w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all"
+  const ic = "w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all"
 
   return (
     <div className="p-8 max-w-[1400px] mx-auto">
@@ -299,11 +299,11 @@ export default function Factures() {
         </div>
         <div className="flex flex-wrap gap-2">
           <motion.button onClick={() => navigate('/factures/nouvelle')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            className="px-4 py-2 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-[#1a9e52] hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20">
+            className="px-4 py-2 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-[#1E40AF] hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20">
             Nouvelle facture
           </motion.button>
           {[
-            { label: 'Facturer un devis', modal: 'facturer' as const, cls: 'bg-white border border-[#1a9e52] text-[#1a9e52] hover:bg-emerald-50' },
+            { label: 'Facturer un devis', modal: 'facturer' as const, cls: 'bg-white border border-[#1E40AF] text-[#1E40AF] hover:bg-blue-50' },
             { label: 'Acompte', modal: 'acompte' as const, cls: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
             { label: 'Situation', modal: 'situation' as const, cls: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
             { label: 'Solde', modal: 'solde' as const, cls: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
@@ -316,7 +316,7 @@ export default function Factures() {
 
       {/* KPI pills */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex gap-3 mb-6 flex-wrap">
-        {[{ label: 'Payées', c: factures.filter((f) => f.statut === 'payee').length, cls: 'bg-emerald-50 text-emerald-700' },
+        {[{ label: 'Payées', c: factures.filter((f) => f.statut === 'payee').length, cls: 'bg-blue-50 text-blue-700' },
           { label: 'Impayées', c: factures.filter((f) => f.statut === 'impayee').length, cls: 'bg-red-50 text-red-600' },
           { label: 'Situations', c: factures.filter((f) => f.type === 'situation').length, cls: 'bg-blue-50 text-blue-700' },
           { label: 'Avoirs', c: factures.filter((f) => f.type === 'avoir').length, cls: 'bg-amber-50 text-amber-700' },
@@ -328,10 +328,10 @@ export default function Factures() {
         <div className="relative flex-1 max-w-md">
           <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52] transition-all" />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] transition-all" />
         </div>
         <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
-          {TYPES.map((t) => <button key={t.key} onClick={() => setFilterType(t.key)} className={`px-3 py-2.5 text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${filterType === t.key ? 'bg-[#1a9e52] text-white' : 'text-gray-500 hover:bg-gray-50'}`}>{t.label}</button>)}
+          {TYPES.map((t) => <button key={t.key} onClick={() => setFilterType(t.key)} className={`px-3 py-2.5 text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${filterType === t.key ? 'bg-[#1E40AF] text-white' : 'text-gray-500 hover:bg-gray-50'}`}>{t.label}</button>)}
         </div>
       </motion.div>
 
@@ -355,7 +355,7 @@ export default function Factures() {
               <td className="px-5 py-3"><span className="font-mono font-medium text-gray-900">{f.numero}</span></td>
               <td className="px-5 py-3"><div className="text-gray-900 truncate max-w-[180px]">{f.client_display || '—'}</div>
                 {f.devis_display && <div className="text-[11px] text-gray-400 truncate max-w-[180px]">{f.devis_display}</div>}
-                {f.type === 'situation' && f.avancement_pct > 0 && <div className="text-[11px] text-[#1a9e52] font-medium">Situation — {f.avancement_pct}% avancement</div>}
+                {f.type === 'situation' && f.avancement_pct > 0 && <div className="text-[11px] text-[#1E40AF] font-medium">Situation — {f.avancement_pct}% avancement</div>}
               </td>
               <td className="px-5 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${f.type === 'avoir' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>{typeLabel[f.type] ?? f.type}</span></td>
               <td className="px-5 py-3 text-right"><span className={`font-semibold tabular-nums ${f.type === 'avoir' ? 'text-red-600' : 'text-gray-900'}`}>{f.type === 'avoir' ? '- ' : ''}{fmt0(f.montant_ttc)}</span></td>
@@ -370,12 +370,12 @@ export default function Factures() {
                 {f.date_echeance && <div className="text-[10px] text-gray-400 mt-0.5">Éch. {new Date(f.date_echeance).toLocaleDateString('fr-FR')}</div>}
               </td>
               <td className="px-5 py-3">{f.date_paiement
-                ? <div><div className="text-xs text-emerald-600 font-medium">{fmt0(f.montant_paye ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.date_paiement).toLocaleDateString('fr-FR')} · {f.mode_paiement}</div></div>
+                ? <div><div className="text-xs text-blue-600 font-medium">{fmt0(f.montant_paye ?? 0)}</div><div className="text-[10px] text-gray-400">{new Date(f.date_paiement).toLocaleDateString('fr-FR')} · {f.mode_paiement}</div></div>
                 : <span className="text-gray-300 text-xs">—</span>}</td>
               <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}><div className="flex items-center justify-end gap-0.5">
                 <button onClick={() => setPreviewFacture(f)} title="Aperçu" className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-all cursor-pointer">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
-                <button onClick={() => generatePDF(f)} title="PDF" className="p-1.5 rounded-lg text-gray-400 hover:text-[#1a9e52] hover:bg-emerald-50 transition-all cursor-pointer">
+                <button onClick={() => generatePDF(f)} title="PDF" className="p-1.5 rounded-lg text-gray-400 hover:text-[#1E40AF] hover:bg-blue-50 transition-all cursor-pointer">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></button>
                 {f.statut !== 'annulee' && f.type !== 'avoir' && <button onClick={() => openModal('paiement', f.id)} title="Paiement" className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></button>}
@@ -432,7 +432,7 @@ export default function Factures() {
                   <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-2">Mode</label>
                     <div className="flex gap-2">
                       {[{ k: 'pct' as const, l: 'Pourcentage' }, { k: 'fixe' as const, l: 'Montant fixe' }].map((m) => (
-                        <button key={m.k} onClick={() => setAcompteMode(m.k)} className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${acompteMode === m.k ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500'}`}>{m.l}</button>
+                        <button key={m.k} onClick={() => setAcompteMode(m.k)} className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${acompteMode === m.k ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-500'}`}>{m.l}</button>
                       ))}
                     </div>
                   </div>
@@ -460,8 +460,8 @@ export default function Factures() {
                 {/* Avoir fields */}
                 {modal === 'avoir' && <>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setAvoirPartiel(false)} className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${!avoirPartiel ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500'}`}>Avoir total</button>
-                    <button onClick={() => setAvoirPartiel(true)} className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${avoirPartiel ? 'border-[#1a9e52] bg-emerald-50 text-[#1a9e52]' : 'border-gray-200 text-gray-500'}`}>Avoir partiel</button>
+                    <button onClick={() => setAvoirPartiel(false)} className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${!avoirPartiel ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-500'}`}>Avoir total</button>
+                    <button onClick={() => setAvoirPartiel(true)} className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${avoirPartiel ? 'border-[#1E40AF] bg-blue-50 text-[#1E40AF]' : 'border-gray-200 text-gray-500'}`}>Avoir partiel</button>
                   </div>
                   {avoirPartiel && <div><label className="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Montant de l'avoir (€)</label>
                     <input type="number" value={avoirMontant} onChange={(e) => setAvoirMontant(parseFloat(e.target.value) || 0)} min={0} className={ic} /></div>}
@@ -493,7 +493,7 @@ export default function Factures() {
                       else if (modal === 'avoir') handleAvoir()
                       else if (modal === 'paiement') handlePaiement()
                     }}
-                    className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1a9e52] hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-500/20 transition-colors disabled:opacity-60 cursor-pointer">
+                    className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1E40AF] hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition-colors disabled:opacity-60 cursor-pointer">
                     {saving ? 'Création...' : modal === 'paiement' ? 'Enregistrer' : 'Créer'}
                   </motion.button>
                 </div>

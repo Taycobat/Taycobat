@@ -14,7 +14,7 @@ interface AuditLog {
 }
 
 const actionStyle: Record<string, string> = {
-  create: 'bg-emerald-50 text-emerald-700',
+  create: 'bg-blue-50 text-blue-700',
   update: 'bg-blue-50 text-blue-700',
   delete: 'bg-red-50 text-red-600',
 }
@@ -80,7 +80,7 @@ export default function Conformite() {
           </div>
           <div className="flex gap-2">
             {[
-              { label: 'Créations', count: logs.filter((l) => l.action === 'create').length, cls: 'bg-emerald-50 text-emerald-700' },
+              { label: 'Créations', count: logs.filter((l) => l.action === 'create').length, cls: 'bg-blue-50 text-blue-700' },
               { label: 'Modifications', count: logs.filter((l) => l.action === 'update').length, cls: 'bg-blue-50 text-blue-700' },
               { label: 'Suppressions', count: logs.filter((l) => l.action === 'delete').length, cls: 'bg-red-50 text-red-600' },
             ].map((p) => <span key={p.label} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${p.cls}`}>{p.count} {p.label}</span>)}

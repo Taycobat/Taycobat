@@ -95,7 +95,7 @@ export default function Onboarding() {
           {/* Progress bar */}
           <div className="h-1 bg-gray-100">
             <motion.div
-              className="h-full bg-[#1a9e52]"
+              className="h-full bg-[#1E40AF]"
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
             />
@@ -104,7 +104,7 @@ export default function Onboarding() {
           <div className="p-5">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-semibold text-[#1a9e52] bg-emerald-50 px-2 py-1 rounded-full">
+              <span className="text-[11px] font-semibold text-[#1E40AF] bg-blue-50 px-2 py-1 rounded-full">
                 Etape {step + 1}/{STEPS.length}
               </span>
               <button onClick={handleDismiss}
@@ -119,7 +119,7 @@ export default function Onboarding() {
             <AnimatePresence mode="wait">
               <motion.div key={step} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.2 }}>
-                <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center text-[#1a9e52] mb-3">
+                <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-[#1E40AF] mb-3">
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={s.icon} />
                   </svg>
@@ -132,7 +132,7 @@ export default function Onboarding() {
             {/* Actions */}
             <div className="flex items-center gap-2">
               <button onClick={handleAction}
-                className="flex-1 py-2.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer">
+                className="flex-1 py-2.5 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition-colors cursor-pointer">
                 {s.actionLabel}
               </button>
               {step < STEPS.length - 1 && (
@@ -147,7 +147,7 @@ export default function Onboarding() {
             <div className="flex justify-center gap-1.5 mt-4">
               {STEPS.map((_, i) => (
                 <button key={i} onClick={() => setStep(i)}
-                  className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === step ? 'bg-[#1a9e52] w-5' : i < step ? 'bg-emerald-300' : 'bg-gray-200'}`} />
+                  className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === step ? 'bg-[#1E40AF] w-5' : i < step ? 'bg-blue-300' : 'bg-gray-200'}`} />
               ))}
             </div>
           </div>

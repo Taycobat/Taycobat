@@ -13,7 +13,7 @@ function dateFR(d: string | null) {
 function PlanBadge({ plan }: { plan: string | null }) {
   const map: Record<string, string> = {
     solo: 'bg-blue-100 text-blue-700',
-    pro: 'bg-emerald-100 text-emerald-700',
+    pro: 'bg-blue-100 text-blue-700',
     business: 'bg-purple-100 text-purple-700',
   }
   const label = plan || 'Essai'
@@ -50,7 +50,7 @@ export default function Admin() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <StatCard label="MRR" value={`${fmt(stats.mrr)} €`} sub="Revenu mensuel récurrent" color="text-[#1a9e52]" />
+        <StatCard label="MRR" value={`${fmt(stats.mrr)} €`} sub="Revenu mensuel récurrent" color="text-[#1E40AF]" />
         <StatCard label="Artisans inscrits" value={stats.total} color="text-gray-900" />
         <StatCard label="Abonnés actifs" value={stats.actifs} sub={`${stats.solo} Solo · ${stats.pro} Pro · ${stats.business} Biz`} color="text-blue-600" />
         <StatCard label="En essai gratuit" value={stats.trial} color="text-amber-600" />

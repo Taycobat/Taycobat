@@ -5,7 +5,7 @@ export default function MentionsLegales() {
     <div className="min-h-screen bg-white">
       <nav className="border-b border-gray-100 px-6 h-16 flex items-center">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#1a9e52] rounded-xl flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#1E40AF] rounded-xl flex items-center justify-center">
             <span className="text-white text-xs font-bold">T</span>
           </div>
           <span className="font-bold text-gray-900">TAYCOBAT</span>
@@ -46,7 +46,7 @@ export default function MentionsLegales() {
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Donnees personnelles</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
             Le traitement des donnees personnelles est detaille dans notre{' '}
-            <Link to="/politique-confidentialite" className="text-[#1a9e52] underline">politique de confidentialite</Link>.
+            <Link to="/politique-confidentialite" className="text-[#1E40AF] underline">politique de confidentialite</Link>.
             Conformement au RGPD, vous disposez d'un droit d'acces, de rectification et de suppression
             de vos donnees en ecrivant a contact@taycobat.fr.
           </p>

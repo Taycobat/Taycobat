@@ -35,7 +35,7 @@ function formatMoney(n: number) {
 function statutBadge(statut: string) {
   const map: Record<string, { label: string; cls: string }> = {
     en_attente: { label: 'En attente', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-    accepte: { label: 'Accepté', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    accepte: { label: 'Accepté', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
     refuse: { label: 'Refusé', cls: 'bg-red-50 text-red-600 border-red-200' },
   }
   const s = map[statut] ?? map.en_attente
@@ -57,9 +57,9 @@ const kpiConfig = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
       </svg>
     ),
-    color: 'from-[#1a9e52] to-emerald-400',
-    bgLight: 'bg-emerald-50',
-    textColor: 'text-[#1a9e52]',
+    color: 'from-[#1E40AF] to-blue-400',
+    bgLight: 'bg-blue-50',
+    textColor: 'text-[#1E40AF]',
   },
   {
     key: 'devisEnAttente' as const,
@@ -141,7 +141,7 @@ export default function Dashboard() {
             Nouvelle facture
           </motion.button>
           <motion.button onClick={() => navigate('/ia-audio')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2.5 px-5 py-2.5 bg-[#1a9e52] hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-colors cursor-pointer">
+            className="flex items-center gap-2.5 px-5 py-2.5 bg-[#1E40AF] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-colors cursor-pointer">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
@@ -197,7 +197,7 @@ export default function Dashboard() {
               <p className="text-sm text-gray-400 mt-0.5">6 derniers mois</p>
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-400">
-              <div className="w-3 h-3 rounded-full bg-[#1a9e52]" />
+              <div className="w-3 h-3 rounded-full bg-[#1E40AF]" />
               CA mensuel
             </div>
           </div>
@@ -209,8 +209,8 @@ export default function Dashboard() {
               <AreaChart data={caData} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="caGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1a9e52" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#1a9e52" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#1E40AF" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="#1E40AF" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
@@ -240,11 +240,11 @@ export default function Dashboard() {
                 <Area
                   type="monotone"
                   dataKey="montant"
-                  stroke="#1a9e52"
+                  stroke="#1E40AF"
                   strokeWidth={2.5}
                   fill="url(#caGradient)"
-                  dot={{ r: 4, fill: '#1a9e52', stroke: '#fff', strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: '#1a9e52', stroke: '#fff', strokeWidth: 2 }}
+                  dot={{ r: 4, fill: '#1E40AF', stroke: '#fff', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#1E40AF', stroke: '#fff', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -273,7 +273,7 @@ export default function Dashboard() {
 
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-semibold text-gray-900">Dernieres factures</h2>
-            <button onClick={() => navigate('/factures')} className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer">Voir tout</button>
+            <button onClick={() => navigate('/factures')} className="text-sm text-[#1E40AF] hover:text-blue-700 font-medium transition-colors cursor-pointer">Voir tout</button>
           </div>
 
           {loading ? (
@@ -288,7 +288,7 @@ export default function Dashboard() {
               {recentFactures.map((f, i) => {
                 const factureStatut: Record<string, { label: string; cls: string }> = {
                   brouillon: { label: 'Brouillon', cls: 'bg-gray-50 text-gray-600 border-gray-200' },
-                  payee: { label: 'Payee', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                  payee: { label: 'Payee', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
                   impayee: { label: 'Impayee', cls: 'bg-red-50 text-red-600 border-red-200' },
                   envoyee: { label: 'Envoyee', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
                 }
@@ -297,8 +297,8 @@ export default function Dashboard() {
                   <motion.div key={f.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.05 }}
                     onClick={() => navigate(`/factures/${f.id}`)}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.type === 'directe' ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-emerald-50 group-hover:bg-emerald-100'}`}>
-                      <svg className={`w-4 h-4 ${f.type === 'directe' ? 'text-blue-600' : 'text-[#1a9e52]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.type === 'directe' ? 'bg-blue-50 group-hover:bg-blue-100' : 'bg-blue-50 group-hover:bg-blue-100'}`}>
+                      <svg className={`w-4 h-4 ${f.type === 'directe' ? 'text-blue-600' : 'text-[#1E40AF]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
                       </svg>
                     </div>
@@ -322,15 +322,15 @@ export default function Dashboard() {
             <>
               <div className="flex items-center justify-between mt-6 mb-4 pt-4 border-t border-gray-100">
                 <h2 className="text-base font-semibold text-gray-900">Derniers devis</h2>
-                <button onClick={() => navigate('/devis')} className="text-sm text-[#1a9e52] hover:text-emerald-700 font-medium transition-colors cursor-pointer">Voir tout</button>
+                <button onClick={() => navigate('/devis')} className="text-sm text-[#1E40AF] hover:text-blue-700 font-medium transition-colors cursor-pointer">Voir tout</button>
               </div>
               <div className="space-y-3">
                 {recentDevis.map((devis, i) => (
                   <motion.div key={devis.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 + i * 0.05 }}
                     onClick={() => navigate(`/devis/${devis.id}`)}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition-colors">
-                      <svg className="w-4 h-4 text-[#1a9e52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+                      <svg className="w-4 h-4 text-[#1E40AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>

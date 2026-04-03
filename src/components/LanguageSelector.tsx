@@ -56,7 +56,7 @@ export default function LanguageSelector() {
                   }}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
                     l.code === lang
-                      ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                      ? 'bg-blue-50 text-blue-700 font-semibold'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >

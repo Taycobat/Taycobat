@@ -22,7 +22,7 @@ interface Row {
 const TABS = ['Journal des ventes', 'Synthese ventes', 'Synthese TVA', 'Encaissements'] as const
 type Tab = typeof TABS[number]
 
-const ic = 'px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1a9e52]/20 focus:border-[#1a9e52]'
+const ic = 'px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]'
 
 export default function Rapports() {
   const { user } = useAuthStore()
@@ -150,13 +150,13 @@ export default function Rapports() {
       <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 overflow-x-auto">
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${tab === t ? 'bg-white text-[#1a9e52] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>{t}</button>
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${tab === t ? 'bg-white text-[#1E40AF] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>{t}</button>
         ))}
       </div>
 
       {/* Export buttons */}
       <div className="flex gap-2 mb-6">
-        <button onClick={exportPDF} className="px-3 py-2 text-xs font-semibold text-[#1a9e52] border border-[#1a9e52]/30 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer">Export PDF</button>
+        <button onClick={exportPDF} className="px-3 py-2 text-xs font-semibold text-[#1E40AF] border border-[#1E40AF]/30 hover:bg-blue-50 rounded-lg transition-all cursor-pointer">Export PDF</button>
         <button onClick={exportCSV} className="px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-lg transition-all cursor-pointer">Export CSV</button>
         <button onClick={exportFEC} className="px-3 py-2 text-xs font-semibold text-amber-600 border border-amber-200 hover:bg-amber-50 rounded-lg transition-all cursor-pointer">FEC Provisoire</button>
       </div>
@@ -194,20 +194,20 @@ export default function Rapports() {
                     ))}
                     {/* Monthly subtotals */}
                     {monthly.length > 1 && monthly.map((m) => (
-                      <tr key={m.mois} className="bg-emerald-50/50 border-b border-emerald-100">
-                        <td colSpan={4} className="px-5 py-2 text-xs font-semibold text-[#1a9e52]">{m.mois} ({m.count} factures)</td>
-                        <td className="px-5 py-2 text-right text-xs font-semibold text-[#1a9e52]">{fmt(m.ht)}</td>
-                        <td className="px-5 py-2 text-right text-xs font-semibold text-[#1a9e52]">{fmt(m.tva)}</td>
-                        <td className="px-5 py-2 text-right text-xs font-semibold text-[#1a9e52]">{fmt(m.ttc)}</td>
+                      <tr key={m.mois} className="bg-blue-50/50 border-b border-blue-100">
+                        <td colSpan={4} className="px-5 py-2 text-xs font-semibold text-[#1E40AF]">{m.mois} ({m.count} factures)</td>
+                        <td className="px-5 py-2 text-right text-xs font-semibold text-[#1E40AF]">{fmt(m.ht)}</td>
+                        <td className="px-5 py-2 text-right text-xs font-semibold text-[#1E40AF]">{fmt(m.tva)}</td>
+                        <td className="px-5 py-2 text-right text-xs font-semibold text-[#1E40AF]">{fmt(m.ttc)}</td>
                         <td />
                       </tr>
                     ))}
                     {/* Total */}
-                    <tr className="bg-[#1a9e52]/5 font-bold">
-                      <td colSpan={4} className="px-5 py-3 text-[#1a9e52]">TOTAL GENERAL</td>
-                      <td className="px-5 py-3 text-right text-[#1a9e52]">{fmt(totalHT)}</td>
-                      <td className="px-5 py-3 text-right text-[#1a9e52]">{fmt(totalTVA)}</td>
-                      <td className="px-5 py-3 text-right text-[#1a9e52]">{fmt(totalTTC)}</td>
+                    <tr className="bg-[#1E40AF]/5 font-bold">
+                      <td colSpan={4} className="px-5 py-3 text-[#1E40AF]">TOTAL GENERAL</td>
+                      <td className="px-5 py-3 text-right text-[#1E40AF]">{fmt(totalHT)}</td>
+                      <td className="px-5 py-3 text-right text-[#1E40AF]">{fmt(totalTVA)}</td>
+                      <td className="px-5 py-3 text-right text-[#1E40AF]">{fmt(totalTTC)}</td>
                       <td />
                     </tr>
                   </tbody>
@@ -222,7 +222,7 @@ export default function Rapports() {
               {/* KPIs */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">CA HT</p><p className="text-xl font-bold text-gray-900">{fmt0(totalHT)}</p></div>
-                <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">CA TTC</p><p className="text-xl font-bold text-[#1a9e52]">{fmt0(totalTTC)}</p></div>
+                <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">CA TTC</p><p className="text-xl font-bold text-[#1E40AF]">{fmt0(totalTTC)}</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Factures</p><p className="text-xl font-bold text-gray-900">{validRows.length}</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Clients</p><p className="text-xl font-bold text-gray-900">{topClients.length}</p></div>
               </div>
@@ -236,7 +236,7 @@ export default function Rapports() {
                     <XAxis dataKey="mois" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => v === 0 ? '0' : `${(v / 1000).toFixed(0)}k`} />
                     <Tooltip formatter={(v) => [fmt(Number(v)), 'CA HT']} contentStyle={{ borderRadius: 12, border: '1px solid #e5e7eb' }} />
-                    <Bar dataKey="ht" fill="#1a9e52" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="ht" fill="#1E40AF" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -248,7 +248,7 @@ export default function Rapports() {
                   {topClients.map((c, i) => (
                     <div key={c.name} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50">
                       <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-[#1a9e52]/10 text-[#1a9e52] text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                        <span className="w-6 h-6 rounded-full bg-[#1E40AF]/10 text-[#1E40AF] text-xs font-bold flex items-center justify-center">{i + 1}</span>
                         <span className="text-sm font-medium text-gray-900">{c.name}</span>
                         <span className="text-xs text-gray-400">{c.count} factures</span>
                       </div>
@@ -264,7 +264,7 @@ export default function Rapports() {
           {tab === 'Synthese TVA' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">TVA collectee</p><p className="text-xl font-bold text-[#1a9e52]">{fmt0(totalTVA)}</p></div>
+                <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">TVA collectee</p><p className="text-xl font-bold text-[#1E40AF]">{fmt0(totalTVA)}</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Base HT</p><p className="text-xl font-bold text-gray-900">{fmt0(totalHT)}</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Autoliquidation</p><p className="text-xl font-bold text-amber-600">{fmt0(validRows.filter((r) => r.tva_pct === 0).reduce((s, r) => s + r.montant_ht, 0))}</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">A declarer</p><p className="text-xl font-bold text-red-600">{fmt0(totalTVA)}</p></div>
@@ -285,10 +285,10 @@ export default function Rapports() {
                         <td className="px-5 py-3 text-right tabular-nums font-semibold">{fmt(t.tva)}</td>
                       </tr>
                     ))}
-                    <tr className="bg-[#1a9e52]/5 font-bold">
-                      <td className="px-5 py-3 text-[#1a9e52]">TOTAL TVA A DECLARER</td>
-                      <td className="px-5 py-3 text-right text-[#1a9e52]">{fmt(totalHT)}</td>
-                      <td className="px-5 py-3 text-right text-[#1a9e52]">{fmt(totalTVA)}</td>
+                    <tr className="bg-[#1E40AF]/5 font-bold">
+                      <td className="px-5 py-3 text-[#1E40AF]">TOTAL TVA A DECLARER</td>
+                      <td className="px-5 py-3 text-right text-[#1E40AF]">{fmt(totalHT)}</td>
+                      <td className="px-5 py-3 text-right text-[#1E40AF]">{fmt(totalTVA)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -301,7 +301,7 @@ export default function Rapports() {
           {tab === 'Encaissements' && (
             <div className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Total encaisse</p><p className="text-xl font-bold text-[#1a9e52]">{fmt0(totalEncaisse)}</p><p className="text-xs text-gray-400">{encaissements.length} encaissements</p></div>
+                <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Total encaisse</p><p className="text-xl font-bold text-[#1E40AF]">{fmt0(totalEncaisse)}</p><p className="text-xs text-gray-400">{encaissements.length} encaissements</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">En attente</p><p className="text-xl font-bold text-amber-600">{fmt0(totalAttente)}</p><p className="text-xs text-gray-400">{enAttente.length} factures</p></div>
                 <div className="bg-white rounded-xl border border-gray-100 p-4"><p className="text-xs text-gray-400 uppercase font-semibold mb-1">Taux encaissement</p><p className="text-xl font-bold text-gray-900">{totalTTC > 0 ? Math.round(totalEncaisse / totalTTC * 100) : 0}%</p></div>
               </div>
@@ -325,13 +325,13 @@ export default function Rapports() {
                           <td className="px-5 py-3 text-gray-500">{dateFR(r.date_paiement)}</td>
                           <td className="px-5 py-3 font-mono font-medium text-gray-900">{r.numero}</td>
                           <td className="px-5 py-3 text-gray-700">{r.client_display || '—'}</td>
-                          <td className="px-5 py-3 text-right tabular-nums font-semibold text-[#1a9e52]">{fmt(r.montant_paye)}</td>
+                          <td className="px-5 py-3 text-right tabular-nums font-semibold text-[#1E40AF]">{fmt(r.montant_paye)}</td>
                           <td className="px-5 py-3 text-xs text-gray-500">{r.mode_paiement || '—'}</td>
                         </tr>
                       ))}
-                      <tr className="bg-[#1a9e52]/5 font-bold">
-                        <td colSpan={3} className="px-5 py-3 text-[#1a9e52]">TOTAL ENCAISSE</td>
-                        <td className="px-5 py-3 text-right text-[#1a9e52]">{fmt(totalEncaisse)}</td>
+                      <tr className="bg-[#1E40AF]/5 font-bold">
+                        <td colSpan={3} className="px-5 py-3 text-[#1E40AF]">TOTAL ENCAISSE</td>
+                        <td className="px-5 py-3 text-right text-[#1E40AF]">{fmt(totalEncaisse)}</td>
                         <td />
                       </tr>
                     </tbody>
