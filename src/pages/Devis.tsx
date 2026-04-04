@@ -9,6 +9,7 @@ import DevisModal from '../components/DevisModal'
 import DocumentPreview from '../components/DocumentPreview'
 import { loadImageAsBase64 } from '../lib/storage'
 import { wrapDocText } from '../lib/exportUtils'
+import { loadCompanySettings, generateLegalBlock, DEFAULT_SETTINGS } from '../lib/paymentConditions'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -199,17 +200,23 @@ export default function Devis() {
     doc.setDrawColor(200, 200, 200)
     doc.roundedRect(14, sigY + 4, 76, 25, 2, 2); doc.roundedRect(120, sigY + 4, 76, 25, 2, 2)
 
-    // Conditions de paiement
+    // Conditions de reglement (from company_settings + overrides)
+    const compSettings = user ? await loadCompanySettings(user.id) : { ...DEFAULT_SETTINGS }
+    const legal = generateLegalBlock(compSettings)
     let condY = sigY + 34
-    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
-    const condPaiement = m.conditions_paiement || '30 jours'
-    doc.text(`Conditions de reglement : ${condPaiement} a compter de la date d'acceptation du devis.`, 14, condY)
-    condY += 4
-    doc.text(`Validite du devis : ${d.date_validite ? new Date(d.date_validite).toLocaleDateString('fr-FR') : '30 jours'}.`, 14, condY)
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
+    doc.text('CONDITIONS DE REGLEMENT', 14, condY); condY += 5
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
+    doc.text(legal.delayText, 14, condY); condY += 4
+    if (legal.methodsText) { doc.text(legal.methodsText, 14, condY); condY += 4 }
+    if (m.iban) { doc.text(`IBAN : ${m.iban}`, 14, condY); condY += 4 }
+    doc.text(`Validite du devis : ${d.date_validite ? new Date(d.date_validite).toLocaleDateString('fr-FR') : '30 jours'}.`, 14, condY); condY += 5
+    doc.setFontSize(6.5); doc.setTextColor(120, 120, 120)
+    doc.text(legal.penaltyText, 14, condY, { maxWidth: 182 })
 
     // Autoliquidation mention if TVA = 0
     if (d.tva_pct === 0) {
-      condY += 6
+      condY += 10
       doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 120, 0)
       doc.text('AUTOLIQUIDATION DE LA TVA', 14, condY)
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 90, 0)

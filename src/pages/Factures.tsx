@@ -10,6 +10,7 @@ import FactureDirecteModal from '../components/FactureDirecteModal'
 import DocumentPreview from '../components/DocumentPreview'
 import { loadLignes } from '../hooks/useFactureLignes'
 import { wrapDocText } from '../lib/exportUtils'
+import { loadCompanySettings, generateLegalBlock, DEFAULT_SETTINGS } from '../lib/paymentConditions'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -254,19 +255,22 @@ export default function Factures() {
       doc.text(`Paye le ${new Date(f.date_paiement!).toLocaleDateString('fr-FR')} par ${f.mode_paiement ?? '-'} - ${fmt(f.montant_paye)}`, 14, finalY + 20)
     }
 
-    // --- Conditions de paiement & mentions legales (Art. 289 CGI) ---
+    // --- Conditions de reglement (from company_settings + overrides) ---
+    const compSettings = user ? await loadCompanySettings(user.id) : { ...DEFAULT_SETTINGS }
+    const legal = generateLegalBlock(compSettings, {
+      delay: (f as any).payment_delay_override || undefined,
+      methods: (f as any).payment_methods_override || undefined,
+    })
     let condY = finalY + 28
     doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(...blue)
-    doc.text('CONDITIONS DE REGLEMENT', 14, condY)
-    condY += 5
+    doc.text('CONDITIONS DE REGLEMENT', 14, condY); condY += 5
     doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80)
-    doc.text(`Delai de paiement : ${condPaiement} a compter de la date de reception de la facture.`, 14, condY); condY += 4
-    doc.text(`Modes de reglement acceptes : virement bancaire, cheque, carte bancaire.`, 14, condY); condY += 4
+    doc.text(legal.delayText, 14, condY); condY += 4
+    if (legal.methodsText) { doc.text(legal.methodsText, 14, condY); condY += 4 }
     if (ibanE) { doc.text(`Coordonnees bancaires (IBAN) : ${ibanE}`, 14, condY); condY += 4 }
     condY += 2
     doc.setFontSize(6.5); doc.setTextColor(120, 120, 120)
-    doc.text(`Penalites de retard : ${tauxPen}. Exigibles sans rappel prealable (Art. L441-10 Code de commerce).`, 14, condY); condY += 3.5
-    doc.text('Indemnite forfaitaire pour frais de recouvrement : 40 EUR (Art. D441-5 Code de commerce).', 14, condY); condY += 3.5
+    doc.text(legal.penaltyText, 14, condY, { maxWidth: 182 }); condY += 7
     doc.text('Pas d\'escompte pour paiement anticipe.', 14, condY)
 
     // --- Pied de page legal ---

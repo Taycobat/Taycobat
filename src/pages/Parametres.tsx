@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
+import { DELAY_OPTIONS, METHOD_OPTIONS, PENALTY_OPTIONS, DEFAULT_SETTINGS, getDelayText, getMethodsText, getPenaltyText, loadCompanySettings, saveCompanySettings, type CompanyPaymentSettings, type PaymentDelayType, type PenaltyType, type PaymentMethod } from '../lib/paymentConditions'
 import { uploadFile } from '../lib/storage'
 import { searchSiret } from '../lib/siret'
 import { getPlanComptable, PLAN_DEFAUT, PLAN_FIELDS, type PlanComptable } from '../lib/planComptable'
@@ -23,9 +24,11 @@ export default function Parametres() {
   const [telephone, setTelephone] = useState(meta.telephone || '')
   const [emailPro, setEmailPro] = useState(meta.email_pro || '')
   const [iban, setIban] = useState(meta.iban || '')
-  const [conditionsPaiement, setConditionsPaiement] = useState(meta.conditions_paiement || '30 jours')
-  const [tauxPenalites, setTauxPenalites] = useState(meta.taux_penalites || '3 fois le taux legal')
   const [searching, setSearching] = useState(false)
+
+  // Company payment settings
+  const [paySettings, setPaySettings] = useState<CompanyPaymentSettings>({ ...DEFAULT_SETTINGS })
+  useEffect(() => { if (user) loadCompanySettings(user.id).then(setPaySettings) }, [user])
   const [siretFound, setSiretFound] = useState(false)
 
   // Plan comptable
@@ -83,13 +86,14 @@ export default function Parametres() {
   }
 
   async function handleSave() {
+    if (!user) return
     setSaving(true)
     await supabase.auth.updateUser({ data: {
       prenom, nom, entreprise, forme_juridique: formeJuridique, siret, tva_intracom: tvaIntracom,
       rcs, capital_social: capitalSocial, adresse, telephone, email_pro: emailPro,
-      iban, conditions_paiement: conditionsPaiement, taux_penalites: tauxPenalites,
-      photo_url: photoUrl, logo_url: logoUrl,
+      iban, photo_url: photoUrl, logo_url: logoUrl,
     } })
+    await saveCompanySettings(user.id, paySettings)
     setSaving(false); setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -214,21 +218,74 @@ export default function Parametres() {
           <input type="email" value={emailPro} onChange={(e) => setEmailPro(e.target.value)} placeholder="contact@monentreprise.fr" className={ic} /></div>
       </motion.div>
 
-      {/* Facturation */}
+      {/* Facturation & conditions de reglement */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
         className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 mb-6">
         <h2 className="text-base font-semibold text-gray-900">Facturation & paiement</h2>
         <div><label className={lb}>IBAN / RIB</label>
           <input type="text" value={iban} onChange={(e) => setIban(e.target.value)} placeholder="FR76 1234 5678 9012 3456 7890 123" className={ic + ' font-mono'} /></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label className={lb}>Delai de paiement</label>
-            <select value={conditionsPaiement} onChange={(e) => setConditionsPaiement(e.target.value)} className={ic}>
-              {['A reception', '15 jours', '30 jours', '45 jours', '60 jours'].map((c) => <option key={c} value={c}>{c}</option>)}
-            </select></div>
-          <div><label className={lb}>Penalites de retard</label>
-            <select value={tauxPenalites} onChange={(e) => setTauxPenalites(e.target.value)} className={ic}>
-              {['3 fois le taux legal', '10%', '12%', '15%', 'Taux BCE + 10 points'].map((t) => <option key={t} value={t}>{t}</option>)}
-            </select></div>
+
+        {/* Conditions de reglement */}
+        <div className="border border-gray-200 rounded-xl p-5 space-y-5">
+          <h3 className="text-sm font-semibold text-gray-900">Conditions de reglement</h3>
+
+          {/* Delai */}
+          <div>
+            <label className={lb}>Delai de paiement par defaut</label>
+            <select value={paySettings.payment_delay_type} onChange={(e) => setPaySettings((s) => ({ ...s, payment_delay_type: e.target.value as PaymentDelayType }))} className={ic}>
+              {DELAY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          {paySettings.payment_delay_type === 'custom' && (
+            <div>
+              <label className={lb}>Nombre de jours</label>
+              <input type="number" min={0} max={60} value={paySettings.payment_delay_days} onChange={(e) => setPaySettings((s) => ({ ...s, payment_delay_days: parseInt(e.target.value) || 0 }))} className={ic + ' w-32'} />
+            </div>
+          )}
+
+          {/* Modes de paiement */}
+          <div>
+            <label className={lb}>Modes de paiement acceptes</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
+              {METHOD_OPTIONS.map((m) => (
+                <label key={m.value} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                  <input type="checkbox" checked={paySettings.payment_methods.includes(m.value)}
+                    onChange={(e) => setPaySettings((s) => ({
+                      ...s,
+                      payment_methods: e.target.checked
+                        ? [...s.payment_methods, m.value]
+                        : s.payment_methods.filter((v) => v !== m.value),
+                    }))}
+                    className="w-4 h-4 rounded border-gray-300 text-[#1E40AF] focus:ring-[#1E40AF]/20" />
+                  {m.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Penalites */}
+          <div>
+            <label className={lb}>Penalites de retard</label>
+            <select value={paySettings.late_penalty_type} onChange={(e) => setPaySettings((s) => ({ ...s, late_penalty_type: e.target.value as PenaltyType }))} className={ic}>
+              {PENALTY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          {paySettings.late_penalty_type === 'custom' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className={lb}>Taux (%)</label>
+                <input type="number" min={0} step={0.1} value={paySettings.late_penalty_rate} onChange={(e) => setPaySettings((s) => ({ ...s, late_penalty_rate: parseFloat(e.target.value) || 0 }))} className={ic + ' w-32'} /></div>
+              <div><label className={lb}>Indemnite recouvrement (EUR)</label>
+                <input type="number" min={0} value={paySettings.late_recovery_fee} onChange={(e) => setPaySettings((s) => ({ ...s, late_recovery_fee: parseInt(e.target.value) || 40 }))} className={ic + ' w-32'} /></div>
+            </div>
+          )}
+
+          {/* Apercu legal */}
+          <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+            <div className="text-xs font-semibold text-gray-400 uppercase mb-2">Apercu mention legale</div>
+            <p className="text-xs text-gray-600 leading-relaxed">{getDelayText(paySettings.payment_delay_type, paySettings.payment_delay_days)}</p>
+            {paySettings.payment_methods.length > 0 && <p className="text-xs text-gray-600 leading-relaxed">{getMethodsText(paySettings.payment_methods)}</p>}
+            <p className="text-xs text-gray-500 leading-relaxed italic">{getPenaltyText(paySettings.late_penalty_type, paySettings.late_penalty_rate, paySettings.late_recovery_fee)}</p>
+          </div>
         </div>
 
         {saved && <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium">Parametres sauvegardes</div>}

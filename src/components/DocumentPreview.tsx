@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { loadLignes } from '../hooks/useFactureLignes'
+import { loadCompanySettings, generateLegalBlock, DEFAULT_SETTINGS, type CompanyPaymentSettings } from '../lib/paymentConditions'
 
 function fmt(n: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(n)
@@ -77,6 +78,7 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
   const [client, setClient] = useState<ClientInfo | null>(null)
   const [lignes, setLignes] = useState<Ligne[]>([])
   const [loading, setLoading] = useState(true)
+  const [paySettings, setPaySettings] = useState<CompanyPaymentSettings>({ ...DEFAULT_SETTINGS })
 
   useEffect(() => {
     if (!open || !doc) return
@@ -86,6 +88,9 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
 
     async function load() {
       if (!doc) return
+
+      // Load company settings
+      if (user) { const s = await loadCompanySettings(user.id); setPaySettings(s) }
 
       // Load client
       if (doc.client_id) {
@@ -129,9 +134,8 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
   const emailPro = meta.email_pro || ''
   const tvaIntraE = meta.tva_intracom || ''
   const logoUrl = meta.logo_url as string | undefined
-  const condPaiement = meta.conditions_paiement || '30 jours'
   const ibanE = meta.iban || ''
-  const tauxPen = meta.taux_penalites || '3 fois le taux légal'
+  const legalBlock = generateLegalBlock(paySettings)
 
   const isDevis = doc.type === 'devis'
   const isFacture = doc.type === 'facture'
@@ -346,32 +350,20 @@ export default function DocumentPreview({ open, onClose, document: doc, onDownlo
                     </div>
                   )}
 
-                  {/* === CONDITIONS DE PAIEMENT === */}
-                  <div className="mb-6">
-                    {isDevis ? (
-                      <div className="text-xs text-gray-400 space-y-1">
-                        <div>Conditions de reglement : {condPaiement} a compter de la date d'acceptation du devis.</div>
-                        <div>Validite du devis : {(doc as DevisData).date_validite ? new Date((doc as DevisData).date_validite!).toLocaleDateString('fr-FR') : '30 jours'}.</div>
-                        {doc.tva_pct === 0 && (
-                          <div className="mt-2">
-                            <div className="font-bold text-amber-600 text-xs">AUTOLIQUIDATION DE LA TVA</div>
-                            <div className="text-amber-500">Autoliquidation de la TVA - Article 283-2 nonies du CGI. TVA due par le preneur assujetti.</div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="text-xs font-bold text-[#1E40AF] uppercase mb-2">Conditions de reglement</div>
-                        <div className="text-xs text-gray-400">Delai de paiement : {condPaiement} a compter de la date de reception de la facture.</div>
-                        <div className="text-xs text-gray-400">Modes de reglement acceptes : virement bancaire, cheque, carte bancaire.</div>
-                        {ibanE && <div className="text-xs text-gray-400">Coordonnees bancaires (IBAN) : {ibanE}</div>}
-                        <div className="text-[10px] text-gray-300 mt-2">
-                          Penalites de retard : {tauxPen}. Exigibles sans rappel prealable (Art. L441-10 Code de commerce).
-                        </div>
-                        <div className="text-[10px] text-gray-300">
-                          Indemnite forfaitaire pour frais de recouvrement : 40 EUR (Art. D441-5 Code de commerce).
-                        </div>
-                        <div className="text-[10px] text-gray-300">Pas d'escompte pour paiement anticipe.</div>
+                  {/* === CONDITIONS DE REGLEMENT === */}
+                  <div className="mb-6 space-y-1">
+                    <div className="text-xs font-bold text-[#1E40AF] uppercase mb-2">Conditions de reglement</div>
+                    <div className="text-xs text-gray-400">{legalBlock.delayText}</div>
+                    {legalBlock.methodsText && <div className="text-xs text-gray-400">{legalBlock.methodsText}</div>}
+                    {ibanE && <div className="text-xs text-gray-400">Coordonnees bancaires (IBAN) : {ibanE}</div>}
+                    {isDevis && (
+                      <div className="text-xs text-gray-400">Validite du devis : {(doc as DevisData).date_validite ? new Date((doc as DevisData).date_validite!).toLocaleDateString('fr-FR') : '30 jours'}.</div>
+                    )}
+                    <div className="text-[10px] text-gray-300 mt-2 leading-relaxed">{legalBlock.penaltyText}</div>
+                    {doc.tva_pct === 0 && (
+                      <div className="mt-2">
+                        <div className="font-bold text-amber-600 text-xs">AUTOLIQUIDATION DE LA TVA</div>
+                        <div className="text-[10px] text-amber-500">Autoliquidation de la TVA - Article 283-2 nonies du CGI. TVA due par le preneur assujetti.</div>
                       </div>
                     )}
                   </div>

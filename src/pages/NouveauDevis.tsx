@@ -10,6 +10,7 @@ import { logAudit } from '../lib/auditLog'
 import { emptyLigne, UNITES, TVA_RATES, type LigneType } from '../hooks/useFactureLignes'
 import LigneActions from '../components/LigneActions'
 import { loadImageAsBase64 } from '../lib/storage'
+import { DELAY_OPTIONS, METHOD_OPTIONS, loadCompanySettings, generateLegalBlock, DEFAULT_SETTINGS, type CompanyPaymentSettings, type PaymentDelayType } from '../lib/paymentConditions'
 import { wrapDocText } from '../lib/exportUtils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -40,9 +41,12 @@ export default function NouveauDevis() {
   const [ajustement, setAjustement] = useState(0)
   const [ajustementType, setAjustementType] = useState<'pct' | 'fixe'>('pct')
   const [notesBasPage, setNotesBasPage] = useState('')
-  const [conditionsAcompte, setConditionsAcompte] = useState('')
   const [showConditions, setShowConditions] = useState(false)
   const [showDechets, setShowDechets] = useState(false)
+  const [companySettings, setCompanySettings] = useState<CompanyPaymentSettings>({ ...DEFAULT_SETTINGS })
+  const [delayOverride, setDelayOverride] = useState<string>('')
+  const [methodsOverride, setMethodsOverride] = useState<string[]>([])
+  useEffect(() => { if (user) loadCompanySettings(user.id).then((s) => { setCompanySettings(s); setMethodsOverride(s.payment_methods) }) }, [user])
 
   const [lignes, setLignes] = useState<Ligne[]>([])
 
@@ -128,6 +132,8 @@ export default function NouveauDevis() {
       statut: finalize ? 'envoye' : 'brouillon',
       date_devis: dateDevis, date_validite: dateValidite,
       adresse_chantier: adresseChantier || null, user_id: user.id,
+      payment_delay_override: delayOverride || null,
+      payment_methods_override: methodsOverride.length > 0 ? methodsOverride : null,
     }
     let id = devisId
     if (id) { await supabase.from('devis').update(payload).eq('id', id) }
@@ -420,13 +426,32 @@ export default function NouveauDevis() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase">Conditions de paiement</h3>
-                  <button onClick={() => setShowConditions(!showConditions)} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">{showConditions ? 'Masquer' : '+ Ajouter'}</button>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase">Conditions de reglement</h3>
+                  <button onClick={() => setShowConditions(!showConditions)} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">{showConditions ? 'Masquer' : 'Modifier'}</button>
                 </div>
-                <p className="text-sm text-gray-600">Delai : {meta.conditions_paiement || '30 jours'}</p>
-                {meta.iban && <p className="text-sm text-gray-600 font-mono">IBAN : {meta.iban as string}</p>}
+                {(() => { const b = generateLegalBlock(companySettings, { delay: delayOverride || undefined, methods: methodsOverride.length ? methodsOverride : undefined }); return (
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>{b.delayText}</p>
+                    {b.methodsText && <p>{b.methodsText}</p>}
+                  </div>
+                ) })()}
+                {meta.iban && <p className="text-xs text-gray-500 font-mono">IBAN : {meta.iban as string}</p>}
                 {showConditions && (
-                  <textarea value={conditionsAcompte} onChange={(e) => setConditionsAcompte(e.target.value)} placeholder="Ex: 30% a la commande, solde a la livraison..." rows={2} className={ic + ' resize-vertical min-h-[44px]'} />
+                  <div className="space-y-3 pt-2 border-t border-gray-100">
+                    <div><label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Delai pour ce devis</label>
+                      <select value={delayOverride || companySettings.payment_delay_type} onChange={(e) => setDelayOverride(e.target.value)} className={ic}>
+                        {DELAY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select></div>
+                    <div><label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Modes de paiement</label>
+                      <div className="flex flex-wrap gap-2">
+                        {METHOD_OPTIONS.map((m) => (
+                          <label key={m.value} className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+                            <input type="checkbox" checked={methodsOverride.includes(m.value)} onChange={(e) => setMethodsOverride((prev) => e.target.checked ? [...prev, m.value] : prev.filter((v) => v !== m.value))}
+                              className="w-3.5 h-3.5 rounded border-gray-300 text-[#1E40AF]" />{m.label}
+                          </label>
+                        ))}
+                      </div></div>
+                  </div>
                 )}
                 {hasAutoliquidation && (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">Autoliquidation TVA — Art. 283-2 nonies du CGI.</div>

@@ -8,6 +8,7 @@ import { searchSiret } from '../lib/siret'
 import { logAudit } from '../lib/auditLog'
 import { emptyLigne, saveLignes, UNITES, TVA_RATES, type LigneType } from '../hooks/useFactureLignes'
 import { loadImageAsBase64 } from '../lib/storage'
+import { DELAY_OPTIONS, METHOD_OPTIONS, loadCompanySettings, generateLegalBlock, DEFAULT_SETTINGS, type CompanyPaymentSettings, type PaymentDelayType } from '../lib/paymentConditions'
 import { wrapDocText } from '../lib/exportUtils'
 import LigneActions from '../components/LigneActions'
 import jsPDF from 'jspdf'
@@ -36,6 +37,11 @@ export default function NouvelleFacture() {
   const [description, setDescription] = useState('')
   const [ajustement, setAjustement] = useState(0)
   const [ajustementType, setAjustementType] = useState<'pct' | 'fixe'>('pct')
+  const [companySettings, setCompanySettings] = useState<CompanyPaymentSettings>({ ...DEFAULT_SETTINGS })
+  const [delayOverride, setDelayOverride] = useState<string>('')
+  const [methodsOverride, setMethodsOverride] = useState<string[]>([])
+  const [showConditions, setShowConditions] = useState(false)
+  useEffect(() => { if (user) loadCompanySettings(user.id).then((s) => { setCompanySettings(s); setMethodsOverride(s.payment_methods) }) }, [user])
 
   // Lignes
   const [lignes, setLignes] = useState<Ligne[]>([emptyLigne(0)])
@@ -138,6 +144,8 @@ export default function NouvelleFacture() {
       date_emission: dateEmission, date_echeance: dateEcheance,
       adresse_chantier: adresseChantier || null,
       retenue_garantie_pct: retenueGarantie, user_id: user.id,
+      payment_delay_override: delayOverride || null,
+      payment_methods_override: methodsOverride.length > 0 ? methodsOverride : null,
     }
 
     let id = factureId
@@ -436,10 +444,34 @@ export default function NouvelleFacture() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Conditions */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase">Conditions de paiement</h3>
-                <p className="text-sm text-gray-600">Delai : {meta.conditions_paiement || '30 jours'}</p>
-                <p className="text-sm text-gray-600">Modes : virement, cheque, CB</p>
-                {meta.iban && <p className="text-sm text-gray-600 font-mono">IBAN : {meta.iban as string}</p>}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase">Conditions de reglement</h3>
+                  <button onClick={() => setShowConditions(!showConditions)} className="text-xs text-[#1E40AF] font-semibold hover:underline cursor-pointer">{showConditions ? 'Masquer' : 'Modifier'}</button>
+                </div>
+                {(() => { const b = generateLegalBlock(companySettings, { delay: delayOverride || undefined, methods: methodsOverride.length ? methodsOverride : undefined }); return (
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>{b.delayText}</p>
+                    {b.methodsText && <p>{b.methodsText}</p>}
+                  </div>
+                ) })()}
+                {meta.iban && <p className="text-xs text-gray-500 font-mono">IBAN : {meta.iban as string}</p>}
+                {showConditions && (
+                  <div className="space-y-3 pt-2 border-t border-gray-100">
+                    <div><label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Delai pour cette facture</label>
+                      <select value={delayOverride || companySettings.payment_delay_type} onChange={(e) => setDelayOverride(e.target.value)} className={ic}>
+                        {DELAY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select></div>
+                    <div><label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Modes de paiement</label>
+                      <div className="flex flex-wrap gap-2">
+                        {METHOD_OPTIONS.map((m) => (
+                          <label key={m.value} className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+                            <input type="checkbox" checked={methodsOverride.includes(m.value)} onChange={(e) => setMethodsOverride((prev) => e.target.checked ? [...prev, m.value] : prev.filter((v) => v !== m.value))}
+                              className="w-3.5 h-3.5 rounded border-gray-300 text-[#1E40AF]" />{m.label}
+                          </label>
+                        ))}
+                      </div></div>
+                  </div>
+                )}
                 {hasAutoliquidation && (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
                     Autoliquidation TVA — Art. 283-2 nonies du CGI. TVA due par le preneur assujetti.
